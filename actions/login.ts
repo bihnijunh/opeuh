@@ -50,6 +50,7 @@ export const login = async (
     );
 
     return { success: "Confirmation email sent!" };
+    
   }
 
   if (existingUser.isTwoFactorEnabled && existingUser.email) {

@@ -10,7 +10,7 @@ import { getUserByEmail, getUserById } from "@/data/user";
 import { currentUser } from "@/lib/auth";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
-
+import { Prisma } from "@prisma/client";
 export const settings = async (
   values: z.infer<typeof SettingsSchema>
 ) => {
@@ -20,7 +20,10 @@ export const settings = async (
     return { error: "Unauthorized" }
   }
 
-  const dbUser = await getUserById(user.id);
+  const dbUser = await db.user.findUnique({
+    where: { id: user.id },
+    include: { balance: true },
+  });
 
   if (!dbUser) {
     return { error: "Unauthorized" }
@@ -69,8 +72,10 @@ export const settings = async (
     values.newPassword = undefined;
   }
 
+  // Include the balance field in the update
   const updatedUser = await db.user.update({
     where: { id: dbUser.id },
+    include: { balance: true },
     data: {
       ...values,
     }
@@ -81,7 +86,7 @@ export const settings = async (
       name: updatedUser.name,
       email: updatedUser.email,
       isTwoFactorEnabled: updatedUser.isTwoFactorEnabled,
-      role: updatedUser.role,
+      balance: updatedUser.balance, // Make sure to include the balance field
     }
   });
 

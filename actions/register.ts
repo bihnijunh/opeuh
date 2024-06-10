@@ -9,35 +9,58 @@ import { getUserByEmail } from "@/data/user";
 import { sendVerificationEmail } from "@/lib/mail";
 import { generateVerificationToken } from "@/lib/tokens";
 
-export const register = async (values: z.infer<typeof RegisterSchema>) => {
-  const validatedFields = RegisterSchema.safeParse(values);
+export const register = async (values: any) => {
 
-  if (!validatedFields.success) {
-    return { error: "Invalid fields!" };
+  // Validate input
+  const validated = RegisterSchema.safeParse(values) 
+  if(!validated.success) {
+    return {
+      error: "Invalid input"
+    }
   }
 
-  const { email, password, name } = validatedFields.data;
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const {email, password, name} = validated.data
 
-  const existingUser = await getUserByEmail(email);
+  // Hash password
+  const hashedPassword = await bcrypt.hash(password, 10)
 
-  if (existingUser) {
-    return { error: "Email already in use!" };
+  // Check for duplicate user
+  const existingUser = await getUserByEmail(email)
+  if(existingUser) {
+    return {
+      error: "Email already exists" 
+    }
   }
 
-  await db.user.create({
+  // Create new user
+  const user = await db.user.create({
     data: {
-      name,
       email,
-      password: hashedPassword,
-    },
-  });
+      name,
+      password: hashedPassword
+    }
+  })
 
-  const verificationToken = await generateVerificationToken(email);
-  await sendVerificationEmail(
-    verificationToken.email,
-    verificationToken.token,
-  );
+  // Create new balance for user
+  await db.balance.create({
+    data: {
+      userId: user.id,
+      total: 0.0,
+      BTC: 0.0,
+      USDT: 0.0,
+      ETH: 0.0,
 
-  return { success: "Confirmation email sent!" };
-};
+      // ...other default amounts
+    }
+  })
+
+  // Generate and send verification email
+  const verificationToken = await generateVerificationToken(email)
+  await sendVerificationEmail(email, verificationToken.token)
+
+  // Return user and balance  
+  return {
+    message: "Registration successful!",  
+  }
+
+}
