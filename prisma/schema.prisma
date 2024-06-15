@@ -26,13 +26,14 @@ model User {
   accounts Account[]
   isTwoFactorEnabled Boolean @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
-  balance Balance?
+  balance        Balance?
+  balanceId      String? @unique // Ensure this is unique to establish a one-to-one relation
   transactions Transaction[]
 }
 
 model Balance {
   id String @id @default(cuid())
-  userId String @unique
+  userId String @unique // Add the @unique attribute here as well
   total Float @default(0.0) 
   USDT Float @default(0.0)
   BTC Float @default(0.0)
