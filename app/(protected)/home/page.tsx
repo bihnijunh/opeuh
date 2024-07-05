@@ -25,7 +25,6 @@ import { useEffect, useState } from "react";
 import { currentUser } from "@/lib/auth";
 
 import { ExtendedUser, UserWithBalance } from "@/next-auth";
-import { BalanceCard } from "@/components/balance-ui";
 import { PrismaClient } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { getUserById } from "@/data/user";

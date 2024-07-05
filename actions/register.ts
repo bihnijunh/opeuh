@@ -38,10 +38,10 @@ export const register = async (values: any) => {
       email,
       name,
       password: hashedPassword,
-      total: 0.0,
       btc: 0.0,
       usdt: 0.0,
       eth: 0.0,
+     
     }
   })
 
