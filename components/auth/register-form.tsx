@@ -43,7 +43,7 @@ export const RegisterForm = () => {
       register(values)
         .then((data) => {
           setError(data.error);
-          setSuccess(data.success);
+          setSuccess(data.message);
         });
     });
   };
