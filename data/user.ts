@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { Balance, UserRole } from "@prisma/client";
+import {  UserRole } from "@prisma/client";
 import { User } from "next-auth";
 
 interface UserWithBalance extends User {
@@ -12,18 +12,16 @@ interface UserWithBalance extends User {
   role: UserRole;
   isTwoFactorEnabled: boolean;
   isOAuth: boolean;
-  balance: Balance | null;
+  usdt: number;
+  btc: number;
+  eth: number;
 }
-
-
-
-
 
 export const getUserByEmail = async (email: string) => {
   try {
     const user = await db.user.findUnique({
       where: { email },
-      include: { balance: true },
+      
     });
 
     return user;
@@ -31,15 +29,31 @@ export const getUserByEmail = async (email: string) => {
     return null;
   }
 };
-export const getUserById = async (id: string): Promise<UserWithBalance | null> => {
+
+export const getUserById = async (
+  id: string
+): Promise<UserWithBalance | null> => {
   try {
-    console.log("Fetching user with ID:", id); // Add this line
     const userWithBalance = await db.user.findUnique({
       where: { id },
-      include: { balance: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        usdt: true,
+        btc: true,
+        eth: true,
+      },
     });
-    console.log("Fetched user with balance:", userWithBalance); // Add this line
-    return userWithBalance as UserWithBalance; // Add type assertion
+
+    if (userWithBalance) {
+      userWithBalance.usdt = Number(userWithBalance.usdt);
+      userWithBalance.btc = Number(userWithBalance.btc);
+      userWithBalance.eth = Number(userWithBalance.eth);
+    }
+    console.log("Fetched user with balance:", userWithBalance);
+    return userWithBalance as UserWithBalance;
   } catch (error) {
     console.error("Error fetching user with balance:", error);
     return null;

@@ -37,22 +37,14 @@ export const register = async (values: any) => {
     data: {
       email,
       name,
-      password: hashedPassword
-    }
-  })
-
-  // Create new balance for user
-  await db.balance.create({
-    data: {
-      userId: user.id,
+      password: hashedPassword,
       total: 0.0,
-      BTC: 0.0,
-      USDT: 0.0,
-      ETH: 0.0,
-
-      // ...other default amounts
+      btc: 0.0,
+      usdt: 0.0,
+      eth: 0.0,
     }
   })
+
 
   // Generate and send verification email
   const verificationToken = await generateVerificationToken(email)

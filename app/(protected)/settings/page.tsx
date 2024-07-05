@@ -97,7 +97,7 @@ const SettingsPage = () => {
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="John Doe"
+                        placeholder={user?.name || "John Doe"}
                         disabled={isPending}
                       />
                     </FormControl>

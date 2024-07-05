@@ -8,9 +8,9 @@ const ClientPage = () => {
   const user = useCurrentUser();
 
   return ( 
-   <BalanceCard 
+   <BalanceCard user={user} />
  
-   />
+  
    );
 }
  

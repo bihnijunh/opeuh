@@ -1,11 +1,14 @@
 import { Balance, UserRole } from "@prisma/client";
 import NextAuth, { type DefaultSession } from "next-auth";
+import { DefaultSession } from "next-auth";
 
 export type ExtendedUser = DefaultSession["user"] & {
   role: UserRole;
   isTwoFactorEnabled: boolean;
   isOAuth: boolean;
-  balance: Balance | null;
+  usdt: number;
+  btc: number;
+  eth: number;
 };
 
 declare module "next-auth" {
@@ -13,3 +16,18 @@ declare module "next-auth" {
     user: ExtendedUser;
   }
 }
+
+export type UserWithBalance = DefaultSession["user"] & {
+  id: string;
+  name: string | null;
+  email: string | null;
+  emailVerified: Date | null;
+  image: string | null;
+  password: string | null;
+  role: UserRole;
+  isTwoFactorEnabled: boolean;
+  isOAuth: boolean;
+  usdt: number;
+  btc: number;
+  eth: number;
+};

@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import authConfig from "@/auth.config";
 import { getUserById } from "@/data/user";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
-import { getAccountByUserId } from "./data/account";
+import { getAccountByUserId, } from "./data/account";
 
 export const {
   handlers: { GET, POST },
@@ -67,7 +67,12 @@ export const {
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.isOAuth = token.isOAuth as boolean;
+        session.user.usdt = token.usdt as number;
+        session.user.btc = token.btc as number;
+        session.user.eth = token.eth as number;
       }
+
+      
 
       return session;
     },
@@ -87,6 +92,9 @@ export const {
       token.email = existingUser.email;
       token.role = existingUser.role;
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+      token.usdt = existingUser.usdt;
+      token.btc = existingUser.btc;
+      token.eth = existingUser.eth;
 
       return token;
     }

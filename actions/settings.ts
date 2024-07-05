@@ -22,7 +22,7 @@ export const settings = async (
 
   const dbUser = await db.user.findUnique({
     where: { id: user.id },
-    include: { balance: true },
+   
   });
 
   if (!dbUser) {
@@ -75,7 +75,7 @@ export const settings = async (
   // Include the balance field in the update
   const updatedUser = await db.user.update({
     where: { id: dbUser.id },
-    include: { balance: true },
+   
     data: {
       ...values,
     }
@@ -86,7 +86,7 @@ export const settings = async (
       name: updatedUser.name,
       email: updatedUser.email,
       isTwoFactorEnabled: updatedUser.isTwoFactorEnabled,
-      balance: updatedUser.balance, // Make sure to include the balance field
+     
     }
   });
 

@@ -1,7 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { User } from "next-auth";
-import { ExtendedUser } from "@/next-auth";
-import { useSession } from "next-auth/react";
+
+"use client";
 
 import { Libre_Franklin } from 'next/font/google';
 import { Chivo } from 'next/font/google';
@@ -27,16 +25,11 @@ const chivo = Chivo({
   display: 'swap',
 });
 
-interface UserInfoProps {
-  user?: ExtendedUser;
-  
-}
-
-export const UserInfo = ({ user,  }: UserInfoProps) => {
+export default  function BalanceFace() {
   const pathname = usePathname();
 
  
- 
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex h-16 items-center justify-between border-b bg-gray-100 px-6 dark:border-gray-800 dark:bg-gray-950">
@@ -64,6 +57,7 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div>
+                  <p className="text-4xl font-semibold">10</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Available balance</p>
                 </div>
                 <Link className="text-blue-600 hover:underline" href="#">
@@ -77,7 +71,7 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-semibold"> {Number(user?.btc) || '0'} $</p>
+                  <p className="text-4xl font-semibold">30</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Available balance</p>
                 </div>
                 <Link className="text-blue-600 hover:underline" href="#">
@@ -91,7 +85,7 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-semibold"> {Number(user?.usdt) || '0'} $</p>
+                  <p className="text-4xl font-semibold">40</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Available credit</p>
                 </div>
                 <Link className="text-blue-600 hover:underline" href="#">
@@ -101,11 +95,11 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>ETH</CardTitle>
+                <CardTitle>FIAT</CardTitle>
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-semibold"> {Number(user?.eth) || '0'} $</p>
+                  <p className="text-4xl font-semibold">100</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Available credit</p>
                 </div>
                 <Link className="text-blue-600 hover:underline" href="#">
@@ -152,8 +146,6 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
     </div>
   );
 };
-
-
 
 function MountainIcon(props: any) {
   return (

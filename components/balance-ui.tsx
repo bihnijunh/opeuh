@@ -1,20 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { getUserById } from "@/data/user";
+import { useSession } from "next-auth/react";
 
-export const BalanceCard = () => {
-  const [userWithBalance, setUserWithBalance] = useState<UserWithBalance | null>(null);
-  useEffect(() => {
-    const fetchUser = async () => {
-      // Replace 'userId' with the actual user ID you want to fetch
-      const userId = 'clr6iblya0000z7qt7jn2fmr4'; // Example user ID
-      const userData = await getUserById(userId);
-      setUserWithBalance(userData);
-    };
+export const BalanceCard = ({user}: {user: any }) => {
+ 
 
-    fetchUser();
-  }, []);
+
 
   return (
     <Tabs defaultValue="overview" className="space-y-4">
@@ -22,7 +14,7 @@ export const BalanceCard = () => {
         <TabsTrigger value="overview">Overview</TabsTrigger>
       </TabsList>
       <TabsContent value="overview" className="space-y-4">
-        {userWithBalance && userWithBalance.balance && (
+    
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -43,7 +35,7 @@ export const BalanceCard = () => {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${userWithBalance.balance.total}</div>
+                <div className="text-2xl font-bold">${user.balance.total}</div>
               </CardContent>
             </Card>
             <Card>
@@ -63,7 +55,7 @@ export const BalanceCard = () => {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${userWithBalance.balance?.USDT}</div>
+                <div className="text-2xl font-bold">${user.balance?.USDT}</div>
               </CardContent>
             </Card>
             <Card>
@@ -83,11 +75,11 @@ export const BalanceCard = () => {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${userWithBalance.balance?.BTC}</div>
+                <div className="text-2xl font-bold">${user.balance?.BTC}</div>
               </CardContent>
             </Card>
           </div>
-        )}
+     
       </TabsContent>
     </Tabs>
   );
