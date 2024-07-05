@@ -52,7 +52,7 @@ export const getUserById = async (
       userWithBalance.btc = Number(userWithBalance.btc);
       userWithBalance.eth = Number(userWithBalance.eth);
     }
-    console.log("Fetched user with balance:", userWithBalance);
+    
     return userWithBalance as UserWithBalance;
   } catch (error) {
     console.error("Error fetching user with balance:", error);
