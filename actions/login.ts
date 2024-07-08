@@ -23,7 +23,7 @@ import {
 
 export const login = async (
   values: z.infer<typeof LoginSchema>,
-  callbackUrl?: string | null,
+  callbackUrl?:"https://cuba-vendor.vercel.app/api/auth/callback/google",
 ) => {
   const validatedFields = LoginSchema.safeParse(values);
 
