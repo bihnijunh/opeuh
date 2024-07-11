@@ -145,9 +145,9 @@ export const Navbar = () => {
                 </Button>
                 <Button
                   asChild
-                  variant={pathname === "/exchange" ? "default" : "outline"}
+                  variant={pathname === "/send" ? "default" : "outline"}
                 >
-                  <Link href="/exchange">Exchange</Link>
+                  <Link href="/exchange">Send</Link>
                 </Button>
                 <Button
                   asChild
