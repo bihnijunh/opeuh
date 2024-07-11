@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card";
 import { usePathname } from 'next/navigation';
 import { calculateTotal } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 const libreFranklin = Libre_Franklin({
   subsets: ['latin'],
@@ -27,6 +28,28 @@ interface UserInfoProps {
 
 export const UserInfo = ({ user,  }: UserInfoProps) => {
   const pathname = usePathname();
+  const [conversionRates, setConversionRates] = useState({ btc: 0, usdt: 0, eth: 0 });
+  useEffect(() => {
+    const fetchConversionRates = async () => {
+      try {
+        const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd");
+        const data = await response.json();
+        setConversionRates({
+          btc: data.bitcoin.usd,
+          eth: data.ethereum.usd,
+          usdt: data.tether.usd,
+        });
+      } catch (error) {
+        console.error("Error fetching conversion rates:", error);
+      }
+    };
+
+    fetchConversionRates();
+  }, []);
+
+  const convertToCrypto = (usdAmount: number, rate: number) => (usdAmount / rate).toFixed(8);
+
+
 
  
  
@@ -61,9 +84,7 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
                   {calculateTotal(Number(user?.btc) || 0, Number(user?.eth) || 0, Number(user?.usdt) || 0)} $                  </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Available balance</p>
                 </div>
-                <Link className="text-blue-600 hover:underline" href="#">
-                  View details
-                </Link>
+                
               </CardContent>
             </Card>
             <Card>
@@ -73,11 +94,9 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
               <CardContent className="flex items-center justify-between">
                 <div>
                   <p className="text-4xl font-semibold"> {Number(user?.btc) || '0'} $</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Available balance</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{convertToCrypto(Number(user?.btc) || 0, conversionRates.btc)} BTC</p>
                 </div>
-                <Link className="text-blue-600 hover:underline" href="#">
-                  View details
-                </Link>
+               
               </CardContent>
             </Card>
             <Card>
@@ -87,11 +106,9 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
               <CardContent className="flex items-center justify-between">
                 <div>
                   <p className="text-4xl font-semibold"> {Number(user?.usdt) || '0'} $</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Available credit</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{convertToCrypto(Number(user?.usdt) || 0, conversionRates.usdt)} USDT</p>
                 </div>
-                <Link className="text-blue-600 hover:underline" href="#">
-                  View details
-                </Link>
+                
               </CardContent>
             </Card>
             <Card>
@@ -101,11 +118,9 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
               <CardContent className="flex items-center justify-between">
                 <div>
                   <p className="text-4xl font-semibold"> {Number(user?.eth) || '0'} $</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Available credit</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{convertToCrypto(Number(user?.eth) || 0, conversionRates.eth)} ETH</p>
                 </div>
-                <Link className="text-blue-600 hover:underline" href="#">
-                  View details
-                </Link>
+               
               </CardContent>
             </Card>
           </div>
