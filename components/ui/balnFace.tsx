@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Libre_Franklin } from 'next/font/google';
@@ -25,21 +24,17 @@ const chivo = Chivo({
   display: 'swap',
 });
 
-export default  function BalanceFace() {
+export default function BalanceFace() {
   const pathname = usePathname();
 
- 
-
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex h-16 items-center justify-between border-b bg-gray-100 px-6 dark:border-gray-800 dark:bg-gray-950">
+    <div className="flex min-h-screen flex-col items-center">
+      <header className="flex h-16 w-full items-center justify-between border-b bg-gray-100 px-6 dark:border-gray-800 dark:bg-gray-950">
         <Link className="flex items-center gap-2" href="#">
           <MountainIcon className="h-6 w-6" />
-          <span className="text-lg font-semibold">PIEDRA Dashboard</span>
+          <span className="text-lg font-semibold">PIEDRA Dashboard </span>
         </Link>
-        
-        
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ">
           <Button
             asChild
             variant={pathname === "/recieve" ? "default" : "outline"}
@@ -48,7 +43,7 @@ export default  function BalanceFace() {
           </Button>
         </div>
       </header>
-      <main className="flex-1 bg-gray-100 px-4 py-8 dark:bg-gray-950 md:px-6 lg:px-8">
+      <main className="flex-1 w-full bg-gray-100 px-4 py-8 dark:bg-gray-950 md:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl space-y-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>

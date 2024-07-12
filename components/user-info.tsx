@@ -24,12 +24,12 @@ const chivo = Chivo({
 
 interface UserInfoProps {
   user?: ExtendedUser;
-  
 }
 
-export const UserInfo = ({ user,  }: UserInfoProps) => {
+export const UserInfo = ({ user }: UserInfoProps) => {
   const pathname = usePathname();
   const [conversionRates, setConversionRates] = useState({ btc: 0, usdt: 0, eth: 0 });
+
   useEffect(() => {
     const fetchConversionRates = async () => {
       try {
@@ -50,19 +50,13 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
 
   const convertToCrypto = (usdAmount: number, rate: number) => (usdAmount / rate).toFixed(8);
 
-
-
- 
- 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex h-16 items-center justify-between border-b bg-gray-100 px-6 dark:border-gray-800 dark:bg-gray-950">
+    <div className="flex min-h-screen flex-col items-center justify-center">
+      <header className="flex h-16 items-center justify-between w-full max-w-5xl border-b bg-gray-100 px-6 dark:border-gray-800 dark:bg-gray-950">
         <Link className="flex items-center gap-2" href="#">
           <MountainIcon className="h-6 w-6" />
           <span className="text-lg font-semibold">PIEDRA Dashboard</span>
         </Link>
-        
-        
         <div className="flex items-center gap-2">
           <Button
             asChild
@@ -72,8 +66,8 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
           </Button>
         </div>
       </header>
-      <main className="flex-1 bg-gray-100 px-4 py-8 dark:bg-gray-950 md:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl space-y-8">
+      <main className="flex-1 w-full max-w-5xl bg-gray-100 px-4 py-8 dark:bg-gray-950 md:px-6 lg:px-8">
+        <div className="mx-auto space-y-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader>
@@ -81,11 +75,11 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-semibold">  
-                  {calculateTotal(Number(user?.btc) || 0, Number(user?.eth) || 0, Number(user?.usdt) || 0)} $                  </p>
+                  <p className="text-4xl font-semibold">
+                    {calculateTotal(Number(user?.btc) || 0, Number(user?.eth) || 0, Number(user?.usdt) || 0)} $
+                  </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Available balance</p>
                 </div>
-                
               </CardContent>
             </Card>
             <Card>
@@ -97,7 +91,6 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
                   <p className="text-4xl font-semibold"> {Number(user?.btc) || '0'} $</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{convertToCrypto(Number(user?.btc) || 0, conversionRates.btc)} BTC</p>
                 </div>
-               
               </CardContent>
             </Card>
             <Card>
@@ -109,7 +102,6 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
                   <p className="text-4xl font-semibold"> {Number(user?.usdt) || '0'} $</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{convertToCrypto(Number(user?.usdt) || 0, conversionRates.usdt)} USDT</p>
                 </div>
-                
               </CardContent>
             </Card>
             <Card>
@@ -121,40 +113,6 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
                   <p className="text-4xl font-semibold"> {Number(user?.eth) || '0'} $</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{convertToCrypto(Number(user?.eth) || 0, conversionRates.eth)} ETH</p>
                 </div>
-               
-              </CardContent>
-            </Card>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Transactions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-800" />
-                    <span className="text-sm font-medium">Amazon</span>
-                  </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">Jun 23</span>
-                  <span className="text-sm font-medium text-red-500">-$45.99</span>
-                </div>
-                <div className="grid grid-cols-3 items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-800" />
-                    <span className="text-sm font-medium">Rent</span>
-                  </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">Jun 1</span>
-                  <span className="text-sm font-medium text-red-500">-$1,200.00</span>
-                </div>
-                <div className="grid grid-cols-3 items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-800" />
-                    <span className="text-sm font-medium">Paycheck</span>
-                  </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">Jun 15</span>
-                  <span className="text-sm font-medium text-green-500">+$3,500.00</span>
-                </div>
               </CardContent>
             </Card>
           </div>
@@ -163,8 +121,6 @@ export const UserInfo = ({ user,  }: UserInfoProps) => {
     </div>
   );
 };
-
-
 
 function MountainIcon(props: any) {
   return (

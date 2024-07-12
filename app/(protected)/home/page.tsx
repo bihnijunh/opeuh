@@ -31,54 +31,43 @@ import { getUserById } from "@/data/user";
 import BalanceFace from "@/components/ui/balnFace";
 import { UserInfo } from "@/components/user-info";
 import { useCurrentUser } from "@/hooks/use-current-user";
-
 export default function Component() {
   const pathname = usePathname();
   const { data: session } = useSession();
- const user = useCurrentUser();
+  const user = useCurrentUser();
 
- const [loading, setLoading] = useState(true);
- const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
 
+  useEffect(() => {
+    if (session?.user) {
+      getUserById(session.user.id)
+        .then((data) => {
+          setCurrentUser(data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching user data:", error);
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, [session]);
 
- useEffect(() => {
-  if (session?.user) {
-    getUserById(session.user.id)
-      .then((data) => {
-        setCurrentUser(data);
-        setLoading(false); // Move it here
-      })
-      .catch((error) => {
-        console.error("Error fetching user data:", error);
-        setLoading(false);
-      });
-  } else {
-    setLoading(false);
+  if (loading) {
+    return <div>Loading...</div>;
   }
-}, [session]);
 
-if (loading) {
-  return <div>Loading...</div>;
-}
   return (
     <>
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 shadow-sm py-4 px-6">
-       
-      </header>
-      <main className="p-6">
-      <div className="flex items-center gap-4">
-    <UserInfo 
-    user={user} />
-   
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <main className="p-6 flex flex-col items-center">
+          <div className="flex flex-col items-center gap-4 w-full max-w-4xl">
+            <UserInfo user={user} />
+          </div>
+        </main>
       </div>
-      <div>
-    
-      </div>
-
-      
-      </main>
-    </div>
     </>
   );
 }
