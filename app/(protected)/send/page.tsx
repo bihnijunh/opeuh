@@ -1,29 +1,67 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FiCopy } from "react-icons/fi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useSession } from "next-auth/react"; 
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { currentBTCBalance, currentETHBalance, currentUSDTBalance } from "@/lib/auth";
+import { getUserById } from "@/data/user";
 
 interface Transaction {
   id: number;
   amount: string;
   walletAddress: string;
-  date: string;
+  date: string; 
   time: string;
+  btc: boolean;
+  usdt: boolean;
+  eth: boolean;
 }
 
 function Send() {
   const [amount, setAmount] = useState<string>("");
   const [walletAddress, setWalletAddress] = useState<string>("");
+  const [cryptoType, setCryptoType] = useState<string>("btc");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [balances, setBalances] = useState({ btc: 0, usdt: 0, eth: 0 });
+  const { data: session } = useSession();
+  const user = useCurrentUser();
+  
+  
+  useEffect(() => {
+    const fetchBalances = async () => {
+      if (session?.user?.id) {
+        const btcBalance = (await currentBTCBalance()) ?? 0;
+        const usdtBalance = (await currentUSDTBalance()) ?? 0;
+        const ethBalance = (await currentETHBalance()) ?? 0;
+        setBalances({ btc: btcBalance, usdt: usdtBalance, eth: ethBalance });
+      }
+    };
+    fetchBalances();
+  }, [session]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
+    if (!session?.user?.id || !user) {
+      toast.error("User not authenticated");
+      return;
+    }
+
     if (amount && walletAddress) {
       const amountNumber = Number(amount);
       if (isNaN(amountNumber) || amountNumber <= 0) {
         toast.error("Please enter a valid amount");
+        return;
+      }
+  
+      if (
+        (cryptoType === "btc" && amountNumber > user.btc) ||
+        (cryptoType === "usdt" && amountNumber > user.usdt) ||
+        (cryptoType === "eth" && amountNumber > user.eth)
+      ) {
+        toast.error("Amount exceeds available balance");
         return;
       }
 
@@ -33,8 +71,11 @@ function Send() {
         walletAddress,
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
+        btc: cryptoType === "btc",
+        usdt: cryptoType === "usdt",
+        eth: cryptoType === "eth",
       };
-
+  
       setTransactions([...transactions, newTransaction]);
       setAmount("");
       setWalletAddress("");
@@ -75,6 +116,15 @@ function Send() {
               onChange={(e) => setWalletAddress(e.target.value)}
               className="border p-2 md:flex-grow"
             />
+            <select
+              value={cryptoType}
+              onChange={(e) => setCryptoType(e.target.value)}
+              className="border p-2 md:flex-grow"
+            >
+              <option value="btc">BTC - {user?.btc} $</option>
+              <option value="usdt">USDT - {user?.usdt} $</option>
+              <option value="eth">ETH - {user?.eth} $</option>
+            </select>
             <button
               onClick={handleSend}
               className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -84,48 +134,52 @@ function Send() {
           </div>
         </div>
         <div className="mt-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Transaction History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Transaction ID</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Wallet Address</TableHead>
-                  <TableHead>Trx Time</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>{transaction.id}</TableCell>
-                    <TableCell>{transaction.amount}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <div className="truncate w-28 sm:w-40">
-                          {transaction.walletAddress}
-                        </div>
-                        <button
-                          className="ml-2 text-blue-500 hover:underline focus:outline-none"
-                          onClick={() =>
-                            handleCopyToClipboard(transaction.walletAddress)
-                          }
-                        >
-                          <FiCopy className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </TableCell>
-                    <TableCell>{`${transaction.date} ${transaction.time}`}</TableCell>
+          <Card>
+            <CardHeader>
+              <CardTitle>Transaction History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Transaction ID</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Wallet Address</TableHead>
+                    <TableHead>Trx Time</TableHead>
+                    <TableHead>Crypto Type</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((transaction) => (
+                    <TableRow key={transaction.id}>
+                      <TableCell>{transaction.id}</TableCell>
+                      <TableCell>{transaction.amount}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <div className="truncate w-28 sm:w-40">
+                            {transaction.walletAddress}
+                          </div>
+                          <button
+                            className="ml-2 text-blue-500 hover:underline focus:outline-none"
+                            onClick={() =>
+                              handleCopyToClipboard(transaction.walletAddress)
+                            }
+                          >
+                            <FiCopy className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </TableCell>
+                      <TableCell>{`${transaction.date} ${transaction.time}`}</TableCell>
+                      <TableCell>
+                        {transaction.btc ? "BTC" : transaction.usdt ? "USDT" : "ETH"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -90,10 +90,11 @@ model TwoFactorConfirmation {
 model Transaction {
   id             Int      @id @default(autoincrement())
   date           DateTime
-  type           String
-  cryptocurrency String
+  btc            Boolean  @default(false)
+  usdt           Boolean  @default(false)
+  eth            Boolean  @default(false)
   amount         Float
-  status         String
+  walletAddress  String
   userId         String
   user           User     @relation(fields: [userId], references: [id])
 }
