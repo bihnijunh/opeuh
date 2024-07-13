@@ -31,6 +31,7 @@ import { getUserById } from "@/data/user";
 import BalanceFace from "@/components/ui/balnFace";
 import { UserInfo } from "@/components/user-info";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { Skeleton } from "@/components/ui/skeleton";
 export default function Component() {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -56,7 +57,15 @@ export default function Component() {
   }, [session]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">
+    <div className="space-y-4 text-center">
+      <Skeleton className="h-12 w-12 rounded-full" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[200px]" />
+        <Skeleton className="h-4 w-[150px]" />
+      </div>
+    </div>
+  </div>;
   }
 
   return (
