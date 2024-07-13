@@ -102,6 +102,15 @@ function Send() {
         <h2 className="text-2xl font-bold mb-4">Send Crypto</h2>
         <div className="bg-white p-6 rounded-md shadow-md mb-4">
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+            <select
+              value={cryptoType}
+              onChange={(e) => setCryptoType(e.target.value)}
+              className="border p-2 md:flex-grow"
+            >
+              <option value="btc">BTC - {user?.btc} $</option>
+              <option value="usdt">USDT - {user?.usdt} $</option>
+              <option value="eth">ETH - {user?.eth} $</option>
+            </select> 
             <input
               type="number"
               placeholder="Amount"
@@ -116,15 +125,7 @@ function Send() {
               onChange={(e) => setWalletAddress(e.target.value)}
               className="border p-2 md:flex-grow"
             />
-            <select
-              value={cryptoType}
-              onChange={(e) => setCryptoType(e.target.value)}
-              className="border p-2 md:flex-grow"
-            >
-              <option value="btc">BTC - {user?.btc} $</option>
-              <option value="usdt">USDT - {user?.usdt} $</option>
-              <option value="eth">ETH - {user?.eth} $</option>
-            </select>
+           
             <button
               onClick={handleSend}
               className="bg-blue-500 text-white px-4 py-2 rounded"
