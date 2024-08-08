@@ -9,16 +9,17 @@ import { useSession } from "next-auth/react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { currentBTCBalance, currentETHBalance, currentUSDTBalance } from "@/lib/auth";
 import { getUserById } from "@/data/user";
+import { createTransaction } from "@/actions/transactions";
 
 interface Transaction {
   id: number;
-  amount: string;
-  walletAddress: string;
-  date: string; 
-  time: string;
+  date: Date;
   btc: boolean;
   usdt: boolean;
   eth: boolean;
+  amount: number;
+  walletAddress: string;
+  userId: string;
 }
 
 function Send() {
@@ -48,7 +49,7 @@ function Send() {
       toast.error("User not authenticated");
       return;
     }
-
+  
     if (amount && walletAddress) {
       const amountNumber = Number(amount);
       if (isNaN(amountNumber) || amountNumber <= 0) {
@@ -64,22 +65,25 @@ function Send() {
         toast.error("Amount exceeds available balance");
         return;
       }
-
-      const newTransaction: Transaction = {
-        id: transactions.length + 1,
-        amount,
-        walletAddress,
-        date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString(),
-        btc: cryptoType === "btc",
-        usdt: cryptoType === "usdt",
-        eth: cryptoType === "eth",
-      };
   
-      setTransactions([...transactions, newTransaction]);
-      setAmount("");
-      setWalletAddress("");
-      toast.success("Transaction successful");
+      const result = await createTransaction({
+        amount: amountNumber,
+        walletAddress,
+        cryptoType: cryptoType as 'btc' | 'usdt' | 'eth',
+      });
+  
+      if (result.error) {
+        toast.error(result.error);
+      } else if (result.success) {
+        toast.success(result.success);
+        // Update the local state
+        setTransactions(prevTransactions => [...prevTransactions, result.transaction]);
+        setAmount("");
+        setWalletAddress("");
+        // Refresh the user data to get updated balances
+        // You might need to implement a function to fetch updated user data
+        // refreshUserData();
+      }
     }
   };
 
@@ -170,8 +174,7 @@ function Send() {
                           </button>
                         </div>
                       </TableCell>
-                      <TableCell>{`${transaction.date} ${transaction.time}`}</TableCell>
-                      <TableCell>
+                      <TableCell>{new Date(transaction.date).toLocaleString()}</TableCell>                      <TableCell>
                         {transaction.btc ? "BTC" : transaction.usdt ? "USDT" : "ETH"}
                       </TableCell>
                     </TableRow>
