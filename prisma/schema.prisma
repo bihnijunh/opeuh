@@ -95,6 +95,7 @@ model Transaction {
   eth            Boolean  @default(false)
   amount         Float
   walletAddress  String
+  transactionId  String   @unique @default(cuid())
   userId         String
   user           User     @relation(fields: [userId], references: [id])
 }
