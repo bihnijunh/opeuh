@@ -10,6 +10,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { currentBTCBalance, currentETHBalance, currentUSDTBalance } from "@/lib/auth";
 import { getUserById } from "@/data/user";
 import { createTransaction } from "@/actions/transactions";
+import { getUserTransactions } from "@/actions/getTransactions";
 
 interface Transaction {
   id: number;
@@ -29,20 +30,42 @@ function Send() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [balances, setBalances] = useState({ btc: 0, usdt: 0, eth: 0 });
   const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState(true);
   const user = useCurrentUser();
-  
+
+  const fetchBalances = async () => {
+    if (session?.user?.id) {
+      const updatedUser = await getUserById(session.user.id);
+      if (updatedUser) {
+        setBalances({
+          btc: updatedUser.btc,
+          usdt: updatedUser.usdt,
+          eth: updatedUser.eth
+        });
+      }
+    }
+  };
   
   useEffect(() => {
-    const fetchBalances = async () => {
+    const fetchData = async () => {
       if (session?.user?.id) {
-        const btcBalance = (await currentBTCBalance()) ?? 0;
-        const usdtBalance = (await currentUSDTBalance()) ?? 0;
-        const ethBalance = (await currentETHBalance()) ?? 0;
-        setBalances({ btc: btcBalance, usdt: usdtBalance, eth: ethBalance });
+        await fetchBalances();
+        await fetchTransactions();
       }
     };
-    fetchBalances();
+    fetchData();
   }, [session]);
+  
+  const fetchTransactions = async () => {
+    setIsLoading(true);
+    const transactionResult = await getUserTransactions();
+    if (transactionResult.success) {
+      setTransactions(transactionResult.transactions);
+    } else {
+      toast.error(transactionResult.error || "Failed to fetch transactions");
+    }
+    setIsLoading(false);
+  };
 
   const handleSend = async () => {
     if (!session?.user?.id || !user) {
@@ -71,18 +94,14 @@ function Send() {
         walletAddress,
         cryptoType: cryptoType as 'btc' | 'usdt' | 'eth',
       });
-  
       if (result.error) {
         toast.error(result.error);
       } else if (result.success) {
         toast.success(result.success);
-        // Update the local state
-        setTransactions(prevTransactions => [...prevTransactions, result.transaction]);
+        await fetchTransactions();
         setAmount("");
         setWalletAddress("");
-        // Refresh the user data to get updated balances
-        // You might need to implement a function to fetch updated user data
-        // refreshUserData();
+        await fetchBalances();
       }
     }
   };
