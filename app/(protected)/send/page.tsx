@@ -56,10 +56,13 @@ interface Transaction {
   walletAddress: string;
   userId: string;
   transactionId: string;
-  status: "pending" | "approved" | "successful" | string;}
+  status: "pending" | "approved" | "successful" | string;
+}
 
 function Send() {
   const [amount, setAmount] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [cryptoType, setCryptoType] = useState<string>("btc");
   const [isLoading, setIsLoading] = useState(true);
@@ -70,6 +73,7 @@ function Send() {
   const [balances, setBalances] = useState({ btc: 0, usdt: 0, eth: 0 });
   const { data: session, status } = useSession();
   const user = useCurrentUser();
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const fetchBalances = async () => {
     const result = await getUserBalances();
@@ -80,11 +84,32 @@ function Send() {
     }
   };
 
-  const fetchTransactions = async () => {
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
+  const handleItemsPerPageChange = (value: string) => {
+    const newItemsPerPage = parseInt(value, 10);
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+    fetchTransactions(1);
+  };
+
+  const fetchTransactions = async (page = currentPage) => {
     try {
-      const result = await getUserTransactions();
+      const result = await getUserTransactions(page, itemsPerPage);
       if (result.success) {
         setTransactions(result.transactions);
+        setTotalPages(result.totalPages);
+        setCurrentPage(result.currentPage);
       } else {
         toast.error(result.error || "Failed to fetch transactions");
       }
@@ -94,25 +119,28 @@ function Send() {
     }
   };
 
- useEffect(() => {
-  const fetchData = async () => {
-    if (status === "authenticated" && session?.user?.id) {
-      setIsLoading(true);
-      try {
-        await fetchBalances();
-        await fetchTransactions();
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to fetch data");
-      } finally {
-        setIsLoading(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (status === "authenticated" && session?.user?.id) {
+        setIsLoading(true);
+        try {
+          await fetchBalances();
+          await fetchTransactions();
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          toast.error("Failed to fetch data");
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
+    };
+    fetchData();
+  }, [status, session?.user?.id]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    fetchTransactions(newPage);
   };
-  fetchData();
-}, [status, session?.user?.id]);
-
-
 
   const handleSend = async () => {
     if (!session?.user?.id || !user) {
@@ -147,7 +175,7 @@ function Send() {
         toast.success(result.success);
         const newTransaction: Transaction = {
           ...result.transaction,
-          status: "pending", // Set a default status for new transactions
+          status: "pending",
         };
         setTransactions([newTransaction, ...transactions]);
         setAmount("");
@@ -188,24 +216,24 @@ function Send() {
   }
 
   return (
-    <div className="space-y-4 p-8">
-      <Tabs defaultValue="week">
-        <div className="flex items-center">
-          <TabsList>
+    <div className="space-y-4 p-4 sm:p-8">
+      <Tabs defaultValue="week" className="w-full">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
+          <TabsList className="mb-4 sm:mb-0">
             <TabsTrigger value="week">Week</TabsTrigger>
             <TabsTrigger value="month">Month</TabsTrigger>
             <TabsTrigger value="year">Year</TabsTrigger>
           </TabsList>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 gap-1 text-sm"
+                  className="h-8 px-2 lg:px-3"
                 >
-                  <ListFilter className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only">Filter</span>
+                  <ListFilter className="h-4 w-4 lg:mr-2" />
+                  <span className="hidden lg:inline">Filter</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -218,9 +246,9 @@ function Send() {
                 <DropdownMenuCheckboxItem>Refunded</DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button size="sm" variant="outline" className="h-7 gap-1 text-sm">
-              <File className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only">Export</span>
+            <Button variant="outline" size="sm" className="h-8 px-2 lg:px-3">
+              <File className="h-4 w-4 lg:mr-2" />
+              <span className="hidden lg:inline">Export</span>
             </Button>
           </div>
         </div>
@@ -234,7 +262,7 @@ function Send() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex space-x-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Select
                     value={cryptoType}
                     onValueChange={(value) => setCryptoType(value)}
@@ -266,82 +294,113 @@ function Send() {
                     value={walletAddress}
                     onChange={(e) => setWalletAddress(e.target.value)}
                   />
-                  <Button onClick={handleSend}>Send</Button>
+                  <Button onClick={handleSend} className="w-full">Send</Button>
                 </div>
               </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Transaction ID</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Wallet Address</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Crypto Type</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.length === 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center">
-                        No transactions found
-                      </TableCell>
+                      <TableHead className="w-[100px]">ID</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead className="min-w-[200px]">Wallet Address</TableHead>
+                      <TableHead className="min-w-[150px]">Date</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                  ) : (
-                    transactions.map((transaction) => (
-                      <TableRow key={transaction.id}>
-                        <TableCell>{transaction.transactionId}</TableCell>
-                        <TableCell>{transaction.amount}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <div className="truncate w-28 sm:w-40">
-                              {transaction.walletAddress}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleCopyToClipboard(transaction.walletAddress)
-                              }
-                            >
-                              <FiCopy className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(transaction.date).toLocaleString()}
-                        </TableCell>
-                        <TableCell>
-                          {transaction.btc
-                            ? "BTC"
-                            : transaction.usdt
-                            ? "USDT"
-                            : "ETH"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              transaction.status === "pending"
-                                ? "warning"
-                                : transaction.status === "approved"
-                                ? "secondary"
-                                : "success"
-                            }
-                          >
-                            {transaction.status === "pending"
-                              ? "Pending"
-                              : transaction.status === "approved"
-                              ? "Approved"
-                              : "Successful"}
-                          </Badge>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center">
+                          No transactions found
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ) : (
+                      transactions.map((transaction) => (
+                        <TableRow key={transaction.id}>
+                          <TableCell className="font-medium">{transaction.transactionId.slice(0, 8)}...</TableCell>
+                          <TableCell>{transaction.amount}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <div className="truncate max-w-[150px]">
+                                {transaction.walletAddress}
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleCopyToClipboard(transaction.walletAddress)
+                                }
+                              >
+                                <FiCopy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(transaction.date).toLocaleString()}
+                          </TableCell>
+                          <TableCell>
+                            {transaction.btc
+                              ? "BTC"
+                              : transaction.usdt
+                              ? "USDT"
+                              : "ETH"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                transaction.status === "pending"
+                                  ? "warning"
+                                  : transaction.status === "approved"
+                                  ? "secondary"
+                                  : "success"
+                              }
+                            >
+                              {transaction.status === "pending"
+                                ? "Pending"
+                                : transaction.status === "approved"
+                                ? "Approved"
+                                : "Successful"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-4 sm:space-y-0">
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={handleItemsPerPageChange}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Items per page" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5 per page</SelectItem>
+                <SelectItem value="10">10 per page</SelectItem>
+                <SelectItem value="20">20 per page</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex items-center space-x-2">
+              <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
+                Previous
+              </Button>
+              <span className="flex items-center">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
