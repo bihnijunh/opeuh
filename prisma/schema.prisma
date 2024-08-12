@@ -97,5 +97,6 @@ model Transaction {
   walletAddress  String
   transactionId  String   @unique @default(cuid())
   userId         String
+  status String @default("pending")
   user           User     @relation(fields: [userId], references: [id])
 }

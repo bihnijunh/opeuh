@@ -3,7 +3,32 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FiCopy } from "react-icons/fi";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ListFilter, File } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,6 +44,7 @@ import { getUserTransactions } from "@/actions/getTransactions";
 import { getUserBalances } from "@/actions/getBalances";
 import useLocalStorage from "@/hooks/use-local-storage";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 interface Transaction {
   id: number;
@@ -30,7 +56,7 @@ interface Transaction {
   walletAddress: string;
   userId: string;
   transactionId: string;
-}
+  status: "pending" | "approved" | "successful" | string;}
 
 function Send() {
   const [amount, setAmount] = useState<string>("");
@@ -55,24 +81,38 @@ function Send() {
   };
 
   const fetchTransactions = async () => {
-    const transactionResult = await getUserTransactions();
-    if (transactionResult.success) {
-      setTransactions(transactionResult.transactions);
-    } else {
-      toast.error(transactionResult.error || "Failed to fetch transactions");
+    try {
+      const result = await getUserTransactions();
+      if (result.success) {
+        setTransactions(result.transactions);
+      } else {
+        toast.error(result.error || "Failed to fetch transactions");
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      toast.error("Failed to fetch transactions");
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (status === "authenticated" && session?.user?.id) {
-        setIsLoading(true);
-        await Promise.all([fetchBalances(), fetchTransactions()]);
+ useEffect(() => {
+  const fetchData = async () => {
+    if (status === "authenticated" && session?.user?.id) {
+      setIsLoading(true);
+      try {
+        await fetchBalances();
+        await fetchTransactions();
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to fetch data");
+      } finally {
         setIsLoading(false);
       }
-    };
-    fetchData();
-  }, [status, session]);
+    }
+  };
+  fetchData();
+}, [status, session?.user?.id]);
+
+
 
   const handleSend = async () => {
     if (!session?.user?.id || !user) {
@@ -105,7 +145,10 @@ function Send() {
         toast.error(result.error);
       } else if (result.success) {
         toast.success(result.success);
-        const newTransaction = result.transaction;
+        const newTransaction: Transaction = {
+          ...result.transaction,
+          status: "pending", // Set a default status for new transactions
+        };
         setTransactions([newTransaction, ...transactions]);
         setAmount("");
         setWalletAddress("");
@@ -131,80 +174,116 @@ function Send() {
   };
 
   if (isLoading) {
-    return <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">
-    <div className="space-y-4 text-center">
-      <Skeleton className="h-12 w-12 rounded-full" />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-[200px]" />
-        <Skeleton className="h-4 w-[150px]" />
+    return (
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">
+        <div className="space-y-4 text-center">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[200px]" />
+            <Skeleton className="h-4 w-[150px]" />
+          </div>
+        </div>
       </div>
-    </div>
-  </div>;
+    );
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <h2 className="text-2xl font-bold mb-4">Send Crypto</h2>
-        <div className="bg-white p-6 rounded-md shadow-md mb-4">
-          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-            <select
-              id="cryptoType"
-              name="cryptoType"
-              value={cryptoType}
-              onChange={(e) => setCryptoType(e.target.value)}
-              className="border p-2 md:flex-grow"
-            >
-              <option value="btc">BTC - {balances.btc} $</option>
-              <option value="usdt">USDT - {balances.usdt} $</option>
-              <option value="eth">ETH - {balances.eth} $</option>
-            </select>
-            <input
-              id="amount"
-              name="amount"
-              type="number"
-              placeholder="Amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="border p-2 md:flex-grow"
-            />
-            <input
-              id="walletAddress"
-              name="walletAddress"
-              type="text"
-              placeholder="Wallet Address"
-              value={walletAddress}
-              onChange={(e) => setWalletAddress(e.target.value)}
-              className="border p-2 md:flex-grow"
-            />
-            <button
-              onClick={handleSend}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              Send
-            </button>
+    <div className="space-y-4 p-8">
+      <Tabs defaultValue="week">
+        <div className="flex items-center">
+          <TabsList>
+            <TabsTrigger value="week">Week</TabsTrigger>
+            <TabsTrigger value="month">Month</TabsTrigger>
+            <TabsTrigger value="year">Year</TabsTrigger>
+          </TabsList>
+          <div className="ml-auto flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1 text-sm"
+                >
+                  <ListFilter className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only">Filter</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem checked>
+                  Fulfilled
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>Declined</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>Refunded</DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button size="sm" variant="outline" className="h-7 gap-1 text-sm">
+              <File className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only">Export</span>
+            </Button>
           </div>
         </div>
-        <div className="mt-8">
+        <TabsContent value="week">
           <Card>
             <CardHeader>
-              <CardTitle>Transaction History</CardTitle>
+              <CardTitle>Send Crypto</CardTitle>
+              <CardDescription>
+                Send cryptocurrency to another wallet.
+              </CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="space-y-4">
+                <div className="flex space-x-4">
+                  <Select
+                    value={cryptoType}
+                    onValueChange={(value) => setCryptoType(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select cryptocurrency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="btc">
+                        BTC - {balances.btc} $
+                      </SelectItem>
+                      <SelectItem value="usdt">
+                        USDT - {balances.usdt} $
+                      </SelectItem>
+                      <SelectItem value="eth">
+                        ETH - {balances.eth} $
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    placeholder="Amount"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                  <Input
+                    type="text"
+                    placeholder="Wallet Address"
+                    value={walletAddress}
+                    onChange={(e) => setWalletAddress(e.target.value)}
+                  />
+                  <Button onClick={handleSend}>Send</Button>
+                </div>
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Transaction ID</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Wallet Address</TableHead>
-                    <TableHead>Trx Time</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead>Crypto Type</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {transactions.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center">
+                      <TableCell colSpan={6} className="text-center">
                         No transactions found
                       </TableCell>
                     </TableRow>
@@ -218,14 +297,15 @@ function Send() {
                             <div className="truncate w-28 sm:w-40">
                               {transaction.walletAddress}
                             </div>
-                            <button
-                              className="ml-2 text-blue-500 hover:underline focus:outline-none"
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() =>
                                 handleCopyToClipboard(transaction.walletAddress)
                               }
                             >
-                              <FiCopy className="h-5 w-5" />
-                            </button>
+                              <FiCopy className="h-4 w-4" />
+                            </Button>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -238,6 +318,23 @@ function Send() {
                             ? "USDT"
                             : "ETH"}
                         </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              transaction.status === "pending"
+                                ? "warning"
+                                : transaction.status === "approved"
+                                ? "secondary"
+                                : "success"
+                            }
+                          >
+                            {transaction.status === "pending"
+                              ? "Pending"
+                              : transaction.status === "approved"
+                              ? "Approved"
+                              : "Successful"}
+                          </Badge>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -245,8 +342,8 @@ function Send() {
               </Table>
             </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
