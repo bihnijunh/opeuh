@@ -189,14 +189,39 @@ function Send() {
     navigator.clipboard.writeText(address).then(
       () => {
         toast.success("Wallet address copied!", {
-          position: "top-right",
+          position: "top-center",
           autoClose: 2000,
-          hideProgressBar: true,
+          hideProgressBar: false,
           closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          className: "custom-toast",
+          bodyClassName: "custom-toast-body",
+          style: {
+            fontSize: '14px',
+            maxWidth: '300px',
+            textAlign: 'center',
+          },
         });
       },
       () => {
-        toast.error("Failed to copy wallet address");
+        toast.error("Failed to copy wallet address", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          className: "custom-toast",
+          bodyClassName: "custom-toast-body",
+          style: {
+            fontSize: '14px',
+            maxWidth: '300px',
+            textAlign: 'center',
+          },
+        });
       }
     );
   };
@@ -219,11 +244,7 @@ function Send() {
     <div className="space-y-4 p-4 sm:p-8">
       <Tabs defaultValue="week" className="w-full">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
-          <TabsList className="mb-4 sm:mb-0">
-            <TabsTrigger value="week">Week</TabsTrigger>
-            <TabsTrigger value="month">Month</TabsTrigger>
-            <TabsTrigger value="year">Year</TabsTrigger>
-          </TabsList>
+         
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

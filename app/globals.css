@@ -7,6 +7,17 @@ body,
 :root {
   height: 100%;
 }
+
+.custom-toast {
+  width: 90%;
+  max-width: 300px;
+}
+
+@media (min-width: 768px) {
+  .custom-toast {
+    width: auto;
+  }
+}
  
 @layer base {
   :root {
