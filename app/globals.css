@@ -9,10 +9,37 @@ body,
 }
 
 .custom-toast {
-  width: 90%;
-  max-width: 300px;
+  border-radius: 25px !important;
+  padding: 16px 24px !important;
+  font-size: 14px !important;
+  max-width: 300px !important;
+  width: auto !important;
+  text-align: center !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
+.custom-toast-body {
+  font-family: 'Arial', sans-serif !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.Toastify__toast-icon {
+  font-size: 20px !important;
+  margin-right: 12px !important;
+}
+
+.Toastify__close-button {
+  align-self: center !important;
+  color: #999 !important;
+}
+
+@media (max-width: 480px) {
+  .custom-toast {
+    max-width: 90% !important;
+    margin: 0 auto !important;
+  }
+}
 @media (min-width: 768px) {
   .custom-toast {
     width: auto;

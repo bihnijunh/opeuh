@@ -189,38 +189,30 @@ function Send() {
     navigator.clipboard.writeText(address).then(
       () => {
         toast.success("Wallet address copied!", {
-          position: "top-center",
+          position: "bottom-center",
           autoClose: 2000,
-          hideProgressBar: false,
+          hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
           className: "custom-toast",
           bodyClassName: "custom-toast-body",
-          style: {
-            fontSize: '14px',
-            maxWidth: '300px',
-            textAlign: 'center',
-          },
+          icon: "🔗",
         });
       },
       () => {
         toast.error("Failed to copy wallet address", {
-          position: "top-center",
+          position: "bottom-center",
           autoClose: 2000,
-          hideProgressBar: false,
+          hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
           className: "custom-toast",
           bodyClassName: "custom-toast-body",
-          style: {
-            fontSize: '14px',
-            maxWidth: '300px',
-            textAlign: 'center',
-          },
+          icon: "❌",
         });
       }
     );
