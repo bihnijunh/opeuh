@@ -47,9 +47,9 @@ export const Navbar = () => {
         {user?.role === UserRole.ADMIN && (
   <Button 
     asChild
-    variant={pathname === "/admin/users" ? "default" : "outline"}
+    variant={pathname === "/admin" ? "default" : "outline"}
   >
-    <Link href="/admin/users">
+    <Link href="/admin">
       Admin
     </Link>
   </Button>
