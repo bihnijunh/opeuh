@@ -14,10 +14,13 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { UserRole } from "@prisma/client";
 
 // Navbar component
 export const Navbar = () => {
   const pathname = usePathname();
+  const user = useCurrentUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleMobileMenuToggle = () => {
@@ -41,6 +44,16 @@ export const Navbar = () => {
           <h1 className="text-xl font-semibold">PIEDRA</h1>
         </div>
         <div className="hidden md:flex items-center space-x-6">
+        {user?.role === UserRole.ADMIN && (
+  <Button 
+    asChild
+    variant={pathname === "/admin/users" ? "default" : "outline"}
+  >
+    <Link href="/admin/users">
+      Admin
+    </Link>
+  </Button>
+)}
           <div className="flex space-x-2">
             <Button 
               asChild
@@ -163,6 +176,15 @@ export const Navbar = () => {
                 </Button>
                 <div className="flex items-center py-2 -mx-1 md:mx-0">
             <UserButton />
+            {user?.role === UserRole.ADMIN && (
+  <Button
+    asChild
+    variant={pathname === "/admin/users" ? "default" : "outline"}
+    onClick={handleMobileMenuItemClick}
+  >
+    <Link href="/admin/users">Admin</Link>
+  </Button>
+)}
           </div>
                 {/* ... other mobile menu items */}
               </div>

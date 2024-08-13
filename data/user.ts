@@ -3,6 +3,7 @@ import { UserRole } from "@prisma/client";
 import { User } from "next-auth";
 
 interface UserWithBalance extends User {
+  isOAuth: boolean;
   id: string;
   name: string | null;
   email: string | null;
@@ -11,7 +12,7 @@ interface UserWithBalance extends User {
   password: string | null;
   role: UserRole;
   isTwoFactorEnabled: boolean;
-  isOAuth: boolean;
+  
   usdt: number;
   btc: number;
   eth: number;
@@ -50,6 +51,10 @@ export const getUserById = async (id: string): Promise<UserWithBalance | null> =
         name: true,
         email: true,
         emailVerified: true,
+        image: true,
+        password: true,
+        role: true,
+        isTwoFactorEnabled: true,
         usdt: true,
         btc: true,
         eth: true,
@@ -57,12 +62,16 @@ export const getUserById = async (id: string): Promise<UserWithBalance | null> =
     });
 
     if (userWithBalance) {
-      userWithBalance.usdt = Number(userWithBalance.usdt);
-      userWithBalance.btc = Number(userWithBalance.btc);
-      userWithBalance.eth = Number(userWithBalance.eth);
+      return {
+        ...userWithBalance,
+        usdt: Number(userWithBalance.usdt),
+        btc: Number(userWithBalance.btc),
+        eth: Number(userWithBalance.eth),
+        isOAuth: false, // Set this based on your logic
+      } as UserWithBalance;
     }
 
-    return userWithBalance as UserWithBalance;
+    return null;
   } catch (error) {
     console.error("Error fetching user with balance:", error);
     return null;

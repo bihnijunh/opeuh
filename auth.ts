@@ -50,43 +50,37 @@ export const {
 
       return true;
     },
+
     async session({ token, session }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
-
-      if (token.role && session.user) {
+    
+      if (session.user) {
         session.user.role = token.role as UserRole;
-      }
-
-      if (session.user) {
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
-      }
-
-      if (session.user) {
-        session.user.name = token.name;
-        session.user.email = token.email;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
         session.user.isOAuth = token.isOAuth as boolean;
         session.user.usdt = token.usdt as number;
         session.user.btc = token.btc as number;
         session.user.eth = token.eth as number;
       }
-
-      
-
+    
+      console.log("Session callback - updated session:", session);
+    
       return session;
     },
+
     async jwt({ token }) {
       if (!token.sub) return token;
-
+    
       const existingUser = await getUserById(token.sub);
-
+    
       if (!existingUser) return token;
-
-      const existingAccount = await getAccountByUserId(
-        existingUser.id
-      );
-
+    
+      const existingAccount = await getAccountByUserId(existingUser.id);
+    
       token.isOAuth = !!existingAccount;
       token.name = existingUser.name;
       token.email = existingUser.email;
@@ -95,9 +89,11 @@ export const {
       token.usdt = existingUser.usdt;
       token.btc = existingUser.btc;
       token.eth = existingUser.eth;
-
+    
+      console.log("JWT callback - token:", token);
+    
       return token;
-    }
+    },
   },
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
