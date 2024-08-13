@@ -185,10 +185,10 @@ function Send() {
     }
   };
 
-  const handleCopyToClipboard = (address: string) => {
-    navigator.clipboard.writeText(address).then(
+  const handleCopyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text).then(
       () => {
-        toast.success("Wallet address copied!", {
+        toast.success(`${label} copied!`, {
           position: "bottom-center",
           autoClose: 2000,
           hideProgressBar: true,
@@ -202,7 +202,7 @@ function Send() {
         });
       },
       () => {
-        toast.error("Failed to copy wallet address", {
+        toast.error(`Failed to copy ${label}`, {
           position: "bottom-center",
           autoClose: 2000,
           hideProgressBar: true,
@@ -217,7 +217,6 @@ function Send() {
       }
     );
   };
-
   if (isLoading) {
     return (
       <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">
@@ -236,7 +235,6 @@ function Send() {
     <div className="space-y-4 p-4 sm:p-8">
       <Tabs defaultValue="week" className="w-full">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
-         
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -307,7 +305,9 @@ function Send() {
                     value={walletAddress}
                     onChange={(e) => setWalletAddress(e.target.value)}
                   />
-                  <Button onClick={handleSend} className="w-full">Send</Button>
+                  <Button onClick={handleSend} className="w-full">
+                    Send
+                  </Button>
                 </div>
               </div>
               <div className="overflow-x-auto">
@@ -316,7 +316,9 @@ function Send() {
                     <TableRow>
                       <TableHead className="w-[100px]">ID</TableHead>
                       <TableHead>Amount</TableHead>
-                      <TableHead className="min-w-[200px]">Wallet Address</TableHead>
+                      <TableHead className="min-w-[200px]">
+                        Wallet Address
+                      </TableHead>
                       <TableHead className="min-w-[150px]">Date</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Status</TableHead>
@@ -332,8 +334,19 @@ function Send() {
                     ) : (
                       transactions.map((transaction) => (
                         <TableRow key={transaction.id}>
-                          <TableCell className="font-medium">{transaction.transactionId.slice(0, 8)}...</TableCell>
-                          <TableCell>{transaction.amount}</TableCell>
+                          <TableCell
+                            className="font-medium cursor-pointer hover:text-blue-500"
+                            onClick={() =>
+                              handleCopyToClipboard(
+                                transaction.transactionId,
+                                "Transaction ID"
+                              )
+                            }
+                          >
+                            {transaction.transactionId.slice(0, 8)}...
+                          </TableCell>
+                          <TableCell>{transaction.amount}$</TableCell>
+
                           <TableCell>
                             <div className="flex items-center">
                               <div className="truncate max-w-[150px]">
@@ -343,7 +356,10 @@ function Send() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() =>
-                                  handleCopyToClipboard(transaction.walletAddress)
+                                  handleCopyToClipboard(
+                                    transaction.walletAddress,
+                                    "Wallet address"
+                                  )
                                 }
                               >
                                 <FiCopy className="h-4 w-4" />
