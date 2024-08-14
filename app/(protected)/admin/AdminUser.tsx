@@ -11,35 +11,31 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { UserRole } from "@prisma/client";
-
-interface User {
-  id: string;
-  name: string | null;
-  email: string | null;
-  role: UserRole;
-  
-}
+import { EditUserModal } from "../_components/EditUserModal+";
+import { ExtendedUser } from "@/next-auth";
 
 interface AdminUsersPageProps {
-  initialUsers: User[];
+  initialUsers: ExtendedUser[];
   totalPages: number;
 }
 
 const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<ExtendedUser[]>(initialUsers);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const fetchUsers = async (page: number) => {
-    const res = await fetch(`/api/admin/users?page=${page}&limit=10`);
-    if (res.ok) {
-      const data = await res.json();
-      setUsers(data.users);
-    }
-  };
+  const [editingUser, setEditingUser] = useState<ExtendedUser | null>(null);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    fetchUsers(newPage);
+    // Implement server-side pagination here
+  };
+
+  const handleEditUser = (user: ExtendedUser) => {
+    setEditingUser(user);
+  };
+
+  const handleUserUpdated = (updatedUser: ExtendedUser) => {
+    setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+    setEditingUser(null);
   };
 
   return (
@@ -51,7 +47,8 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Role</TableHead>
-            <TableHead>Created At</TableHead>
+            <TableHead>Two Factor</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -60,7 +57,11 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.role}</TableCell>
-              
+              <TableCell>{user.isTwoFactorEnabled ? "Enabled" : "Disabled"}</TableCell>
+              <TableCell>
+  <Button onClick={() => handleEditUser(user)}>Edit</Button>
+ 
+</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -82,6 +83,14 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
           Next
         </Button>
       </div>
+      {editingUser && (
+        <EditUserModal
+          user={editingUser}
+          isOpen={!!editingUser}
+          onClose={() => setEditingUser(null)}
+          onUserUpdated={handleUserUpdated}
+        />
+      )}
     </div>
   );
 };

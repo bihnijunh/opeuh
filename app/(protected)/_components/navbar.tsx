@@ -1,5 +1,5 @@
-"use client"
-import { useState } from "react";
+"use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -16,27 +16,46 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserRole } from "@prisma/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Navbar component
 export const Navbar = () => {
   const pathname = usePathname();
   const user = useCurrentUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const handleMobileMenuToggle = () => {
     setIsMobileMenuOpen((prev) => !prev);
   };
 
   const handleMobileMenuItemClick = () => {
-    // Close the mobile menu after clicking on a menu item
     setIsMobileMenuOpen(false);
   };
 
   const handleCloseButtonClick = () => {
-    // Close the mobile menu when the close button is clicked
     setIsMobileMenuOpen(false);
   };
 
+  useEffect(() => {
+    if (user !== undefined) {
+      setIsLoaded(true);
+    }
+  }, [user]);
+
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">
+        <div className="space-y-4 text-center">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[200px]" />
+            <Skeleton className="h-4 w-[150px]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <nav className="bg-white py-4 shadow-md">
       <div className="container mx-auto flex items-center justify-between">
@@ -44,41 +63,33 @@ export const Navbar = () => {
           <h1 className="text-xl font-semibold">PIEDRA</h1>
         </div>
         <div className="hidden md:flex items-center space-x-6">
-        {user?.role === UserRole.ADMIN && (
-  <Button 
-    asChild
-    variant={pathname === "/admin" ? "default" : "outline"}
-  >
-    <Link href="/admin">
-      Admin
-    </Link>
-  </Button>
-)}
+          {user && user.role === UserRole.ADMIN && (
+            <Button
+              asChild
+              variant={pathname === "/admin" ? "default" : "outline"}
+            >
+              <Link href="/admin">Admin</Link>
+            </Button>
+          )}
           <div className="flex space-x-2">
-            <Button 
+            <Button
               asChild
               variant={pathname === "/home" ? "default" : "outline"}
             >
-              <Link href="/home">
-                Home
-              </Link>
+              <Link href="/home">Home</Link>
             </Button>
-           
-            <Button 
+
+            <Button
               asChild
               variant={pathname === "/send" ? "default" : "outline"}
             >
-              <Link href="/send">
-                Send
-              </Link>
+              <Link href="/send">Send</Link>
             </Button>
-            <Button 
+            <Button
               asChild
               variant={pathname === "/settings" ? "default" : "outline"}
             >
-              <Link href="/settings">
-                Settings
-              </Link>
+              <Link href="/settings">Settings</Link>
             </Button>
           </div>
           <div className="flex items-center space-x-2">
@@ -175,17 +186,19 @@ export const Navbar = () => {
                   <Link href="/settings">Settings</Link>
                 </Button>
                 <div className="flex items-center py-2 -mx-1 md:mx-0">
-            <UserButton />
-            {user?.role === UserRole.ADMIN && (
-  <Button
-    asChild
-    variant={pathname === "/admin/users" ? "default" : "outline"}
-    onClick={handleMobileMenuItemClick}
-  >
-    <Link href="/admin/users">Admin</Link>
-  </Button>
-)}
-          </div>
+                  <UserButton />
+                  {user?.role === UserRole.ADMIN && (
+                    <Button
+                      asChild
+                      variant={
+                        pathname === "/admin" ? "default" : "outline"
+                      }
+                      onClick={handleMobileMenuItemClick}
+                    >
+                      <Link href="/admin">Admin</Link>
+                    </Button>
+                  )}
+                </div>
                 {/* ... other mobile menu items */}
               </div>
             </div>

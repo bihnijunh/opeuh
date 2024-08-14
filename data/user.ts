@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { ExtendedUser } from "@/next-auth";
 import { UserRole } from "@prisma/client";
 import { User } from "next-auth";
 
@@ -42,7 +43,7 @@ export const getUserByEmail = async (email: string) => {
   }
 };
 
-export const getUserById = async (id: string): Promise<UserWithBalance | null> => {
+export const getUserById = async (id: string): Promise<ExtendedUser | null> => {
   try {
     const userWithBalance = await db.user.findUnique({
       where: { id },
@@ -58,17 +59,22 @@ export const getUserById = async (id: string): Promise<UserWithBalance | null> =
         usdt: true,
         btc: true,
         eth: true,
+        transactions: true, // Add this line
       },
     });
 
     if (userWithBalance) {
+      const isOAuth = await db.account.findFirst({
+        where: { userId: id }
+      }) !== null;
+
       return {
         ...userWithBalance,
         usdt: Number(userWithBalance.usdt),
         btc: Number(userWithBalance.btc),
         eth: Number(userWithBalance.eth),
-        isOAuth: false, // Set this based on your logic
-      } as UserWithBalance;
+        isOAuth,
+      } as ExtendedUser;
     }
 
     return null;

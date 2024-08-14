@@ -60,16 +60,16 @@ interface Transaction {
 }
 
 function Send() {
-  const [amount, setAmount] = useState<string>("");
+  const [amount, setAmount] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [walletAddress, setWalletAddress] = useState<string>("");
   const [cryptoType, setCryptoType] = useState<string>("btc");
   const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>(
     "userTransactions",
     []
   );
+  const [walletAddress, setWalletAddress] = useState("");
   const [balances, setBalances] = useState({ btc: 0, usdt: 0, eth: 0 });
   const { data: session, status } = useSession();
   const user = useCurrentUser();

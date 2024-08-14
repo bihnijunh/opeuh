@@ -67,7 +67,7 @@ export const {
         session.user.eth = token.eth as number;
       }
     
-      console.log("Session callback - updated session:", session);
+      
     
       return session;
     },
@@ -90,7 +90,6 @@ export const {
       token.btc = existingUser.btc;
       token.eth = existingUser.eth;
     
-      console.log("JWT callback - token:", token);
     
       return token;
     },

@@ -8,6 +8,10 @@ export const SettingsSchema = z.object({
   email: z.optional(z.string().email()),
   password: z.optional(z.string().min(6)),
   newPassword: z.optional(z.string().min(6)),
+  btc: z.number().optional(),
+usdt: z.number().optional(),
+eth: z.number().optional(),
+status: z.enum(["pending", "successful"]).optional(),
 })
   .refine((data) => {
     if (data.password && !data.newPassword) {
