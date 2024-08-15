@@ -12,28 +12,28 @@ import {
 } from "@/components/ui/table";
 import { UserRole } from "@prisma/client";
 import { EditUserModal } from "../_components/EditUserModal+";
-import { ExtendedUser } from "@/next-auth";
+import { UserWithTransactions } from "@/transaction-types";
 
 interface AdminUsersPageProps {
-  initialUsers: ExtendedUser[];
+  initialUsers: UserWithTransactions[];
   totalPages: number;
 }
 
 const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
-  const [users, setUsers] = useState<ExtendedUser[]>(initialUsers);
+  const [users, setUsers] = useState<UserWithTransactions[]>(initialUsers);
   const [currentPage, setCurrentPage] = useState(1);
-  const [editingUser, setEditingUser] = useState<ExtendedUser | null>(null);
+  const [editingUser, setEditingUser] = useState<UserWithTransactions | null>(null);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     // Implement server-side pagination here
   };
 
-  const handleEditUser = (user: ExtendedUser) => {
+  const handleEditUser = (user: UserWithTransactions) => {
     setEditingUser(user);
   };
 
-  const handleUserUpdated = (updatedUser: ExtendedUser) => {
+  const handleUserUpdated = (updatedUser: UserWithTransactions) => {
     setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
     setEditingUser(null);
   };
@@ -47,7 +47,10 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Role</TableHead>
-            <TableHead>Two Factor</TableHead>
+            <TableHead>BTC</TableHead>
+            <TableHead>USDT</TableHead>
+            <TableHead>ETH</TableHead>
+            <TableHead>Transactions</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -57,11 +60,13 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.role}</TableCell>
-              <TableCell>{user.isTwoFactorEnabled ? "Enabled" : "Disabled"}</TableCell>
+              <TableCell>{user.btc}</TableCell>
+              <TableCell>{user.usdt}</TableCell>
+              <TableCell>{user.eth}</TableCell>
+              <TableCell>{user.transactions.length}</TableCell>
               <TableCell>
-  <Button onClick={() => handleEditUser(user)}>Edit</Button>
- 
-</TableCell>
+                <Button onClick={() => handleEditUser(user)}>Edit</Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

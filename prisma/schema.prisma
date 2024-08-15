@@ -99,4 +99,4 @@ model Transaction {
   userId         String
   status String @default("pending")
   user           User     @relation(fields: [userId], references: [id])
-}
+  }

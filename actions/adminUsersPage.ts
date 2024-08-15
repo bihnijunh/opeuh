@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { currentRole } from "@/lib/auth";
 import { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { ExtendedUser } from "@/next-auth";
+import { Transaction, UserWithTransactions } from "@/transaction-types";
 
 export const updateUser = async (userId: string, values: {
   name?: string;
@@ -14,8 +14,8 @@ export const updateUser = async (userId: string, values: {
   btc?: number;
   usdt?: number;
   eth?: number;
-  status?: "pending" | "successful";
-}): Promise<{ error?: string; success?: string; user?: ExtendedUser }> => {
+  status?: string;
+}): Promise<{ error?: string; success?: string; user?: UserWithTransactions }> => {
   const role = await currentRole();
 
   if (role !== UserRole.ADMIN) {
@@ -28,18 +28,35 @@ export const updateUser = async (userId: string, values: {
       data: values,
       include: { transactions: true }, // Include transactions
     });
+
     const isOAuth = await db.account.findFirst({
       where: { userId: updatedUser.id }
     }) !== null;
     
-    const extendedUser: ExtendedUser = {
-      ...updatedUser,
-      isOAuth,
-      transactions: updatedUser.transactions, // Add transactions
+    const userWithTransactions: UserWithTransactions = {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      btc: updatedUser.btc,
+      usdt: updatedUser.usdt,
+      eth: updatedUser.eth,
+      transactions: updatedUser.transactions.map((t): Transaction => ({
+        id: t.id,
+        date: t.date,
+        btc: t.btc,
+        usdt: t.usdt,
+        eth: t.eth,
+        amount: t.amount,
+        walletAddress: t.walletAddress,
+        transactionId: t.transactionId,
+        status: t.status,
+        userId: t.userId,
+      })),
     };
 
     revalidatePath("/admin");
-    return { success: "User updated successfully", user: extendedUser };
+    return { success: "User updated successfully", user: userWithTransactions };
   } catch (error) {
     console.error("Failed to update user:", error);
     return { error: "Failed to update user" };

@@ -28,16 +28,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { UserRole } from "@prisma/client";
-import { ExtendedUser } from "@/next-auth";
+import { UserWithTransactions } from "@/transaction-types";
 import { updateUser } from "@/actions/adminUsersPage";
 
 interface EditUserModalProps {
-  user: ExtendedUser;
+  user: UserWithTransactions;
   isOpen: boolean;
   onClose: () => void;
-  onUserUpdated: (updatedUser: ExtendedUser) => void;
+  onUserUpdated: (updatedUser: UserWithTransactions) => void;
 }
 
 export const EditUserModal = ({
@@ -55,11 +54,9 @@ export const EditUserModal = ({
       name: user.name || "",
       email: user.email || "",
       role: user.role,
-      isTwoFactorEnabled: user.isTwoFactorEnabled || false,
-      btc: user.btc || 0,
-      usdt: user.usdt || 0,
-      eth: user.eth || 0,
-      status: user.status || "pending",
+      btc: user.btc, // Use the actual user.btc value
+      usdt: user.usdt, // Use the actual user.usdt value
+      eth: user.eth, // Use the actual user.eth value
     },
   });
 
@@ -137,24 +134,6 @@ export const EditUserModal = ({
             />
             <FormField
               control={form.control}
-              name="isTwoFactorEnabled"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                  <div className="space-y-0.5">
-                    <FormLabel>Two Factor Authentication</FormLabel>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="btc"
               render={({ field }) => (
                 <FormItem>
@@ -164,9 +143,8 @@ export const EditUserModal = ({
                       {...field}
                       type="number"
                       step="0.00000001"
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || 0)
-                      }
+                      value={field.value || 0} // Ensure a value is always displayed
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -184,9 +162,8 @@ export const EditUserModal = ({
                       {...field}
                       type="number"
                       step="0.01"
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || 0)
-                      }
+                      value={field.value || 0} // Ensure a value is always displayed
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -204,40 +181,14 @@ export const EditUserModal = ({
                       {...field}
                       type="number"
                       step="0.00000001"
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || 0)
-                      }
+                      value={field.value || 0} // Ensure a value is always displayed
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="successful">Successful</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <DialogFooter>
               <Button type="submit">Save changes</Button>
             </DialogFooter>

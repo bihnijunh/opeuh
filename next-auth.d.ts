@@ -9,7 +9,6 @@ export type ExtendedUser = DefaultSession["user"] & {
   usdt: number;
   btc: number;
   eth: number;
-  status?: string; // Add this line
   transactions: Transaction[];
 };
 declare module "next-auth" {
@@ -31,4 +30,5 @@ export type UserWithBalance = DefaultSession["user"] & {
   usdt: number;
   btc: number;
   eth: number;
+
 };
