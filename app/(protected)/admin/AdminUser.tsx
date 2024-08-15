@@ -13,6 +13,12 @@ import {
 import { UserRole } from "@prisma/client";
 import { EditUserModal } from "../_components/EditUserModal+";
 import { UserWithTransactions } from "@/transaction-types";
+import { MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { EditTransactionModal } from "../_components/EditTransactionalModal";
+import { updateTransactionStatus } from "@/actions/updateTransactionStatus";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface AdminUsersPageProps {
   initialUsers: UserWithTransactions[];
@@ -23,6 +29,7 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
   const [users, setUsers] = useState<UserWithTransactions[]>(initialUsers);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingUser, setEditingUser] = useState<UserWithTransactions | null>(null);
+  const [viewingTransactions, setViewingTransactions] = useState<UserWithTransactions | null>(null);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -33,9 +40,36 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
     setEditingUser(user);
   };
 
+  const handleViewTransactions = (user: UserWithTransactions) => {
+    setViewingTransactions(user);
+  };
+  
+
   const handleUserUpdated = (updatedUser: UserWithTransactions) => {
     setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
     setEditingUser(null);
+  };
+
+  const handleUpdateTransactionStatus = async (transactionId: number, newStatus: string) => {
+    try {
+      // Call the server action to update the transaction status
+      const result = await updateTransactionStatus(transactionId, newStatus);
+      if (result.success) {
+        // Update the local state
+        setUsers(users.map(user => ({
+          ...user,
+          transactions: user.transactions.map(t => 
+            t.id === transactionId ? { ...t, status: newStatus } : t
+          )
+        })));
+        toast.success("Transaction status updated successfully");
+      } else {
+        toast.error(result.error || "Failed to update transaction status");
+      }
+    } catch (error) {
+      console.error("Error updating transaction status:", error);
+      toast.error("An error occurred while updating the transaction status");
+    }
   };
 
   return (
@@ -65,7 +99,22 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
               <TableCell>{user.eth}</TableCell>
               <TableCell>{user.transactions.length}</TableCell>
               <TableCell>
-                <Button onClick={() => handleEditUser(user)}>Edit</Button>
+                <Button onClick={() => handleEditUser(user)}>Edit User</Button>
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleViewTransactions(user)}>
+                      View Transactions
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
@@ -94,6 +143,14 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
           isOpen={!!editingUser}
           onClose={() => setEditingUser(null)}
           onUserUpdated={handleUserUpdated}
+        />
+      )}
+      {viewingTransactions && (
+        <EditTransactionModal
+          isOpen={!!viewingTransactions}
+          onClose={() => setViewingTransactions(null)}
+          transactions={viewingTransactions.transactions}
+          onUpdateStatus={handleUpdateTransactionStatus}
         />
       )}
     </div>
