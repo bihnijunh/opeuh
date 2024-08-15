@@ -5,6 +5,7 @@ import { auth } from '@/auth'
 import './globals.css'
 import { Toaster } from "@/components/ui/sonner";
 import { ToastContainer } from 'react-toastify'
+import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,6 +28,7 @@ export default async function RootLayout({
           <ToastContainer/>
           <Toaster />
           {children}
+          <Analytics />
         </body>
       </html>
     </SessionProvider>
