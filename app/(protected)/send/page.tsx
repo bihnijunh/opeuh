@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "sonner";
 import { FiCopy, FiSend, FiDollarSign, FiClock } from "react-icons/fi";
 import {
   Card,
@@ -44,6 +43,7 @@ import {
 } from "@/components/ui/accordion";
 import { ChevronDownIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Toaster } from "@/components/ui/sonner";
 
 interface Transaction {
   id: number;
@@ -82,7 +82,7 @@ function Send() {
     if (result.success) {
       setBalances(result.balances);
     } else {
-      toast.error(result.error || "Failed to fetch balances");
+      toast.error("Failed to fetch balances. Please try again later.");
     }
   };
 
@@ -113,11 +113,11 @@ function Send() {
         setTotalPages(result.totalPages);
         setCurrentPage(result.currentPage);
       } else {
-        toast.error(result.error || "Failed to fetch transactions");
+        toast.error("Failed to fetch transactions. Please try again later.");
       }
     } catch (error) {
       console.error("Error fetching transactions:", error);
-      toast.error("Failed to fetch transactions");
+      toast.error("Failed to fetch transactions. Please try again later.");
     }
   };
 
@@ -130,7 +130,7 @@ function Send() {
           await fetchTransactions();
         } catch (error) {
           console.error("Error fetching data:", error);
-          toast.error("Failed to fetch data");
+          toast.error("Failed to fetch data. Please try again later.");
         } finally {
           setIsLoading(false);
         }
@@ -146,14 +146,14 @@ function Send() {
 
   const handleSend = async () => {
     if (!session?.user?.id || !user) {
-      toast.error("User not authenticated");
+      toast.error("User not authenticated. Please log in to continue.");
       return;
     }
 
     if (amount && walletAddress) {
       const amountNumber = Number(amount);
       if (isNaN(amountNumber) || amountNumber <= 0) {
-        toast.error("Please enter a valid amount");
+        toast.error("Please enter a valid amount. Amount must be a positive number.");
         return;
       }
 
@@ -162,7 +162,7 @@ function Send() {
         (cryptoType === "usdt" && amountNumber > balances.usdt) ||
         (cryptoType === "eth" && amountNumber > balances.eth)
       ) {
-        toast.error("Amount exceeds available balance");
+        toast.error("Amount exceeds available balance. Please enter a lower amount.");
         return;
       }
 
@@ -172,9 +172,9 @@ function Send() {
         cryptoType: cryptoType as "btc" | "usdt" | "eth",
       });
       if (result.error) {
-        toast.error(result.error);
+        toast.error(`${result.error}. Please try again later.`);
       } else if (result.success) {
-        toast.success(result.success);
+        toast.success(`${result.success}. Transaction successful.`);
         const newTransaction: Transaction = {
           ...result.transaction,
           status: "pending",
@@ -190,32 +190,10 @@ function Send() {
   const handleCopyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text).then(
       () => {
-        toast.success(`${label} copied!`, {
-          position: "bottom-center",
-          autoClose: 2000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          className: "custom-toast",
-          bodyClassName: "custom-toast-body",
-          icon: "🔗",
-        });
+        toast.success(`${label} copied to clipboard.`);
       },
       () => {
-        toast.error(`Failed to copy ${label}`, {
-          position: "bottom-center",
-          autoClose: 2000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          className: "custom-toast",
-          bodyClassName: "custom-toast-body",
-          icon: "❌",
-        });
+        toast.error(`Failed to copy ${label}. Please try again.`);
       }
     );
   };
@@ -402,6 +380,8 @@ function Send() {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      <Toaster position="bottom-center" />
     </div>
   );
 }
