@@ -57,6 +57,12 @@ interface Transaction {
   status: "pending" | "approved" | "successful" | string;
 }
 
+const cryptoIcons = {
+  btc: "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=032",
+  usdt: "https://cryptologos.cc/logos/tether-usdt-logo.png?v=032",
+  eth: "https://cryptologos.cc/logos/ethereum-eth-logo.png?v=032"
+};
+
 function Send() {
   const [amount, setAmount] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -237,7 +243,7 @@ function Send() {
               <div key={crypto} className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-lg font-semibold uppercase">{crypto}</span>
-                  <FiDollarSign className="text-2xl opacity-70" />
+                  <img src={cryptoIcons[crypto as keyof typeof cryptoIcons]} alt={`${crypto} icon`} className="w-6 h-6 opacity-70" />
                 </div>
                 <div className="text-3xl font-bold">{balance.toFixed(2)}</div>
                 <div className="text-sm opacity-70">USD</div>

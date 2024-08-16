@@ -2,88 +2,109 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaCopy } from "react-icons/fa";
+import { FaCopy, FaQrcode } from "react-icons/fa";
+import { FiInfo } from "react-icons/fi";
 import QRCode from "qrcode.react";
+import { motion } from "framer-motion";
+import Image from 'next/image';
 
 const cryptocurrencyOptions = [
-  { name: "BTC", address: "16FfUiyaw7xQqbJWEPLc3QxubvawTPWjo7" },
-  { name: "USDT", address: "TFvYytGvjMUvQkPQZofKXQ3ZhTUSXD4LQ6" },
-  { name: "TRX", address: "TFvYytGvjMUvQkPQZofKXQ3ZhTUSXD4LQ6" },
+  { name: "BTC", address: "16FfUiyaw7xQqbJWEPLc3QxubvawTPWjo7", icon: "/images/btc-icon.svg", network: "Bitcoin" },
+  { name: "USDT", address: "TFvYytGvjMUvQkPQZofKXQ3ZhTUSXD4LQ6", icon: "/images/usdt-icon.svg", network: "Tron" },
+  { name: "ETH", address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", icon: "/images/eth-icon.svg", network: "Ethereum" },
 ];
 
 export default function ReceiveComponent() {
-  const [selectedCrypto, setSelectedCrypto] = useState(
-    cryptocurrencyOptions[0]
-  );
+  const [selectedCrypto, setSelectedCrypto] = useState(cryptocurrencyOptions[0]);
+  const [showQR, setShowQR] = useState(false);
+
   const copyAddressToClipboard = () => {
-    if (navigator.clipboard) {
-      // Use the new clipboard API when it's available
-      navigator.clipboard.writeText(selectedCrypto.address);
-    } else {
-      // Fallback for older browsers
-      const textarea = document.createElement('textarea');
-      textarea.value = selectedCrypto.address;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-    }
-    toast.success("Address copied to clipboard");
+    navigator.clipboard.writeText(selectedCrypto.address)
+      .then(() => toast.success("Address copied to clipboard"))
+      .catch(() => toast.error("Failed to copy address"));
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-        Receive Cryptocurrency
+    <div className="max-w-xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+      <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
+        Receive Crypto
       </h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Select a cryptocurrency and copy the address to receive funds:
-      </p>
 
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
+      <div className="space-y-8">
+        <div className="flex flex-wrap justify-start gap-4">
           {cryptocurrencyOptions.map((crypto) => (
-            <button
+            <motion.button
               key={crypto.name}
               onClick={() => setSelectedCrypto(crypto)}
-              className={`px-4 py-2 border rounded-md transition duration-150 ease-in-out ${
-                selectedCrypto === crypto
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-6 py-3 rounded-full transition duration-300 ease-in-out flex items-center ${
+                selectedCrypto.name === crypto.name
                   ? "bg-blue-500 text-white"
-                  : "text-gray-700 hover:bg-gray-100"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
+              <Image src={crypto.icon} alt={crypto.name} width={24} height={24} className="mr-2" />
               {crypto.name}
-            </button>
+            </motion.button>
           ))}
         </div>
 
-        <div className="flex items-center space-x-4">
-          <label className="block text-sm font-medium text-gray-700">
-            {selectedCrypto.name} Address
-          </label>
-          <input
-            type="text"
-            readOnly
-            value={selectedCrypto.address}
-            className="bg-gray-100 px-4 py-2 w-full border rounded-md focus:ring focus:ring-gray-200"
-          />
-          <button
-            onClick={copyAddressToClipboard}
-            className="text-gray-500 hover:text-gray-700 p-2 rounded-md"
-            title="Copy to clipboard"
-          >
-            <FaCopy />
-          </button>
-        </div>
-
-        <div className="mt-6 p-5">
-          <label className="block text-xl font-medium text-gray-700">
-            QR Code
-          </label>
-          <div className="mt-2 bg-white p-10 border rounded-md shadow-md text-center flex justify-center items-center">
-            <QRCode value={selectedCrypto.address} size={200} />
+        <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-sm text-gray-500 dark:text-gray-400">Selected Network</span>
+            <span className="text-sm font-medium">{selectedCrypto.network}</span>
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              readOnly
+              value={selectedCrypto.address}
+              className="w-full bg-white dark:bg-gray-600 text-gray-800 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-500 focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+            <motion.button
+              onClick={copyAddressToClipboard}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+              title="Copy to clipboard"
+            >
+              <FaCopy size={20} />
+            </motion.button>
           </div>
         </div>
+
+        <div className="flex justify-between items-center">
+          <motion.button
+            onClick={() => setShowQR(!showQR)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex-1 mr-4 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg transition duration-300 ease-in-out flex items-center justify-center"
+          >
+            <FaQrcode size={20} className="mr-2" />
+            {showQR ? "Hide" : "Show"} QR Code
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            title="Important Information"
+          >
+            <FiInfo size={24} />
+          </motion.button>
+        </div>
+
+        {showQR && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mt-6 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md flex flex-col items-center"
+          >
+            <QRCode value={selectedCrypto.address} size={200} />
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Scan this QR code to receive {selectedCrypto.name}</p>
+          </motion.div>
+        )}
       </div>
     </div>
   );

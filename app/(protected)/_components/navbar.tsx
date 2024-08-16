@@ -80,15 +80,7 @@ export const Navbar = () => {
                 </Link>
               </Button>
             ))}
-            <Select>
-              <SelectTrigger id="currency" className="w-[70px]">
-                <SelectValue placeholder="USD" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="usd">USD</SelectItem>
-                <SelectItem value="eur">EUR</SelectItem>
-              </SelectContent>
-            </Select>
+           
             <UserButton />
           </div>
           <div className="md:hidden">
@@ -123,15 +115,7 @@ export const Navbar = () => {
                 </Button>
               ))}
               <div className="flex items-center justify-between pt-2">
-                <Select>
-                  <SelectTrigger id="currency-mobile" className="w-[70px]">
-                    <SelectValue placeholder="USD" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="usd">USD</SelectItem>
-                    <SelectItem value="eur">EUR</SelectItem>
-                  </SelectContent>
-                </Select>
+               
                 <UserButton />
               </div>
             </div>
