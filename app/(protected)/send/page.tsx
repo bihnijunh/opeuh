@@ -174,7 +174,7 @@ function Send() {
       if (result.error) {
         toast.error(`${result.error}. Please try again later.`);
       } else if (result.success) {
-        toast.success(`${result.success}. Transaction successful.`);
+        toast.success(`${result.success}. Check mail for confirmation.`);
         const newTransaction: Transaction = {
           ...result.transaction,
           status: "pending",
