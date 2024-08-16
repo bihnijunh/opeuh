@@ -43,6 +43,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ChevronDownIcon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Transaction {
   id: number;
@@ -259,8 +260,14 @@ function Send() {
           <CardDescription className="text-blue-100">Transfer funds to another wallet</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
-          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="space-y-6">
-            <div className="space-y-2">
+          <motion.form
+            onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div className="space-y-2" whileHover={{ scale: 1.02 }}>
               <label htmlFor="crypto-type" className="block text-sm font-medium text-gray-700">Select Cryptocurrency</label>
               <div className="relative">
                 <Select
@@ -277,8 +284,8 @@ function Send() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="space-y-2">
+            </motion.div>
+            <motion.div className="space-y-2" whileHover={{ scale: 1.02 }}>
               <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Amount</label>
               <Input
                 id="amount"
@@ -288,8 +295,8 @@ function Send() {
                 onChange={(e) => setAmount(e.target.value)}
                 className="w-full no-spinner"
               />
-            </div>
-            <div className="space-y-2">
+            </motion.div>
+            <motion.div className="space-y-2" whileHover={{ scale: 1.02 }}>
               <label htmlFor="wallet-address" className="block text-sm font-medium text-gray-700">Wallet Address</label>
               <Input
                 id="wallet-address"
@@ -299,11 +306,13 @@ function Send() {
                 onChange={(e) => setWalletAddress(e.target.value)}
                 className="w-full"
               />
-            </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-              <FiSend className="mr-2" /> Send {cryptoType.toUpperCase()}
-            </Button>
-          </form>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                <FiSend className="mr-2" /> Send {cryptoType.toUpperCase()}
+              </Button>
+            </motion.div>
+          </motion.form>
         </CardContent>
       </Card>
 
