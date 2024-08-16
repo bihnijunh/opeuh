@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FiCopy } from "react-icons/fi";
+import { FiCopy, FiSend, FiDollarSign, FiClock } from "react-icons/fi";
 import {
   Card,
   CardContent,
@@ -12,14 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -28,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ListFilter, File } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -43,9 +34,15 @@ import { createTransaction } from "@/actions/transactions";
 import { getUserTransactions } from "@/actions/getTransactions";
 import { getUserBalances } from "@/actions/getBalances";
 import useLocalStorage from "@/hooks/use-local-storage";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useLoading } from '@/components/contexts/LoadingContext';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { ChevronDownIcon } from "lucide-react";
 
 interface Transaction {
   id: number;
@@ -66,10 +63,7 @@ function Send() {
   const [totalPages, setTotalPages] = useState(1);
   const [cryptoType, setCryptoType] = useState<string>("btc");
   const { isLoading, setIsLoading } = useLoading();
-  const [transactions, setTransactions] = useLocalStorage<Transaction[]>(
-    "userTransactions",
-    []
-  );
+  const [transactions, setTransactions] = useLocalStorage<Transaction[]>("userTransactions", []);
   const [walletAddress, setWalletAddress] = useState("");
   const [balances, setBalances] = useState({ btc: 0, usdt: 0, eth: 0 });
   const { data: session, status } = useSession();
@@ -218,6 +212,7 @@ function Send() {
       }
     );
   };
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
@@ -230,206 +225,174 @@ function Send() {
   }
 
   return (
-    <div className="space-y-4 p-4 sm:p-8">
-      <Tabs defaultValue="week" className="w-full">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 px-2 lg:px-3"
-                >
-                  <ListFilter className="h-4 w-4 lg:mr-2" />
-                  <span className="hidden lg:inline">Filter</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem checked>
-                  Fulfilled
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Declined</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Refunded</DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button variant="outline" size="sm" className="h-8 px-2 lg:px-3">
-              <File className="h-4 w-4 lg:mr-2" />
-              <span className="hidden lg:inline">Export</span>
-            </Button>
-          </div>
-        </div>
-        <TabsContent value="week">
-          <Card>
-            <CardHeader>
-              <CardTitle>Send Crypto</CardTitle>
-              <CardDescription>
-                Send cryptocurrency to another wallet.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Select
-                    value={cryptoType}
-                    onValueChange={(value) => setCryptoType(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select cryptocurrency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="btc">
-                        BTC - {balances.btc} $
-                      </SelectItem>
-                      <SelectItem value="usdt">
-                        USDT - {balances.usdt} $
-                      </SelectItem>
-                      <SelectItem value="eth">
-                        ETH - {balances.eth} $
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    type="number"
-                    placeholder="Amount"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
-                  <Input
-                    type="text"
-                    placeholder="Wallet Address"
-                    value={walletAddress}
-                    onChange={(e) => setWalletAddress(e.target.value)}
-                  />
-                  <Button onClick={handleSend} className="w-full">
-                    Send
-                  </Button>
+    <div className="space-y-6 p-4 sm:p-8 max-w-7xl mx-auto">
+      <Card className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Cryptocurrency Overview</CardTitle>
+          <CardDescription className="text-blue-100">Current balances</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {Object.entries(balances).map(([crypto, balance]) => (
+              <div key={crypto} className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-lg font-semibold uppercase">{crypto}</span>
+                  <FiDollarSign className="text-2xl opacity-70" />
                 </div>
+                <div className="text-3xl font-bold">{balance.toFixed(2)}</div>
+                <div className="text-sm opacity-70">USD</div>
               </div>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6">
+          <CardTitle className="text-2xl font-bold">Send Cryptocurrency</CardTitle>
+          <CardDescription className="text-blue-100">Transfer funds to another wallet</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="space-y-6">
+            <div className="space-y-2">
+              <label htmlFor="crypto-type" className="block text-sm font-medium text-gray-700">Select Cryptocurrency</label>
+              <div className="relative">
+                <Select value={cryptoType} onValueChange={(value) => setCryptoType(value)}>
+                  <SelectTrigger id="crypto-type" className="w-full bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <SelectValue placeholder="Select cryptocurrency" />
+                    <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                    <SelectItem value="btc" className="cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-blue-100">
+                      BTC - {Math.trunc(balances.btc)} USD
+                    </SelectItem>
+                    <SelectItem value="usdt" className="cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-blue-100">
+                      USDT - {Math.trunc(balances.usdt)} USDT
+                    </SelectItem>
+                    <SelectItem value="eth" className="cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-blue-100">
+                      ETH - {Math.trunc(balances.eth)} USD
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Amount</label>
+              <Input
+                id="amount"
+                type="number"
+                placeholder="0.00"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="wallet-address" className="block text-sm font-medium text-gray-700">Wallet Address</label>
+              <Input
+                id="wallet-address"
+                type="text"
+                placeholder="Enter recipient's wallet address"
+                value={walletAddress}
+                onChange={(e) => setWalletAddress(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              <FiSend className="mr-2" /> Send {cryptoType.toUpperCase()}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1">
+          <AccordionTrigger>
+            <div className="flex items-center">
+              <FiClock className="mr-2" />
+              Transaction History
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">ID</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead className="min-w-[200px]">Wallet Address</TableHead>
+                    <TableHead className="min-w-[150px]">Date</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.length === 0 ? (
                     <TableRow>
-                      <TableHead className="w-[100px]">ID</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead className="min-w-[200px]">
-                        Wallet Address
-                      </TableHead>
-                      <TableHead className="min-w-[150px]">Date</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableCell colSpan={6} className="text-center">No transactions found</TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactions.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center">
-                          No transactions found
+                  ) : (
+                    transactions.map((transaction) => (
+                      <TableRow key={transaction.id}>
+                        <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.transactionId, "Transaction ID")}>
+                          {transaction.transactionId.slice(0, 8)}...
+                        </TableCell>
+                        <TableCell>{transaction.amount}$</TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <div className="truncate max-w-[150px]">{transaction.walletAddress}</div>
+                            <Button variant="ghost" size="sm" onClick={() => handleCopyToClipboard(transaction.walletAddress, "Wallet address")}>
+                              <FiCopy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>{new Date(transaction.date).toLocaleString()}</TableCell>
+                        <TableCell>{transaction.btc ? "BTC" : transaction.usdt ? "USDT" : "ETH"}</TableCell>
+                        <TableCell>
+                          <Badge variant={transaction.status === "pending" ? "warning" : transaction.status === "approved" ? "secondary" : "success"}>
+                            {transaction.status}
+                          </Badge>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      transactions.map((transaction) => (
-                        <TableRow key={transaction.id}>
-                          <TableCell
-                            className="font-medium cursor-pointer hover:text-blue-500"
-                            onClick={() =>
-                              handleCopyToClipboard(
-                                transaction.transactionId,
-                                "Transaction ID"
-                              )
-                            }
-                          >
-                            {transaction.transactionId.slice(0, 8)}...
-                          </TableCell>
-                          <TableCell>{transaction.amount}$</TableCell>
-
-                          <TableCell>
-                            <div className="flex items-center">
-                              <div className="truncate max-w-[150px]">
-                                {transaction.walletAddress}
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  handleCopyToClipboard(
-                                    transaction.walletAddress,
-                                    "Wallet address"
-                                  )
-                                }
-                              >
-                                <FiCopy className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(transaction.date).toLocaleString()}
-                          </TableCell>
-                          <TableCell>
-                            {transaction.btc
-                              ? "BTC"
-                              : transaction.usdt
-                              ? "USDT"
-                              : "ETH"}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                transaction.status === "pending"
-                                  ? "warning"
-                                  : transaction.status === "approved"
-                                  ? "secondary"
-                                  : "success"
-                              }
-                            >
-                              {transaction.status === "pending"
-                                ? "Pending"
-                                : transaction.status === "approved"
-                                ? "Approved"
-                                : "Successful"}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-          <div className="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-4 sm:space-y-0">
-            <Select
-              value={itemsPerPage.toString()}
-              onValueChange={handleItemsPerPageChange}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Items per page" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 per page</SelectItem>
-                <SelectItem value="10">10 per page</SelectItem>
-                <SelectItem value="20">20 per page</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex items-center space-x-2">
-              <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
-                Previous
-              </Button>
-              <span className="flex items-center">
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </Button>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+            <div className="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-4 sm:space-y-0">
+              <Select
+                value={itemsPerPage.toString()}
+                onValueChange={handleItemsPerPageChange}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Items per page" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 per page</SelectItem>
+                  <SelectItem value="10">10 per page</SelectItem>
+                  <SelectItem value="20">20 per page</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex items-center space-x-2">
+                <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
+                  Previous
+                </Button>
+                <span className="flex items-center">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }
