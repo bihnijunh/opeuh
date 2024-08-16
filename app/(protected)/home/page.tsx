@@ -33,7 +33,9 @@ import { UserInfo } from "@/components/user-info";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLoading } from "@/components/contexts/LoadingContext";
+import { Playfair_Display } from 'next/font/google';
 
+const playfair = Playfair_Display({ subsets: ['latin'] });
 
 export default function Component() {
   const pathname = usePathname();
@@ -70,6 +72,9 @@ export default function Component() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <main className="p-6 flex flex-col items-center">
+        <h1 className={`${playfair.className} text-4xl md:text-6xl font-bold text-center mb-8 text-black dark:text-white`}>
+          Welcome back, {user?.name || 'User'}
+        </h1>
         <div className="flex flex-col items-center gap-4 w-full max-w-4xl">
           <UserInfo user={user} />
         </div>
