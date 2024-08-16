@@ -263,23 +263,17 @@ function Send() {
             <div className="space-y-2">
               <label htmlFor="crypto-type" className="block text-sm font-medium text-gray-700">Select Cryptocurrency</label>
               <div className="relative">
-                <Select value={cryptoType} onValueChange={(value) => setCryptoType(value)}>
-                  <SelectTrigger id="crypto-type" className="w-full bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <Select
+                  value={cryptoType}
+                  onValueChange={(value) => setCryptoType(value)}
+                >
+                  <SelectTrigger className="w-full no-icon">
                     <SelectValue placeholder="Select cryptocurrency" />
-                    <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                      <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                    </span>
                   </SelectTrigger>
-                  <SelectContent className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                    <SelectItem value="btc" className="cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-blue-100">
-                      BTC - {Math.trunc(balances.btc)} USD
-                    </SelectItem>
-                    <SelectItem value="usdt" className="cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-blue-100">
-                      USDT - {Math.trunc(balances.usdt)} USDT
-                    </SelectItem>
-                    <SelectItem value="eth" className="cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-blue-100">
-                      ETH - {Math.trunc(balances.eth)} USD
-                    </SelectItem>
+                  <SelectContent>
+                    <SelectItem value="btc">BTC - {Math.trunc(balances.btc)} USD</SelectItem>
+                    <SelectItem value="usdt">USDT - {Math.trunc(balances.usdt)} USDT</SelectItem>
+                    <SelectItem value="eth">ETH - {Math.trunc(balances.eth)} USD</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -292,7 +286,7 @@ function Send() {
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full"
+                className="w-full no-spinner"
               />
             </div>
             <div className="space-y-2">
