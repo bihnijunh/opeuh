@@ -381,7 +381,7 @@ function Send() {
         </AccordionItem>
       </Accordion>
 
-      <Toaster position="bottom-center" />
+     
     </div>
   );
 }

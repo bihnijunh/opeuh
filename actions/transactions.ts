@@ -39,7 +39,7 @@ export async function createTransaction(data: TransactionData) {
       },
     });
 
-    return { success: `Transaction of ${data.amount} ${data.cryptoType.toUpperCase()} sent successfully`, transaction };  } catch (error) {
+    return { success: `Transaction of $${data.amount}${data.cryptoType.toUpperCase()} sent successfully`, transaction };  } catch (error) {
     console.error("Error creating transaction:", error);
     return { error: "Failed to create transaction" };
   }
