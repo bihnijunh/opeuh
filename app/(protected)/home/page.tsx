@@ -32,51 +32,48 @@ import BalanceFace from "@/components/ui/balnFace";
 import { UserInfo } from "@/components/user-info";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLoading } from "@/components/contexts/LoadingContext";
+
+
 export default function Component() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = useCurrentUser();
-
-  const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
+  const { isLoading, setIsLoading } = useLoading();
 
   useEffect(() => {
     if (session?.user) {
       getUserById(session.user.id)
         .then((data) => {
-          setCurrentUser(data);
-          setLoading(false);
+          setIsLoading(false);
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
-          setLoading(false);
+          setIsLoading(false);
         });
     } else {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [session]);
+  }, [session, setIsLoading]);
 
-  if (loading) {
-    return <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">
-    <div className="space-y-4 text-center">
-      <Skeleton className="h-12 w-12 rounded-full" />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-[200px]" />
-        <Skeleton className="h-4 w-[150px]" />
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="space-y-4 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="text-blue-500">Loading...</div>
+        </div>
       </div>
-    </div>
-  </div>;
+    );
   }
 
   return (
-    <>
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-        <main className="p-6 flex flex-col items-center">
-          <div className="flex flex-col items-center gap-4 w-full max-w-4xl">
-            <UserInfo user={user} />
-          </div>
-        </main>
-      </div>
-    </>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <main className="p-6 flex flex-col items-center">
+        <div className="flex flex-col items-center gap-4 w-full max-w-4xl">
+          <UserInfo user={user} />
+        </div>
+      </main>
+    </div>
   );
 }

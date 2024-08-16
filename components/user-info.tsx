@@ -1,34 +1,35 @@
 "use client"
-import { Badge } from "@/components/ui/badge";
-import { User } from "next-auth";
 import { ExtendedUser } from "@/next-auth";
-
-import { Libre_Franklin } from 'next/font/google';
-import { Chivo } from 'next/font/google';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card";
 import { usePathname } from 'next/navigation';
 import { calculateTotal } from "@/lib/utils";
 import { useEffect, useState } from "react";
-
-const libreFranklin = Libre_Franklin({
-  subsets: ['latin'],
-  display: 'swap',
-});
-
-const chivo = Chivo({
-  subsets: ['latin'],
-  display: 'swap',
-});
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ArrowUpIcon, ArrowDownIcon, RefreshCcw } from 'lucide-react';
 
 interface UserInfoProps {
   user?: ExtendedUser;
 }
 
+interface ConversionRates {
+  btc: number;
+  usdt: number;
+  eth: number;
+}
+
+interface ChartDataPoint {
+  date: string;
+  value: number;
+}
+
+const convertToCrypto = (usdAmount: number, rate: number) => (usdAmount / rate).toFixed(8);
+
 export const UserInfo = ({ user }: UserInfoProps) => {
   const pathname = usePathname();
-  const [conversionRates, setConversionRates] = useState({ btc: 0, usdt: 0, eth: 0 });
+  const [conversionRates, setConversionRates] = useState<ConversionRates>({ btc: 0, usdt: 0, eth: 0 });
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
 
   useEffect(() => {
     const fetchConversionRates = async () => {
@@ -46,83 +47,149 @@ export const UserInfo = ({ user }: UserInfoProps) => {
     };
 
     fetchConversionRates();
+    generateMockChartData();
   }, []);
 
-  const convertToCrypto = (usdAmount: number, rate: number) => (usdAmount / rate).toFixed(8);
+  const generateMockChartData = () => {
+    const data: ChartDataPoint[] = [];
+    for (let i = 30; i >= 0; i--) {
+      data.push({
+        date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        value: Math.random() * 10000 + 5000,
+      });
+    }
+    setChartData(data);
+  };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center">
-      <header className="flex h-16 items-center justify-between w-full max-w-5xl border-b bg-gray-100 px-6 dark:border-gray-800 dark:bg-gray-950">
-        <Link className="flex items-center gap-2" href="#">
-          <MountainIcon className="h-6 w-6" />
-          <span className="text-lg font-semibold">PIEDRA Dashboard</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <Button
-            asChild
-            variant={pathname === "/recieve" ? "default" : "outline"}
-          >
-            <Link href="/recieve">Recieve</Link>
-          </Button>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <header className="bg-white dark:bg-gray-800 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <Link className="flex items-center gap-2" href="#">
+            <MountainIcon className="h-8 w-8 text-indigo-600" />
+            <span className="text-xl font-bold text-gray-900 dark:text-white">PIEDRA Dashboard</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Button asChild variant={pathname === "/receive" ? "default" : "outline"}>
+              <Link href="/receive">Receive</Link>
+            </Button>
+            <Button asChild variant={pathname === "/send" ? "default" : "outline"}>
+              <Link href="/send">Send</Link>
+            </Button>
+          </div>
         </div>
       </header>
-      <main className="flex-1 w-full max-w-5xl bg-gray-100 px-4 py-8 dark:bg-gray-950 md:px-6 lg:px-8">
-        <div className="mx-auto space-y-8">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>Total</CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <div>
-                  <p className="text-4xl font-semibold">
-                    {calculateTotal(Number(user?.btc) || 0, Number(user?.eth) || 0, Number(user?.usdt) || 0)} $
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Available balance</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>BTC</CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <div>
-                  <p className="text-4xl font-semibold"> {Number(user?.btc) || '0'} $</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{convertToCrypto(Number(user?.btc) || 0, conversionRates.btc)} BTC</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>USDT</CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <div>
-                  <p className="text-4xl font-semibold"> {Number(user?.usdt) || '0'} $</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{convertToCrypto(Number(user?.usdt) || 0, conversionRates.usdt)} USDT</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>ETH</CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <div>
-                  <p className="text-4xl font-semibold"> {Number(user?.eth) || '0'} $</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{convertToCrypto(Number(user?.eth) || 0, conversionRates.eth)} ETH</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Total Balance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                ${calculateTotal(Number(user?.btc) || 0, Number(user?.eth) || 0, Number(user?.usdt) || 0).toFixed(2)}
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Available balance</p>
+            </CardContent>
+          </Card>
+          <CryptoCard title="BTC" amount={Number(user?.btc) || 0} rate={conversionRates.btc} />
+          <CryptoCard title="ETH" amount={Number(user?.eth) || 0} rate={conversionRates.eth} />
+          <CryptoCard title="USDT" amount={Number(user?.usdt) || 0} rate={conversionRates.usdt} />
+        </div>
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>Balance History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-4">
+                <TransactionItem type="received" amount={0.05} currency="BTC" date="2023-06-15" />
+                <TransactionItem type="sent" amount={100} currency="USDT" date="2023-06-14" />
+                <TransactionItem type="received" amount={0.5} currency="ETH" date="2023-06-13" />
+              </ul>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <Button>Buy Crypto</Button>
+                <Button>Sell Crypto</Button>
+                <Button>Swap Tokens</Button>
+                <Button>View History</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
   );
 };
 
-function MountainIcon(props: any) {
+interface CryptoCardProps {
+  title: string;
+  amount: number;
+  rate: number;
+}
+
+const CryptoCard = ({ title, amount, rate }: CryptoCardProps) => (
+  <Card>
+    <CardHeader>
+      <CardTitle>{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold">${amount.toFixed(2)}</div>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        {convertToCrypto(amount, rate)} {title}
+      </p>
+    </CardContent>
+  </Card>
+);
+
+interface TransactionItemProps {
+  type: 'received' | 'sent';
+  amount: number;
+  currency: string;
+  date: string;
+}
+
+const TransactionItem = ({ type, amount, currency, date }: TransactionItemProps) => (
+  <li className="flex items-center justify-between">
+    <div className="flex items-center">
+      {type === 'received' ? (
+        <ArrowDownIcon className="h-5 w-5 text-green-500 mr-2" />
+      ) : (
+        <ArrowUpIcon className="h-5 w-5 text-red-500 mr-2" />
+      )}
+      <div>
+        <p className="font-medium">{type === 'received' ? 'Received' : 'Sent'} {amount} {currency}</p>
+        <p className="text-sm text-gray-500">{date}</p>
+      </div>
+    </div>
+    <RefreshCcw className="h-5 w-5 text-gray-400" />
+  </li>
+);
+
+function MountainIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -137,29 +204,6 @@ function MountainIcon(props: any) {
       strokeLinejoin="round"
     >
       <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
-    </svg>
-  );
-}
-
-function SignalIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2 20h.01" />
-      <path d="M7 20v-4" />
-      <path d="M12 20v-8" />
-      <path d="M17 20V8" />
-      <path d="M22 4v16" />
     </svg>
   );
 }

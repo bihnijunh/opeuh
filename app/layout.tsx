@@ -6,6 +6,7 @@ import './globals.css'
 import { Toaster } from "@/components/ui/sonner"
 import { ToastContainer } from 'react-toastify'
 import { Analytics } from "@vercel/analytics/react"
+import { LoadingProvider } from '@/components/contexts/LoadingContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,16 +24,18 @@ export default async function RootLayout({
 
   return (
     <SessionProvider session={session}>
-      <html lang="en" className="h-full">
-        <body className={`${inter.className} flex flex-col min-h-screen`}>
-          <main className="flex-grow">
-            <ToastContainer position="top-right" autoClose={5000} />
-            <Toaster />
-            {children}
-          </main>
-          <Analytics />
-        </body>
-      </html>
+      <LoadingProvider>
+        <html lang="en" className="h-full">
+          <body className={`${inter.className} flex flex-col min-h-screen`}>
+            <main className="flex-grow">
+              <ToastContainer position="top-right" autoClose={5000} />
+              <Toaster />
+              {children}
+            </main>
+            <Analytics />
+          </body>
+        </html>
+      </LoadingProvider>
     </SessionProvider>
   )
 }

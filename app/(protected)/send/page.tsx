@@ -45,6 +45,7 @@ import { getUserBalances } from "@/actions/getBalances";
 import useLocalStorage from "@/hooks/use-local-storage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { useLoading } from '@/components/contexts/LoadingContext';
 
 interface Transaction {
   id: number;
@@ -64,7 +65,7 @@ function Send() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [cryptoType, setCryptoType] = useState<string>("btc");
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, setIsLoading } = useLoading();
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>(
     "userTransactions",
     []
@@ -135,7 +136,7 @@ function Send() {
       }
     };
     fetchData();
-  }, [status, session?.user?.id]);
+  }, [status, session?.user?.id, setIsLoading]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -219,13 +220,10 @@ function Send() {
   };
   if (isLoading) {
     return (
-      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
         <div className="space-y-4 text-center">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-[200px]" />
-            <Skeleton className="h-4 w-[150px]" />
-          </div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="text-blue-500">Send using piedra fast pay</div>
         </div>
       </div>
     );
