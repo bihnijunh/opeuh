@@ -122,7 +122,7 @@ export default function P2PExchange() {
         isOpen={isBuyModalOpen}
         onClose={() => setIsBuyModalOpen(false)}
         seller={{
-          name: "inver-merlina-",
+          name: "inver-merlina",
           orders: 412,
           completion: 100.00,
           verified: true,
