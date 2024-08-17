@@ -32,8 +32,10 @@ export const Navbar = () => {
   const navItems = [
     { href: "/home", label: "Home" },
     { href: "/send", label: "Send" },
+    { href: "/exchange", label: "Buy Crypto" },
     { href: "/receive", label: "Receive" },
     { href: "/settings", label: "Settings" },
+    
   ];
 
   if (user?.role === UserRole.ADMIN) {
