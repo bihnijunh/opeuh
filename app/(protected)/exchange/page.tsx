@@ -5,27 +5,21 @@ import { Input } from "@/components/ui/input";
 import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NoticeModal } from "@/components/ui/noticeModal";
 import { RefreshCw, Filter } from "lucide-react";
 import { VerifiedIcon } from "@/components/ui/verified-icon";
+import { BuyModal } from "@/components/buycrptoModal";
 
 export default function P2PExchange() {
   const [selectedCrypto, setSelectedCrypto] = useState("USDT");
-  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
-  const openNoticeModal = () => {
-    setIsNoticeModalOpen(true);
-  };
-
-  const handleNoticeConfirm = () => {
-    setIsNoticeModalOpen(false);
+  const openBuyModal = () => {
+    setIsBuyModalOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-white p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-       
-
         <Tabs defaultValue="p2p" className="w-full mb-6">
           <TabsList className="grid w-full grid-cols-4 rounded-full bg-gray-100 p-1">
             <TabsTrigger value="express" className="rounded-full">Express</TabsTrigger>
@@ -112,7 +106,7 @@ export default function P2PExchange() {
                     <div className="mt-4 flex justify-center md:justify-end">
                       <Button 
                         className="rounded-full bg-green-500 hover:bg-green-600 text-white px-8 py-2"
-                        onClick={openNoticeModal}
+                        onClick={openBuyModal}
                       >
                         Buy
                       </Button>
@@ -124,10 +118,27 @@ export default function P2PExchange() {
           </CardContent>
         </Card>
       </div>
-      <NoticeModal
-        isOpen={isNoticeModalOpen}
-        onClose={() => setIsNoticeModalOpen(false)}
-        onConfirm={handleNoticeConfirm}
+      <BuyModal
+        isOpen={isBuyModalOpen}
+        onClose={() => setIsBuyModalOpen(false)}
+        seller={{
+          name: "inver-merlina-",
+          orders: 412,
+          completion: 100.00,
+          verified: true,
+        }}
+        price={0.995}
+        currency="USD"
+        paymentTimeLimit="15 min"
+        avgReleaseTime="18 Minutes"
+        available="1,285.84 USDT"
+        minAmount={999.00}
+        maxAmount={1000.00}
+        paymentMethod="Banco Pichincha"
+        terms="solo titulares"
+        onBuy={() => {
+          setIsBuyModalOpen(false);
+        }}
       />
     </div>
   );

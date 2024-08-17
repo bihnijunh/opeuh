@@ -16,6 +16,7 @@ import { UserRole } from "@prisma/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -39,7 +40,7 @@ export const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           <Link href="/home" className="text-xl font-bold text-primary">
-            PIEDRA
+            PIEDRA-X
           </Link>
           <div className="hidden md:flex items-center space-x-4">
             {navItems.map((item) => (
@@ -60,7 +61,7 @@ export const Navbar = () => {
                 </Link>
               </Button>
             ))}
-           
+           <LanguageSwitcher />
             <UserButton />
           </div>
           <div className="md:hidden">
