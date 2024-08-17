@@ -82,7 +82,6 @@ export default function P2PExchange() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
                         <div>
                           <h3 className="font-semibold flex items-center">
                             {index === 0 ? "DGcoin" : "MoOLina"}
@@ -97,11 +96,15 @@ export default function P2PExchange() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-semibold">{index === 0 ? "0.994" : "0.996"} USD</div>
-                        <div className="text-xs text-gray-500">Available: {index === 0 ? "2,224.01" : "7,585.39"} USDT</div>
-                        <div className="text-xs text-gray-500">Order Limit: ${index === 0 ? "400.00 - $1,000.00" : "100.00 - $2,500.00"}</div>
-                        <div className="text-xs text-blue-600">
+                      <div className="text-right space-y-1">
+                        <div className="font-semibold text-sm sm:text-base">{index === 0 ? "0.994" : "0.996"} USD</div>
+                        <div className="text-xs sm:text-sm text-gray-500">
+                          Available: <span className="font-medium">{index === 0 ? "2,224.01" : "7,585.39"} USDT</span>
+                        </div>
+                        <div className="text-xs sm:text-sm text-gray-500">
+                          Order Limit: <span className="font-medium">${index === 0 ? "400 - $1,000" : "100 - $2,500"}</span>
+                        </div>
+                        <div className="text-xs sm:text-sm text-blue-600 truncate max-w-[150px] sm:max-w-none">
                           {index === 0 ? "Banco Guayaquil, Produbanco" : "Banco del pacifico, Banco Pichincha"}
                         </div>
                       </div>
