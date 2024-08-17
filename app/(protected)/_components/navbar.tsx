@@ -21,13 +21,6 @@ export const Navbar = () => {
   const pathname = usePathname();
   const user = useCurrentUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    if (user !== undefined) {
-      setIsLoaded(true);
-    }
-  }, [user]);
 
   const navItems = [
     { href: "/home", label: "Home" },
@@ -35,25 +28,10 @@ export const Navbar = () => {
     { href: "/exchange", label: "Buy Crypto" },
     { href: "/receive", label: "Receive" },
     { href: "/settings", label: "Settings" },
-    
   ];
 
   if (user?.role === UserRole.ADMIN) {
     navItems.unshift({ href: "/admin", label: "Admin" });
-  }
-
-  if (!isLoaded) {
-    return (
-      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background">
-        <div className="space-y-4 text-center">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-[200px]" />
-            <Skeleton className="h-4 w-[150px]" />
-          </div>
-        </div>
-      </div>
-    );
   }
 
   return (
