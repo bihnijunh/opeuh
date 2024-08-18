@@ -1,14 +1,69 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getExchangeRate } from "@/lib/fetExchange";
 
 export default function P2PExchange() {
   const [payAmount, setPayAmount] = useState("");
   const [receiveAmount, setReceiveAmount] = useState("");
+  const [payCurrency, setPayCurrency] = useState("HKD");
+  const [receiveCurrency, setReceiveCurrency] = useState("USDT");
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateReceiveAmount = (payValue: string) => {
+    if (exchangeRate && payValue) {
+      const received = (parseFloat(payValue) / exchangeRate).toFixed(8);
+      setReceiveAmount(isNaN(parseFloat(received)) ? "" : received);
+    } else {
+      setReceiveAmount("");
+    }
+  };
+
+  const handlePayAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPayAmount(value);
+    updateReceiveAmount(value);
+  };
+
+  const handleReceiveAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setReceiveAmount(value);
+    if (exchangeRate) {
+      const paid = (parseFloat(value) * exchangeRate).toFixed(2);
+      setPayAmount(isNaN(parseFloat(paid)) ? "" : paid);
+    }
+  };
+
+  useEffect(() => {
+    async function fetchRate() {
+      try {
+        let rate;
+        if (payCurrency === "HKD" && (receiveCurrency === "USDT" || receiveCurrency === "BTC" || receiveCurrency === "ETH")) {
+          const hkdToUsd = await getExchangeRate("HKD", "USD");
+          const usdToCrypto = await getExchangeRate("USD", receiveCurrency);
+          rate = hkdToUsd * usdToCrypto;
+        } else {
+          rate = await getExchangeRate(payCurrency, receiveCurrency);
+        }
+        setExchangeRate(rate);
+        setError(null);
+        updateReceiveAmount(payAmount);
+      } catch (error) {
+        console.error("Failed to fetch exchange rate:", error);
+        setError(`Failed to fetch exchange rate: ${error}`);
+      }
+    }
+    fetchRate();
+  }, [payCurrency, receiveCurrency, payAmount]);
+
+  useEffect(() => {
+    updateReceiveAmount(payAmount);
+  }, [exchangeRate, payAmount, payCurrency, receiveCurrency]);
 
   return (
     <div className="max-w-md mx-auto p-4">
@@ -29,10 +84,10 @@ export default function P2PExchange() {
                   type="text"
                   placeholder="78-300000"
                   value={payAmount}
-                  onChange={(e) => setPayAmount(e.target.value)}
+                  onChange={handlePayAmountChange}
                   className="flex-grow"
                 />
-                <Select defaultValue="HKD">
+                <Select value={payCurrency} onValueChange={setPayCurrency}>
                   <SelectTrigger className="w-[100px] ml-2">
                     <SelectValue />
                   </SelectTrigger>
@@ -51,10 +106,10 @@ export default function P2PExchange() {
                   type="text"
                   placeholder="10-5000"
                   value={receiveAmount}
-                  onChange={(e) => setReceiveAmount(e.target.value)}
+                  onChange={handleReceiveAmountChange}
                   className="flex-grow"
                 />
-                <Select defaultValue="USDT">
+                <Select value={receiveCurrency} onValueChange={setReceiveCurrency}>
                   <SelectTrigger className="w-[100px] ml-2">
                     <SelectValue />
                   </SelectTrigger>
@@ -67,9 +122,19 @@ export default function P2PExchange() {
               </div>
             </div>
 
-            <p className="text-sm text-gray-500">Estimated price: 1 USDT ≈ 7.78 HKD</p>
+            {exchangeRate && (
+              <p className="text-sm text-gray-500">
+                Estimated price: 1 {receiveCurrency} ≈ {(1 / exchangeRate).toFixed(6)} {payCurrency}
+              </p>
+            )}
 
-            <Button className="w-full">Buy USDT</Button>
+            {error && (
+              <p className="text-sm text-red-500 mt-2">
+                {error}
+              </p>
+            )}
+
+            <Button className="w-full">Buy {receiveCurrency}</Button>
           </div>
         </CardContent>
       </Card>

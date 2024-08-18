@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,24 +25,6 @@ interface BuyModalProps {
   onBuy: () => void;
 }
 
-async function getExchangeRate(from: string, to: string): Promise<number> {
-  const apiKey = 'YOUR_API_KEY';
-  const url = `https://v6.exchangerate-api.com/v6/${apiKey}/pair/${from}/${to}`;
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    if (data.result === 'success') {
-      return data.conversion_rate;
-    } else {
-      throw new Error('Failed to fetch exchange rate');
-    }
-  } catch (error) {
-    console.error('Error fetching exchange rate:', error);
-    throw error;
-  }
-}
-
 export const BuyModal: React.FC<BuyModalProps> = ({
   isOpen,
   onClose,
@@ -58,30 +40,6 @@ export const BuyModal: React.FC<BuyModalProps> = ({
   terms,
   onBuy,
 }) => {
-  const [payAmount, setPayAmount] = useState("");
-  const [receiveAmount, setReceiveAmount] = useState("");
-  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-
-  useEffect(() => {
-    async function fetchExchangeRate() {
-      try {
-        const rate = await getExchangeRate('USD', 'BRL');
-        setExchangeRate(rate);
-      } catch (error) {
-        console.error('Failed to fetch exchange rate:', error);
-      }
-    }
-    fetchExchangeRate();
-  }, []);
-
-  const handlePayAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPayAmount(value);
-    if (exchangeRate) {
-      setReceiveAmount((parseFloat(value) / exchangeRate).toFixed(2));
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] w-full max-h-[90vh] overflow-y-auto">
@@ -124,38 +82,29 @@ export const BuyModal: React.FC<BuyModalProps> = ({
         </div>
 
         <div className="mb-4">
-          <p className="text-sm text-gray-500 mb-1">You Pay (BRL)</p>
+          <p className="text-sm text-gray-500 mb-1">You Pay</p>
           <div className="flex items-center">
             <Input
               type="number"
               placeholder={`${minAmount} - ${maxAmount}`}
               className="flex-grow mr-2"
-              value={payAmount}
-              onChange={handlePayAmountChange}
             />
-            <span className="font-medium">BRL</span>
+            <span className="font-medium">{currency}</span>
           </div>
         </div>
 
         <div className="mb-4">
-          <p className="text-sm text-gray-500 mb-1">You Receive (USDT)</p>
+          <p className="text-sm text-gray-500 mb-1">You Receive</p>
           <div className="flex items-center">
             <Input
               type="number"
               placeholder="0.00"
               className="flex-grow mr-2"
-              value={receiveAmount}
               readOnly
             />
-            <span className="font-medium">USDT</span>
+            <span className="font-medium">{currency}</span>
           </div>
         </div>
-
-        {exchangeRate && (
-          <p className="text-sm text-gray-500 mb-4">
-            Exchange Rate: 1 USD = {exchangeRate.toFixed(2)} BRL
-          </p>
-        )}
 
         <div className="mb-4">
           <p className="text-sm font-medium mb-1">Payment Method</p>
