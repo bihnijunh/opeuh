@@ -7,16 +7,48 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getExchangeRate } from "@/lib/fetExchange";
 
-type CurrencyPair = {
-  [key: string]: number;
+type CurrencyInfo = {
+  code: string;
+  name: string;
 };
 
-type StaticRates = {
-  [key: string]: CurrencyPair;
-};
-
-const SUPPORTED_CURRENCIES = [
-   "AED",  "ARS", "AUD", "BOB", "BRL",  "BZD", "CAD",  "CLP", "CNY", "COP", "CRC", "CUP",  "EUR",  "GBP", "HKD", "HNL", "KHR", "KID", "KMF", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "MXN",  "NGN",   "PHP","PYG", "QAR",  "USD", "UYU", "VES", "VND"
+const SUPPORTED_CURRENCIES: CurrencyInfo[] = [
+  { code: "AED", name: "United Arab Emirates Dirham" },
+  { code: "ARS", name: "Argentine Peso" },
+  { code: "AUD", name: "Australian Dollar" },
+  { code: "BOB", name: "Bolivian Boliviano" },
+  { code: "BRL", name: "Brazilian Real" },
+  { code: "BZD", name: "Belize Dollar" },
+  { code: "CAD", name: "Canadian Dollar" },
+  { code: "CLP", name: "Chilean Peso" },
+  { code: "CNY", name: "Chinese Yuan" },
+  { code: "COP", name: "Colombian Peso" },
+  { code: "CRC", name: "Costa Rican Colón" },
+  { code: "CUP", name: "Cuban Peso" },
+  { code: "EUR", name: "Euro" },
+  { code: "GBP", name: "British Pound Sterling" },
+  { code: "HKD", name: "Hong Kong Dollar" },
+  { code: "HNL", name: "Honduran Lempira" },
+  { code: "KHR", name: "Cambodian Riel" },
+  { code: "KID", name: "Kiribati Dollar" },
+  { code: "KMF", name: "Comorian Franc" },
+  { code: "KRW", name: "South Korean Won" },
+  { code: "KWD", name: "Kuwaiti Dinar" },
+  { code: "KYD", name: "Cayman Islands Dollar" },
+  { code: "KZT", name: "Kazakhstani Tenge" },
+  { code: "LAK", name: "Lao Kip" },
+  { code: "LBP", name: "Lebanese Pound" },
+  { code: "LKR", name: "Sri Lankan Rupee" },
+  { code: "MXN", name: "Mexican Peso" },
+  { code: "NGN", name: "Nigerian Naira" },
+  { code: "PHP", name: "Philippine Peso" },
+  { code: "PYG", name: "Paraguayan Guaraní" },
+  { code: "QAR", name: "Qatari Riyal" },
+  { code: "USD", name: "United States Dollar" },
+  { code: "UYU", name: "Uruguayan Peso" },
+  { code: "VES", name: "Venezuelan Bolívar" },
+  { code: "VND", name: "Vietnamese Đồng" },
+  { code: "USDT", name: "Tether" },
 ];
 
 export default function P2PExchange() {
@@ -95,13 +127,13 @@ export default function P2PExchange() {
                   className="flex-grow"
                 />
                 <Select value={payCurrency} onValueChange={setPayCurrency}>
-                  <SelectTrigger className="w-[100px] ml-2">
+                  <SelectTrigger className="w-[180px] ml-2">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {SUPPORTED_CURRENCIES.map((currency) => (
-                      <SelectItem key={currency} value={currency}>
-                        {currency}
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.code} - {currency.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -120,13 +152,13 @@ export default function P2PExchange() {
                   className="flex-grow"
                 />
                 <Select value={receiveCurrency} onValueChange={setReceiveCurrency}>
-                  <SelectTrigger className="w-[100px] ml-2">
+                  <SelectTrigger className="w-[180px] ml-2">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {SUPPORTED_CURRENCIES.map((currency) => (
-                      <SelectItem key={currency} value={currency}>
-                        {currency}
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.code} - {currency.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
