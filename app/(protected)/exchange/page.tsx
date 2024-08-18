@@ -7,6 +7,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getExchangeRate } from "@/lib/fetExchange";
 
+type CurrencyPair = {
+  [key: string]: number;
+};
+
+type StaticRates = {
+  [key: string]: CurrencyPair;
+};
+
+const SUPPORTED_CURRENCIES = [
+   "AED",  "ARS", "AUD", "BOB", "BRL",  "BZD", "CAD",  "CLP", "CNY", "COP", "CRC", "CUP",  "EUR",  "GBP", "HKD", "HNL", "KHR", "KID", "KMF", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "MXN",  "NGN",   "PHP","PYG", "QAR",  "USD", "UYU", "VES", "VND"
+];
+
 export default function P2PExchange() {
   const [payAmount, setPayAmount] = useState("");
   const [receiveAmount, setReceiveAmount] = useState("");
@@ -17,7 +29,7 @@ export default function P2PExchange() {
 
   const updateReceiveAmount = (payValue: string) => {
     if (exchangeRate && payValue) {
-      const received = (parseFloat(payValue) / exchangeRate).toFixed(8);
+      const received = (parseFloat(payValue) * exchangeRate).toFixed(8);
       setReceiveAmount(isNaN(parseFloat(received)) ? "" : received);
     } else {
       setReceiveAmount("");
@@ -34,7 +46,7 @@ export default function P2PExchange() {
     const value = e.target.value;
     setReceiveAmount(value);
     if (exchangeRate) {
-      const paid = (parseFloat(value) * exchangeRate).toFixed(2);
+      const paid = (parseFloat(value) / exchangeRate).toFixed(2);
       setPayAmount(isNaN(parseFloat(paid)) ? "" : paid);
     }
   };
@@ -42,24 +54,19 @@ export default function P2PExchange() {
   useEffect(() => {
     async function fetchRate() {
       try {
-        let rate;
-        if (payCurrency === "HKD" && (receiveCurrency === "USDT" || receiveCurrency === "BTC" || receiveCurrency === "ETH")) {
-          const hkdToUsd = await getExchangeRate("HKD", "USD");
-          const usdToCrypto = await getExchangeRate("USD", receiveCurrency);
-          rate = hkdToUsd * usdToCrypto;
-        } else {
-          rate = await getExchangeRate(payCurrency, receiveCurrency);
-        }
+        const rate = await getExchangeRate(payCurrency, receiveCurrency);
+        console.log("Fetched rate:", rate);
         setExchangeRate(rate);
         setError(null);
         updateReceiveAmount(payAmount);
       } catch (error) {
         console.error("Failed to fetch exchange rate:", error);
-        setError(`Failed to fetch exchange rate: ${error}`);
+        setError(`Failed to fetch exchange rate. Please try again later.`);
+        setExchangeRate(null);
       }
     }
     fetchRate();
-  }, [payCurrency, receiveCurrency, payAmount]);
+  }, [payCurrency, receiveCurrency]);
 
   useEffect(() => {
     updateReceiveAmount(payAmount);
@@ -92,8 +99,11 @@ export default function P2PExchange() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="HKD">HKD</SelectItem>
-                    <SelectItem value="USD">USD</SelectItem>
+                    {SUPPORTED_CURRENCIES.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
+                        {currency}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -114,9 +124,11 @@ export default function P2PExchange() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USDT">USDT</SelectItem>
-                    <SelectItem value="BTC">BTC</SelectItem>
-                    <SelectItem value="ETH">ETH</SelectItem>
+                    {SUPPORTED_CURRENCIES.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
+                        {currency}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
