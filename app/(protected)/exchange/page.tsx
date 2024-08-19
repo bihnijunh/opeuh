@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getExchangeRate } from "@/lib/fetExchange";
 import SellComponent from "./SellComponent";
+import { BuyModal } from "@/components/buycrptoModal";
 
 type CurrencyInfo = {
   code: string;
@@ -52,6 +53,7 @@ export default function P2PExchange() {
   const [receiveCurrency, setReceiveCurrency] = useState("BTC");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
   const updateReceiveAmount = (payValue: string) => {
     if (exchangeRate && payValue) {
@@ -75,6 +77,10 @@ export default function P2PExchange() {
       const paid = (parseFloat(value) / exchangeRate).toFixed(2);
       setPayAmount(isNaN(parseFloat(paid)) ? "" : paid);
     }
+  };
+
+  const handleOpenBuyModal = () => {
+    setIsBuyModalOpen(true);
   };
 
   useEffect(() => {
@@ -171,7 +177,7 @@ export default function P2PExchange() {
                   </p>
                 )}
 
-                <Button className="w-full">Buy {receiveCurrency}</Button>
+                <Button className="w-full" onClick={handleOpenBuyModal}>Buy {receiveCurrency}</Button>
               </div>
             </TabsContent>
             <TabsContent value="sell">
@@ -180,6 +186,21 @@ export default function P2PExchange() {
           </Tabs>
         </CardContent>
       </Card>
+      <BuyModal
+        isOpen={isBuyModalOpen}
+        onClose={() => setIsBuyModalOpen(false)}
+        amount={parseFloat(payAmount) || 0}
+        receiveCurrency={receiveCurrency}
+        receiveAmount={parseFloat(receiveAmount) || 0}
+        paymentMethods={[
+          { method: "Instant Transfer", price: 9.28, isBestOffer: true },
+          { method: "Bank Transfer", price: 9.34 },
+        ]}
+        onRefreshPrice={() => {
+          // Implement refresh logic here
+          console.log("Refreshing price");
+        }}
+      />
     </div>
   );
 }
