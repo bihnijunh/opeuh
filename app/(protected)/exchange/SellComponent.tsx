@@ -11,7 +11,16 @@ import {
 } from "@/components/ui/select";
 import { getExchangeRate } from "@/lib/fetExchange";
 
-export default function SellComponent({ SUPPORTED_CURRENCIES }) {
+interface Currency {
+  code: string;
+  name: string;
+}
+
+interface SellComponentProps {
+  SUPPORTED_CURRENCIES: Currency[];
+}
+
+export default function SellComponent({ SUPPORTED_CURRENCIES }: SellComponentProps) {
   const [sellAmount, setSellAmount] = useState("");
   const [receiveAmount, setReceiveAmount] = useState("");
   const [sellCurrency, setSellCurrency] = useState("BTC");
@@ -81,11 +90,11 @@ export default function SellComponent({ SUPPORTED_CURRENCIES }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {SUPPORTED_CURRENCIES.map((currency) => (
-                <SelectItem key={currency.code} value={currency.code}>
-                  {currency.code} - {currency.name}
-                </SelectItem>
-              ))}
+      {SUPPORTED_CURRENCIES.map((currency: Currency) => (
+        <SelectItem key={currency.code} value={currency.code}>
+          {currency.code} - {currency.name}
+        </SelectItem>
+      ))}
             </SelectContent>
           </Select>
         </div>
@@ -106,7 +115,7 @@ export default function SellComponent({ SUPPORTED_CURRENCIES }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {SUPPORTED_CURRENCIES.map((currency) => (
+              {SUPPORTED_CURRENCIES.map((currency: Currency) => (
                 <SelectItem key={currency.code} value={currency.code}>
                   {currency.code} - {currency.name}
                 </SelectItem>
