@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getExchangeRate } from "@/lib/fetExchange";
+import SellComponent from "./SellComponent";
 
 type CurrencyInfo = {
   code: string;
@@ -106,73 +107,77 @@ export default function P2PExchange() {
               <TabsTrigger value="buy">Buy</TabsTrigger>
               <TabsTrigger value="sell">Sell</TabsTrigger>
             </TabsList>
+            <TabsContent value="buy">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">You Pay</p>
+                  <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                    <Input
+                      type="text"
+                      placeholder="78-300000"
+                      value={payAmount}
+                      onChange={handlePayAmountChange}
+                      className="w-full"
+                    />
+                    <Select value={payCurrency} onValueChange={setPayCurrency}>
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUPPORTED_CURRENCIES.map((currency) => (
+                          <SelectItem key={currency.code} value={currency.code}>
+                            {currency.code} - {currency.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">You Receive</p>
+                  <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                    <Input
+                      type="text"
+                      placeholder="10-5000"
+                      value={receiveAmount}
+                      onChange={handleReceiveAmountChange}
+                      className="w-full"
+                    />
+                    <Select value={receiveCurrency} onValueChange={setReceiveCurrency}>
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUPPORTED_CURRENCIES.map((currency) => (
+                          <SelectItem key={currency.code} value={currency.code}>
+                            {currency.code} - {currency.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {exchangeRate && (
+                  <p className="text-sm text-gray-500 break-words">
+                    Estimated price: 1 {receiveCurrency} ≈ {(1 / exchangeRate).toFixed(6)} {payCurrency}
+                  </p>
+                )}
+
+                {error && (
+                  <p className="text-sm text-red-500 mt-2">
+                    {error}
+                  </p>
+                )}
+
+                <Button className="w-full">Buy {receiveCurrency}</Button>
+              </div>
+            </TabsContent>
+            <TabsContent value="sell">
+              <SellComponent SUPPORTED_CURRENCIES={SUPPORTED_CURRENCIES} />
+            </TabsContent>
           </Tabs>
-          
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">You Pay</p>
-              <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                <Input
-                  type="text"
-                  placeholder="78-300000"
-                  value={payAmount}
-                  onChange={handlePayAmountChange}
-                  className="w-full"
-                />
-                <Select value={payCurrency} onValueChange={setPayCurrency}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SUPPORTED_CURRENCIES.map((currency) => (
-                      <SelectItem key={currency.code} value={currency.code}>
-                        {currency.code} - {currency.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500 mb-1">You Receive</p>
-              <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                <Input
-                  type="text"
-                  placeholder="10-5000"
-                  value={receiveAmount}
-                  onChange={handleReceiveAmountChange}
-                  className="w-full"
-                />
-                <Select value={receiveCurrency} onValueChange={setReceiveCurrency}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SUPPORTED_CURRENCIES.map((currency) => (
-                      <SelectItem key={currency.code} value={currency.code}>
-                        {currency.code} - {currency.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {exchangeRate && (
-              <p className="text-sm text-gray-500 break-words">
-                Estimated price: 1 {receiveCurrency} ≈ {(1 / exchangeRate).toFixed(6)} {payCurrency}
-              </p>
-            )}
-
-            {error && (
-              <p className="text-sm text-red-500 mt-2">
-                {error}
-              </p>
-            )}
-
-            <Button className="w-full">Buy {receiveCurrency}</Button>
-          </div>
         </CardContent>
       </Card>
     </div>
