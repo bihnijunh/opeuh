@@ -12,8 +12,8 @@ import { LoadingProvider } from '@/components/contexts/LoadingContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Your App Name',
-  description: 'A brief description of your application',
+  title: 'PIEDRA- STONE BANK | Secure Crypto Exchange',
+  description: 'PIEDRA-X is a secure and user-friendly platform for buying, selling, and exchanging cryptocurrencies. Manage your digital assets with ease, including BTC, ETH, and USDT.',
 }
 
 export default async function RootLayout({
