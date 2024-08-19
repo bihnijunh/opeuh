@@ -13,6 +13,9 @@ type CurrencyInfo = {
 };
 
 const SUPPORTED_CURRENCIES: CurrencyInfo[] = [
+  { code: "BTC", name: "Bitcoin" },
+  { code: "ETH", name: "Ethereum" },
+  { code: "USDT", name: "Tether" },
   { code: "AED", name: "United Arab Emirates Dirham" },
   { code: "ARS", name: "Argentine Peso" },
   { code: "AUD", name: "Australian Dollar" },
@@ -30,32 +33,22 @@ const SUPPORTED_CURRENCIES: CurrencyInfo[] = [
   { code: "HKD", name: "Hong Kong Dollar" },
   { code: "HNL", name: "Honduran Lempira" },
   { code: "KHR", name: "Cambodian Riel" },
-  { code: "KID", name: "Kiribati Dollar" },
-  { code: "KMF", name: "Comorian Franc" },
   { code: "KRW", name: "South Korean Won" },
-  { code: "KWD", name: "Kuwaiti Dinar" },
-  { code: "KYD", name: "Cayman Islands Dollar" },
-  { code: "KZT", name: "Kazakhstani Tenge" },
-  { code: "LAK", name: "Lao Kip" },
-  { code: "LBP", name: "Lebanese Pound" },
-  { code: "LKR", name: "Sri Lankan Rupee" },
   { code: "MXN", name: "Mexican Peso" },
   { code: "NGN", name: "Nigerian Naira" },
   { code: "PHP", name: "Philippine Peso" },
   { code: "PYG", name: "Paraguayan Guaraní" },
-  { code: "QAR", name: "Qatari Riyal" },
   { code: "USD", name: "United States Dollar" },
   { code: "UYU", name: "Uruguayan Peso" },
   { code: "VES", name: "Venezuelan Bolívar" },
   { code: "VND", name: "Vietnamese Đồng" },
-  { code: "USDT", name: "Tether" },
 ];
 
 export default function P2PExchange() {
   const [payAmount, setPayAmount] = useState("");
   const [receiveAmount, setReceiveAmount] = useState("");
-  const [payCurrency, setPayCurrency] = useState("HKD");
-  const [receiveCurrency, setReceiveCurrency] = useState("USDT");
+  const [payCurrency, setPayCurrency] = useState("USD");
+  const [receiveCurrency, setReceiveCurrency] = useState("BTC");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
