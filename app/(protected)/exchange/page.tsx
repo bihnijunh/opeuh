@@ -98,8 +98,8 @@ export default function P2PExchange() {
   }, [exchangeRate, payAmount, payCurrency, receiveCurrency]);
 
   return (
-    <div className="max-w-md mx-auto p-4">
-      <Card>
+    <div className="max-w-md mx-auto p-4 w-full">
+      <Card className="w-full">
         <CardContent className="p-6">
           <Tabs defaultValue="buy" className="w-full mb-6">
             <TabsList className="grid w-full grid-cols-2">
@@ -111,16 +111,16 @@ export default function P2PExchange() {
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-500 mb-1">You Pay</p>
-              <div className="flex items-center">
+              <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                 <Input
                   type="text"
                   placeholder="78-300000"
                   value={payAmount}
                   onChange={handlePayAmountChange}
-                  className="flex-grow"
+                  className="w-full"
                 />
                 <Select value={payCurrency} onValueChange={setPayCurrency}>
-                  <SelectTrigger className="w-[180px] ml-2">
+                  <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -136,16 +136,16 @@ export default function P2PExchange() {
 
             <div>
               <p className="text-sm text-gray-500 mb-1">You Receive</p>
-              <div className="flex items-center">
+              <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                 <Input
                   type="text"
                   placeholder="10-5000"
                   value={receiveAmount}
                   onChange={handleReceiveAmountChange}
-                  className="flex-grow"
+                  className="w-full"
                 />
                 <Select value={receiveCurrency} onValueChange={setReceiveCurrency}>
-                  <SelectTrigger className="w-[180px] ml-2">
+                  <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -160,7 +160,7 @@ export default function P2PExchange() {
             </div>
 
             {exchangeRate && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 break-words">
                 Estimated price: 1 {receiveCurrency} ≈ {(1 / exchangeRate).toFixed(6)} {payCurrency}
               </p>
             )}
