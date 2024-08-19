@@ -6,6 +6,7 @@ import './globals.css'
 import { Toaster } from "@/components/ui/sonner"
 import { ToastContainer } from 'react-toastify'
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { LoadingProvider } from '@/components/contexts/LoadingContext'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -34,6 +35,7 @@ export default async function RootLayout({
               <Toaster />
             </main>
             <Analytics />
+            <SpeedInsights/>
           </body>
         </html>
       </LoadingProvider>
