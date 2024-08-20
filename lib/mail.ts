@@ -114,7 +114,7 @@ export const sendPasswordResetEmail = async (
   `;
 
   await resend.emails.send({
-    from: "mail@kaitrumpfoundation.com",
+    from: "reset@kaitrumpfoundation.com",
     to: email,
     subject: "Reset Your Password - Piedra Exchange",
     html: emailTemplate(content)
@@ -137,7 +137,7 @@ export const sendVerificationEmail = async (
   `;
 
   await resend.emails.send({
-    from: "mail@kaitrumpfoundation.com",
+    from: "verify@kaitrumpfoundation.com",
     to: email,
     subject: "Verify Your Email - Piedra Exchange",
     html: emailTemplate(content)
