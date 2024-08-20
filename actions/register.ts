@@ -52,7 +52,7 @@ export const register = async (values: any) => {
 
   // Return user and balance  
   return {
-    message: "Registration successful!",  
+    message: "Registration successful check email to verify account",  
   }
 
 }
