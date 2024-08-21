@@ -39,6 +39,7 @@
     "framer-motion": "^11.3.28",
     "i18next": "^23.14.0",
     "lucide-react": "^0.427.0",
+    "nested-modal": "^2.0.1",
     "next": "14.0.4",
     "next-auth": "^5.0.0-beta.4",
     "next-i18next": "^15.3.1",
