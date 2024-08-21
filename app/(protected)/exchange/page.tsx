@@ -193,8 +193,7 @@ export default function P2PExchange() {
         receiveCurrency={receiveCurrency}
         receiveAmount={parseFloat(receiveAmount) || 0}
         paymentMethods={[
-          { method: "Instant Transfer", price: 9.28, isBestOffer: true },
-          { method: "Bank Transfer", price: 9.34 },
+          { method: "Bank Transfer", price: 9.34,isBestOffer: true },
         ]}
         onRefreshPrice={() => {
           // Implement refresh logic here
