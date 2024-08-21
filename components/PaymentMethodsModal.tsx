@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Check, CreditCard, Wallet } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Wallet, Building } from 'lucide-react';
 
 interface PaymentMethod {
   method: string;
   price: number;
   isBestOffer?: boolean;
+}
+
+interface BankTransfer {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
 }
 
 interface PaymentMethodModalProps {
@@ -18,6 +24,24 @@ interface PaymentMethodModalProps {
   receiveCurrency: string;
   receiveAmount: number;
 }
+
+const acceptedBankTransfers: BankTransfer[] = [
+  {
+    bankName: "Chase Bank",
+    accountName: "Piedra P2P Exchange",
+    accountNumber: "1234567890",
+  },
+  {
+    bankName: "Bank of America",
+    accountName: "Piedra Crypto Services",
+    accountNumber: "0987654321",
+  },
+  {
+    bankName: "Wells Fargo",
+    accountName: "Piedra Financial",
+    accountNumber: "1122334455",
+  },
+];
 
 export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
   isOpen,
@@ -34,6 +58,8 @@ export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
     switch (method.toLowerCase()) {
       case 'credit card':
         return <CreditCard className="h-6 w-6" />;
+      case 'bank transfer':
+        return <Building className="h-6 w-6" />;
       default:
         return <Wallet className="h-6 w-6" />;
     }
@@ -88,6 +114,20 @@ export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
               </div>
             ))}
           </div>
+          {selectedMethod === 'Bank Transfer' && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-2">Accepted Bank Transfers</h3>
+              <ul className="space-y-2">
+                {acceptedBankTransfers.map((bank, index) => (
+                  <li key={index} className="bg-gray-50 p-3 rounded-lg">
+                    <p className="font-medium">{bank.bankName}</p>
+                    <p className="text-sm text-gray-600">Account Name: {bank.accountName}</p>
+                    <p className="text-sm text-gray-600">Account Number: {bank.accountNumber}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <Button 
             onClick={() => selectedMethod && onSelectMethod(selectedMethod)} 
             disabled={!selectedMethod}
