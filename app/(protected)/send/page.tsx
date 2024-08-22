@@ -45,9 +45,11 @@ import { ChevronDownIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from "@/components/ui/sonner";
 import { createTransactionByUsername } from "@/actions/user-trf";
+import { getUserByUsername } from "@/actions/getUserByUsername";
+import { ConfirmTransactionModal } from "@/app/(protected)/_components/ConfirmTransactionModal";
 
 interface Transaction {
-  id: number;
+  id?: number;
   date: Date;
   btc: boolean;
   usdt: boolean;
@@ -79,6 +81,8 @@ function Send() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sendType, setSendType] = useState<'wallet' | 'username'>('wallet');
   const [username, setUsername] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const fetchBalances = async () => {
     const result = await getUserBalances();
@@ -169,37 +173,70 @@ function Send() {
         return;
       }
 
-      let result;
       if (sendType === 'wallet') {
-        result = await createTransaction({
+        const result = await createTransaction({
           amount: amountNumber,
           walletAddress,
           cryptoType: cryptoType as "btc" | "usdt" | "eth",
         });
-      } else {
-        result = await createTransactionByUsername({
-          amount: amountNumber,
-          username,
-          cryptoType: cryptoType as "btc" | "usdt" | "eth",
-        });
-      }
 
-      if (result.error) {
-        toast.error(`${result.error}. Please try again later.`);
-      } else if (result.success) {
-        toast.success(`${result.success}. Check mail for confirmation.`);
-        const newTransaction: Transaction = {
-          ...result.transaction,
-          status: "pending",
-        };
-        setTransactions([newTransaction, ...transactions]);
-        setAmount("");
-        setSendType('wallet');
-        setWalletAddress("");
-        setUsername("");
-        await fetchBalances();
+        if (result.error) {
+          toast.error(`${result.error}. Please try again later.`);
+        } else if (result.success) {
+          toast.success(`${result.success}. Check mail for confirmation.`);
+          const newTransaction: Transaction = {
+            ...result.transaction,
+            status: "pending",
+            id: result.transaction.id || undefined,
+          };
+          setTransactions([newTransaction, ...transactions]);
+          setAmount("");
+          setWalletAddress("");
+          await fetchBalances();
+        }
+      } else {
+        // Fetch recipient's name before creating the transaction
+        const recipientResult = await getUserByUsername(username);
+        if (recipientResult.error) {
+          toast.error(recipientResult.error);
+          return;
+        }
+        if (recipientResult.user) {
+          setRecipientName(recipientResult.user.name || "Unknown");
+          setIsConfirmModalOpen(true);
+        } else {
+          toast.error("User not found");
+          return;
+        }
       }
     }
+  };
+
+  const handleSendTransaction = async () => {
+    const result = await createTransactionByUsername({
+      amount: Number(amount),
+      username,
+      cryptoType: cryptoType as "btc" | "usdt" | "eth",
+    });
+
+    if (result.error) {
+      toast.error(`${result.error}. Please try again later.`);
+    } else if (result.success) {
+      toast.success(`${result.success}`);
+      const newTransaction: Transaction = {
+        ...result.transaction,
+        status: "successful",
+        id: result.transaction.id || undefined,
+      };
+      setTransactions([newTransaction, ...transactions]);
+      setAmount("");
+      setSendType('wallet');
+      setWalletAddress("");
+      setUsername("");
+      setRecipientName("");
+      await fetchBalances();
+    }
+    setIsConfirmModalOpen(false);
   };
 
   const handleCopyToClipboard = (text: string, label: string) => {
@@ -419,7 +456,18 @@ function Send() {
         </AccordionItem>
       </Accordion>
 
-     
+      <ConfirmTransactionModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={() => {
+          setIsConfirmModalOpen(false);
+          handleSendTransaction();
+        }}
+        amount={amount}
+        cryptoType={cryptoType}
+        recipientName={recipientName}
+        username={username}
+      />
     </div>
   );
 }

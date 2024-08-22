@@ -41,7 +41,7 @@ export async function createTransactionByUsername(data: {
         walletAddress: recipientUser.id, // Use recipient's user ID as wallet address
         date: new Date(),
         [data.cryptoType]: true,
-        status: 'pending',
+        status: 'successful', // Change this to 'successful'
       },
     });
 
