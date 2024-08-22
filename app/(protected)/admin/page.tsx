@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { UserWithTransactions } from "@/transaction-types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserIcon, DollarSignIcon, ActivityIcon } from "lucide-react";
+import Link from 'next/link';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function AdminPage() {
   const users = await db.user.findMany({
@@ -50,6 +52,14 @@ export default async function AdminPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+      <Tabs defaultValue="users" className="mb-8">
+        <TabsList>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="bank-accounts" asChild>
+            <Link href="/admin/bank-accounts">Bank Accounts</Link>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -100,3 +100,12 @@ model Transaction {
   status String @default("pending")
   user           User     @relation(fields: [userId], references: [id])
   }
+
+  model BankAccount {
+  id            String @id @default(cuid())
+  bankName      String
+  accountName   String
+  accountNumber String
+  status        String @default("active")
+ 
+}

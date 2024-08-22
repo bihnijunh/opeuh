@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Info, CreditCard, Wallet } from "lucide-react";
 import { PaymentMethodModal } from "./PaymentMethodsModal";
+import { useBankAccounts } from "@/hooks/use-bank-accounts";
 
 interface PaymentMethod {
   method: string;
@@ -42,7 +43,7 @@ export const BuyModal: React.FC<BuyModalProps> = ({
     setIsPaymentMethodModalOpen(false);
     // You might want to update some state or trigger an action here
   };
-
+  const { bankAccounts } = useBankAccounts();
   const getMethodIcon = (method: string) => {
     switch (method.toLowerCase()) {
       case "credit card":
@@ -118,6 +119,7 @@ export const BuyModal: React.FC<BuyModalProps> = ({
         amount={amount}
         receiveCurrency={receiveCurrency}
         receiveAmount={receiveAmount}
+        bankAccounts={bankAccounts}
       />
     </>
   );

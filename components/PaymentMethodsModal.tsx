@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Check, CreditCard, Wallet, Building } from 'lucide-react';
+import { useEffect } from 'react';
 
 interface PaymentMethod {
   method: string;
@@ -11,9 +12,11 @@ interface PaymentMethod {
 }
 
 interface BankTransfer {
+  id: string;
   bankName: string;
   accountName: string;
   accountNumber: string;
+  status: string;
 }
 
 interface PaymentMethodModalProps {
@@ -24,25 +27,8 @@ interface PaymentMethodModalProps {
   amount: number;
   receiveCurrency: string;
   receiveAmount: number;
+  bankAccounts: BankTransfer[];
 }
-
-const acceptedBankTransfers: BankTransfer[] = [
-  {
-    bankName: "Chase Bank",
-    accountName: "Piedra P2P Exchange",
-    accountNumber: "1234567890",
-  },
-  {
-    bankName: "Bank of America",
-    accountName: "Piedra Crypto Services",
-    accountNumber: "0987654321",
-  },
-  {
-    bankName: "Wells Fargo",
-    accountName: "Piedra Financial",
-    accountNumber: "1122334455",
-  },
-];
 
 export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
   isOpen,
@@ -52,6 +38,7 @@ export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
   amount,
   receiveCurrency,
   receiveAmount,
+  bankAccounts,
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
 
@@ -77,9 +64,9 @@ export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
             </DialogTitle>
           </DialogHeader>
           <div className="mt-4">
-            <h2 className="text-4xl font-bold">${amount.toFixed(2)}</h2>
+            <h2 className="text-4xl font-bold">${amount.toString()}</h2>
             <p className="text-sm opacity-90">
-              You will receive {receiveAmount.toFixed(2)} {receiveCurrency}
+              You will receive {receiveAmount.toString()} {receiveCurrency}
             </p>
           </div>
         </div>
@@ -106,7 +93,7 @@ export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
                   <div>
                     <p className={`font-semibold ${method.disabled ? 'text-gray-500' : ''}`}>{method.method}</p>
                     <p className="text-sm text-gray-500">
-                      {method.disabled ? 'Coming Soon' : `$${method.price.toFixed(2)}`}
+                      {method.disabled ? 'Coming Soon' : method.price.toString()}
                     </p>
                   </div>
                 </div>
@@ -129,15 +116,19 @@ export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
           {selectedMethod === 'Bank Transfer' && (
             <div className="mt-4">
               <h3 className="text-lg font-semibold mb-2">Accepted Bank Transfers</h3>
-              <ul className="space-y-2">
-                {acceptedBankTransfers.map((bank, index) => (
-                  <li key={index} className="bg-gray-50 p-3 rounded-lg">
-                    <p className="font-medium">{bank.bankName}</p>
-                    <p className="text-sm text-gray-600">Account Name: {bank.accountName}</p>
-                    <p className="text-sm text-gray-600">Account Number: {bank.accountNumber}</p>
-                  </li>
-                ))}
-              </ul>
+              {bankAccounts && bankAccounts.length > 0 ? (
+                <ul className="space-y-2">
+                  {bankAccounts.filter(bank => bank.status === 'active').map((bank) => (
+                    <li key={bank.id} className="bg-gray-50 p-3 rounded-lg">
+                      <p className="font-medium">{bank.bankName}</p>
+                      <p className="text-sm text-gray-600">Account Name: {bank.accountName}</p>
+                      <p className="text-sm text-gray-600">Account Number: {bank.accountNumber}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No bank accounts available</p>
+              )}
             </div>
           )}
           <Button 

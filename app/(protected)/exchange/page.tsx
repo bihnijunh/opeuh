@@ -57,7 +57,7 @@ export default function P2PExchange() {
 
   const updateReceiveAmount = (payValue: string) => {
     if (exchangeRate && payValue) {
-      const received = (parseFloat(payValue) * exchangeRate).toFixed(8);
+      const received = (parseFloat(payValue) * exchangeRate).toString();
       setReceiveAmount(isNaN(parseFloat(received)) ? "" : received);
     } else {
       setReceiveAmount("");
@@ -167,7 +167,7 @@ export default function P2PExchange() {
 
                 {exchangeRate && (
                   <p className="text-sm text-gray-500 break-words">
-                    Estimated price: 1 {receiveCurrency} ≈ {(1 / exchangeRate).toFixed(6)} {payCurrency}
+                    Estimated price: 1 {receiveCurrency} ≈ {(1 / exchangeRate).toFixed(8)} {payCurrency}
                   </p>
                 )}
 
