@@ -19,7 +19,7 @@ export const register = async (values: any) => {
     }
   }
 
-  const {email, password, name} = validated.data
+  const {email, password, name, username} = validated.data
 
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10)
