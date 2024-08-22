@@ -52,6 +52,7 @@ const SettingsPage = () => {
       newPassword: undefined,
       name: user?.name || undefined,
       email: user?.email || undefined,
+      username: user?.username || undefined,
       role: user?.role || undefined,
       isTwoFactorEnabled: user?.isTwoFactorEnabled || undefined,
     }
@@ -118,6 +119,23 @@ const SettingsPage = () => {
                               {...field}
                               placeholder="john.doe@example.com"
                               type="email"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="john.doe"
                               disabled={isPending}
                             />
                           </FormControl>
