@@ -157,57 +157,60 @@ function Send() {
       return;
     }
 
-    if (amount && (walletAddress || username)) {
-      const amountNumber = Number(amount);
-      if (isNaN(amountNumber) || amountNumber <= 0) {
-        toast.error("Please enter a valid amount. Amount must be a positive number.");
+    if (!amount || !cryptoType || (sendType === 'wallet' && !walletAddress) || (sendType === 'username' && !username)) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    const amountNumber = Number(amount);
+    if (isNaN(amountNumber) || amountNumber <= 0) {
+      toast.error("Please enter a valid amount. Amount must be a positive number.");
+      return;
+    }
+
+    if (
+      (cryptoType === "btc" && amountNumber > balances.btc) ||
+      (cryptoType === "usdt" && amountNumber > balances.usdt) ||
+      (cryptoType === "eth" && amountNumber > balances.eth)
+    ) {
+      toast.error("Amount exceeds available balance. Please enter a lower amount.");
+      return;
+    }
+
+    if (sendType === 'wallet') {
+      const result = await createTransaction({
+        amount: amountNumber,
+        walletAddress,
+        cryptoType: cryptoType as "btc" | "usdt" | "eth",
+      });
+
+      if (result.error) {
+        toast.error(`${result.error}. Please try again later.`);
+      } else if (result.success) {
+        toast.success(`${result.success}. Check mail for confirmation.`);
+        const newTransaction: Transaction = {
+          ...result.transaction,
+          status: "pending",
+          id: result.transaction.id || undefined,
+        };
+        setTransactions([newTransaction, ...transactions]);
+        setAmount("");
+        setWalletAddress("");
+        await fetchBalances();
+      }
+    } else {
+      // Fetch recipient's name before creating the transaction
+      const recipientResult = await getUserByUsername(username);
+      if (recipientResult.error) {
+        toast.error(recipientResult.error);
         return;
       }
-
-      if (
-        (cryptoType === "btc" && amountNumber > balances.btc) ||
-        (cryptoType === "usdt" && amountNumber > balances.usdt) ||
-        (cryptoType === "eth" && amountNumber > balances.eth)
-      ) {
-        toast.error("Amount exceeds available balance. Please enter a lower amount.");
-        return;
-      }
-
-      if (sendType === 'wallet') {
-        const result = await createTransaction({
-          amount: amountNumber,
-          walletAddress,
-          cryptoType: cryptoType as "btc" | "usdt" | "eth",
-        });
-
-        if (result.error) {
-          toast.error(`${result.error}. Please try again later.`);
-        } else if (result.success) {
-          toast.success(`${result.success}. Check mail for confirmation.`);
-          const newTransaction: Transaction = {
-            ...result.transaction,
-            status: "pending",
-            id: result.transaction.id || undefined,
-          };
-          setTransactions([newTransaction, ...transactions]);
-          setAmount("");
-          setWalletAddress("");
-          await fetchBalances();
-        }
+      if (recipientResult.user) {
+        setRecipientName(recipientResult.user.name || "Unknown");
+        setIsConfirmModalOpen(true);
       } else {
-        // Fetch recipient's name before creating the transaction
-        const recipientResult = await getUserByUsername(username);
-        if (recipientResult.error) {
-          toast.error(recipientResult.error);
-          return;
-        }
-        if (recipientResult.user) {
-          setRecipientName(recipientResult.user.name || "Unknown");
-          setIsConfirmModalOpen(true);
-        } else {
-          toast.error("User not found");
-          return;
-        }
+        toast.error("User not found");
+        return;
       }
     }
   };
