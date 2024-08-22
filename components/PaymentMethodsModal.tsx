@@ -64,9 +64,9 @@ export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
             </DialogTitle>
           </DialogHeader>
           <div className="mt-4">
-            <h2 className="text-4xl font-bold">${amount.toString()}</h2>
+            <h2 className="text-4xl font-bold">${Number(amount).toFixed(2)}</h2>
             <p className="text-sm opacity-90">
-              You will receive {receiveAmount.toString()} {receiveCurrency}
+              You will receive {receiveCurrency === 'BTC' ? Number(receiveAmount).toFixed(8) : Number(receiveAmount).toFixed(2)} {receiveCurrency}
             </p>
           </div>
         </div>
@@ -93,7 +93,7 @@ export const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
                   <div>
                     <p className={`font-semibold ${method.disabled ? 'text-gray-500' : ''}`}>{method.method}</p>
                     <p className="text-sm text-gray-500">
-                      {method.disabled ? 'Coming Soon' : method.price.toString()}
+                      {method.disabled ? 'Coming Soon' : method.method.toLowerCase() === 'btc' ? Number(method.price).toFixed(8) : Number(method.price).toFixed(2)}
                     </p>
                   </div>
                 </div>

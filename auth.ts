@@ -65,6 +65,7 @@ export const {
         session.user.usdt = token.usdt as number;
         session.user.btc = token.btc as number;
         session.user.eth = token.eth as number;
+        session.user.username = token.username as string;
       }
     
       
@@ -84,6 +85,7 @@ export const {
       token.isOAuth = !!existingAccount;
       token.name = existingUser.name;
       token.email = existingUser.email;
+      token.username = existingUser.username;
       token.role = existingUser.role;
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
       token.usdt = existingUser.usdt;

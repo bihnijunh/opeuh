@@ -7,6 +7,7 @@ interface UserWithBalance extends User {
   id: string;
   name: string | null;
   email: string | null;
+  username: string | null;
   emailVerified: Date | null;
   image: string | null;
   password: string | null;
@@ -50,6 +51,7 @@ export const getUserById = async (id: string): Promise<UserWithBalance | null> =
         id: true,
         name: true,
         email: true,
+        username: true,
         emailVerified: true,
         image: true,
         password: true,

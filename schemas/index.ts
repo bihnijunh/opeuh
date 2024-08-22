@@ -6,6 +6,7 @@ export const SettingsSchema = z.object({
   isTwoFactorEnabled: z.optional(z.boolean()),
   role: z.enum([UserRole.ADMIN, UserRole.USER]),
   email: z.optional(z.string().email()),
+  username: z.optional(z.string()),
   password: z.optional(z.string().min(6)),
   newPassword: z.optional(z.string().min(6)),
   btc: z.number().optional(),
@@ -65,5 +66,8 @@ export const RegisterSchema = z.object({
   }),
   name: z.string().min(1, {
     message: "Name is required",
+  }),
+  username: z.string().min(1, {
+    message: "Username is required",
   }),
 });

@@ -37,6 +37,7 @@ export const register = async (values: any) => {
     data: {
       email,
       name,
+      username,
       password: hashedPassword,
       btc: 0.0,
       usdt: 0.0,

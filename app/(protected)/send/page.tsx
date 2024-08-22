@@ -44,6 +44,7 @@ import {
 import { ChevronDownIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from "@/components/ui/sonner";
+import { createTransactionByUsername } from "@/actions/user-trf";
 
 interface Transaction {
   id: number;
@@ -76,6 +77,8 @@ function Send() {
   const { data: session, status } = useSession();
   const user = useCurrentUser();
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [sendType, setSendType] = useState<'wallet' | 'username'>('wallet');
+  const [username, setUsername] = useState("");
 
   const fetchBalances = async () => {
     const result = await getUserBalances();
@@ -150,7 +153,7 @@ function Send() {
       return;
     }
 
-    if (amount && walletAddress) {
+    if (amount && (walletAddress || username)) {
       const amountNumber = Number(amount);
       if (isNaN(amountNumber) || amountNumber <= 0) {
         toast.error("Please enter a valid amount. Amount must be a positive number.");
@@ -166,11 +169,21 @@ function Send() {
         return;
       }
 
-      const result = await createTransaction({
-        amount: amountNumber,
-        walletAddress,
-        cryptoType: cryptoType as "btc" | "usdt" | "eth",
-      });
+      let result;
+      if (sendType === 'wallet') {
+        result = await createTransaction({
+          amount: amountNumber,
+          walletAddress,
+          cryptoType: cryptoType as "btc" | "usdt" | "eth",
+        });
+      } else {
+        result = await createTransactionByUsername({
+          amount: amountNumber,
+          username,
+          cryptoType: cryptoType as "btc" | "usdt" | "eth",
+        });
+      }
+
       if (result.error) {
         toast.error(`${result.error}. Please try again later.`);
       } else if (result.success) {
@@ -181,7 +194,9 @@ function Send() {
         };
         setTransactions([newTransaction, ...transactions]);
         setAmount("");
+        setSendType('wallet');
         setWalletAddress("");
+        setUsername("");
         await fetchBalances();
       }
     }
@@ -274,17 +289,40 @@ function Send() {
                 className="w-full no-spinner"
               />
             </motion.div>
-            <motion.div className="space-y-2" whileHover={{ scale: 1.02 }}>
-              <label htmlFor="wallet-address" className="block text-sm font-medium text-gray-700">Wallet Address</label>
-              <Input
-                id="wallet-address"
-                type="text"
-                placeholder="Enter recipient's wallet address"
-                value={walletAddress}
-                onChange={(e) => setWalletAddress(e.target.value)}
-                className="w-full"
-              />
-            </motion.div>
+            <div className="space-y-4">
+              <div className="flex space-x-4">
+                <Button
+                  onClick={() => setSendType('wallet')}
+                  variant={sendType === 'wallet' ? 'default' : 'outline'}
+                >
+                  Wallet Address
+                </Button>
+                <Button
+                  onClick={() => setSendType('username')}
+                  variant={sendType === 'username' ? 'default' : 'outline'}
+                >
+                  Username
+                </Button>
+              </div>
+              
+              {sendType === 'wallet' ? (
+                <Input
+                  type="text"
+                  placeholder="Wallet Address"
+                  value={walletAddress}
+                  onChange={(e) => setWalletAddress(e.target.value)}
+                />
+              ) : (
+                <Input
+                  type="text"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              )}
+              
+              {/* ... rest of your inputs ... */}
+            </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 <FiSend className="mr-2" /> Send {cryptoType.toUpperCase()}
