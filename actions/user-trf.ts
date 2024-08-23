@@ -15,7 +15,7 @@ export async function createTransactionByUsername(data: {
   }
 
   try {
-    // Find the recipient user by username
+    // Find the user by username
     const recipientUser = await db.user.findUnique({
       where: { username: data.username }
     });
@@ -37,16 +37,16 @@ export async function createTransactionByUsername(data: {
       },
     });
 
-    // Create a received transaction for the recipient
-    const recipientTransaction = await db.receivedTransaction.create({
+    // Create a corresponding transaction for the recipient
+    const recipientTransaction = await db.transaction.create({
       data: {
-        recipientId: recipientUser.id,
+        userId: recipientUser.id,
         amount: data.amount,
-        cryptoType: data.cryptoType,
-        senderAddress: session.user.id,
+        walletAddress: session.user.id,
         date: new Date(),
+        [data.cryptoType]: true,
         status: 'successful',
-        transactionHash: senderTransaction.transactionId, // Use the sender's transactionId as the hash
+        recipientId: session.user.id,
       },
     });
 

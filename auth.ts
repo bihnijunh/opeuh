@@ -91,6 +91,7 @@ export const {
       token.usdt = existingUser.usdt;
       token.btc = existingUser.btc;
       token.eth = existingUser.eth;
+      token.username = existingUser.username;
     
     
       return token;

@@ -72,7 +72,7 @@ export default function ReceiveComponent() {
     try {
       const result = await getReceivedTransactions(page, itemsPerPage);
       if (result.success) {
-        setTransactions(result.transactions as Transaction[]);
+        setTransactions(result.transactions);
         setTotalPages(result.totalPages);
         setCurrentPage(result.currentPage);
       } else {
@@ -233,7 +233,7 @@ export default function ReceiveComponent() {
                         <TableCell colSpan={7} className="text-center">No transactions found</TableCell>
                       </TableRow>
                     ) : (
-                      transactions.map((transaction: Transaction) => (
+                      transactions.map((transaction) => (
                         <TableRow key={transaction.transactionHash}>
                           <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.transactionHash, "Transaction ID")}>
                             {transaction.transactionHash.slice(0, 8)}...

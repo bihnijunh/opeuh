@@ -38,23 +38,33 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
       },
     });
 
-    // Fetch sender information
+    // Fetch sender information with debug logging
     const transactionsWithSenderInfo = await Promise.all(
-      receivedTransactions.map(async (transaction: {
-        senderAddress: string;
-        [key: string]: any;
-      }) => {
+      receivedTransactions.map(async (transaction: any) => {
+        console.log(`Debug: Searching for transaction with ID ${transaction.senderAddress}`);
         const originalTransaction = await db.transaction.findUnique({
           where: { transactionId: transaction.senderAddress },
           select: { 
+            id: true,
+            userId: true,
             sender: {
-              select: { username: true }
+              select: { id: true, username: true }
             }
           }
         });
 
+        console.log(`Debug: Found original transaction:`, originalTransaction);
+
+        if (!originalTransaction) {
+          console.log(`Debug: No transaction found for ID ${transaction.senderAddress}`);
+        } else if (!originalTransaction.sender) {
+          console.log(`Debug: No sender found for transaction ${originalTransaction.id}`);
+        }
+
         return {
           ...transaction,
+          originalTransactionId: originalTransaction?.id,
+          senderUserId: originalTransaction?.sender?.id,
           senderUsername: originalTransaction?.sender?.username || 'Unknown'
         };
       })

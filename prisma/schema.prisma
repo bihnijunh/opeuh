@@ -116,6 +116,7 @@ model ReceivedTransaction {
   cryptoType     String
   senderAddress  String
   recipientId    String
+  senderUsername String
   status         String   @default("pending")
   transactionHash String  @unique
   recipient      User     @relation("ReceivedCryptoTransactions", fields: [recipientId], references: [id])
