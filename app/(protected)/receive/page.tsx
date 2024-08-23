@@ -44,7 +44,7 @@ const cryptocurrencyOptions = [
 ];
 
 interface Transaction {
-  id: number;
+  id: string;
   date: Date;
   amount: number;
   cryptoType: string;
@@ -232,7 +232,7 @@ export default function ReceiveComponent() {
                       </TableRow>
                     ) : (
                       transactions.map((transaction) => (
-                        <TableRow key={transaction.id}>
+                        <TableRow key={transaction.transactionHash}>
                           <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.transactionHash, "Transaction ID")}>
                             {transaction.transactionHash.slice(0, 8)}...
                           </TableCell>
