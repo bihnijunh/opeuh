@@ -1,0 +1,54 @@
+"use server";
+
+import { auth } from "@/auth";
+import { db } from "@/lib/db";
+
+export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
+  const session = await auth();
+  
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" };
+  }
+
+  try {
+    const skip = (page - 1) * itemsPerPage;
+    const receivedTransactions = await db.transaction.findMany({
+      where: { 
+        recipientId: session.user.id,
+        status: 'successful'
+      },
+      orderBy: { date: 'desc' },
+      take: itemsPerPage,
+      skip: skip,
+      select: {
+        id: true,
+        date: true,
+        btc: true,
+        usdt: true,
+        eth: true,
+        amount: true,
+        walletAddress: true,
+        transactionId: true,
+        userId: true,
+        status: true,
+      },
+    });
+
+    const totalTransactions = await db.transaction.count({
+      where: { 
+        recipientId: session.user.id,
+        status: 'successful'
+      },
+    });
+
+    return { 
+      success: true, 
+      transactions: receivedTransactions,
+      totalPages: Math.ceil(totalTransactions / itemsPerPage),
+      currentPage: page
+    };
+  } catch (error) {
+    console.error("Error fetching received transactions:", error);
+    return { error: "Failed to fetch received transactions" };
+  }
+}

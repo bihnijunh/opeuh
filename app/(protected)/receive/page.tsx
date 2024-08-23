@@ -1,11 +1,35 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { FaCopy, FaQrcode } from "react-icons/fa";
-import { FiInfo } from "react-icons/fi";
+import { FiInfo, FiClock } from "react-icons/fi";
 import QRCode from "qrcode.react";
 import { motion } from "framer-motion";
 import Image from 'next/image';
+import { getReceivedTransactions } from "@/actions/getReceivedTransactions";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const cryptoIcons = {
   btc: "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=032",
@@ -19,9 +43,26 @@ const cryptocurrencyOptions = [
   { name: "ETH", address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", icon: cryptoIcons.eth, network: "Ethereum" },
 ];
 
+interface Transaction {
+  id: number;
+  date: Date;
+  btc: boolean;
+  usdt: boolean;
+  eth: boolean;
+  amount: number;
+  walletAddress: string;
+  transactionId: string;
+  userId: string;
+  status: string;
+}
+
 export default function ReceiveComponent() {
   const [selectedCrypto, setSelectedCrypto] = useState(cryptocurrencyOptions[0]);
   const [showQR, setShowQR] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const copyAddressToClipboard = () => {
     navigator.clipboard.writeText(selectedCrypto.address)
@@ -29,8 +70,63 @@ export default function ReceiveComponent() {
       .catch(() => toast.error("Failed to copy address"));
   };
 
+  const fetchTransactions = async (page = currentPage) => {
+    try {
+      const result = await getReceivedTransactions(page, itemsPerPage);
+      if (result.success) {
+        setTransactions(result.transactions);
+        setTotalPages(result.totalPages);
+        setCurrentPage(result.currentPage);
+      } else {
+        toast.error("Failed to fetch transactions. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      toast.error("Failed to fetch transactions. Please try again later.");
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [itemsPerPage]);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    fetchTransactions(newPage);
+  };
+
+  const handleItemsPerPageChange = (value: string) => {
+    const newItemsPerPage = parseInt(value, 10);
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+    fetchTransactions(1);
+  };
+
+  const handleCopyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        toast.success(`${label} copied to clipboard.`);
+      },
+      () => {
+        toast.error(`Failed to copy ${label}. Please try again.`);
+      }
+    );
+  };
+
   return (
-    <div className="max-w-xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+    <div className="max-w-4xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
       <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
         Receive Crypto
       </h2>
@@ -110,6 +206,93 @@ export default function ReceiveComponent() {
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Scan this QR code to receive {selectedCrypto.name}</p>
           </motion.div>
         )}
+
+        <Accordion type="single" collapsible>
+          <AccordionItem value="item-1">
+            <AccordionTrigger>
+              <div className="flex items-center">
+                <FiClock className="mr-2" />
+                Received Transactions History
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">ID</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead className="min-w-[200px]">Sender Address</TableHead>
+                      <TableHead className="min-w-[150px]">Date</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center">No transactions found</TableCell>
+                      </TableRow>
+                    ) : (
+                      transactions.map((transaction) => (
+                        <TableRow key={transaction.id}>
+                          <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.transactionId, "Transaction ID")}>
+                            {transaction.transactionId.slice(0, 8)}...
+                          </TableCell>
+                          <TableCell>{transaction.amount}$</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <div className="truncate max-w-[150px]">{transaction.walletAddress}</div>
+                              <Button variant="ghost" size="sm" onClick={() => handleCopyToClipboard(transaction.walletAddress, "Wallet address")}>
+                                <FaCopy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                          <TableCell>{new Date(transaction.date).toLocaleString()}</TableCell>
+                          <TableCell>{transaction.btc ? "BTC" : transaction.usdt ? "USDT" : "ETH"}</TableCell>
+                          <TableCell>
+                            <Badge variant={transaction.status === "pending" ? "warning" : transaction.status === "approved" ? "secondary" : "success"}>
+                              {transaction.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-4 sm:space-y-0">
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={handleItemsPerPageChange}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Items per page" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5 per page</SelectItem>
+                    <SelectItem value="10">10 per page</SelectItem>
+                    <SelectItem value="20">20 per page</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center space-x-2">
+                  <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
+                    Previous
+                  </Button>
+                  <span className="flex items-center">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </div>
   );

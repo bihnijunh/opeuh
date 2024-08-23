@@ -7,7 +7,7 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js" 
+  provider = "prisma-client-js"
 }
 
 enum UserRole {
@@ -27,13 +27,14 @@ model User {
   accounts Account[]
   isTwoFactorEnabled Boolean @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
-  transactions Transaction[]
-  usdt Float 
-  btc Float 
-  eth Float 
- }
-
-
+  transactions Transaction[] @relation("UserTransactions")
+  sentTransactions Transaction[] @relation("SentTransactions")
+  receivedTransactions Transaction[] @relation("ReceivedTransactions")
+  receivedCryptoTransactions ReceivedTransaction[] @relation("ReceivedCryptoTransactions")
+  usdt Float @default(0)
+  btc Float @default(0)
+  eth Float @default(0)
+}
 
 model Account {
   id String @id @default(cuid())
@@ -98,15 +99,32 @@ model Transaction {
   walletAddress  String
   transactionId  String   @unique @default(cuid())
   userId         String
-  status String @default("pending")
-  user           User     @relation(fields: [userId], references: [id])
-  }
+  recipientId    String?
+  status         String   @default("pending")
+  user           User     @relation("UserTransactions", fields: [userId], references: [id], map: "Transaction_userId_fkey")
+  sender         User     @relation("SentTransactions", fields: [userId], references: [id], map: "Transaction_senderId_fkey")
+  recipient      User?    @relation("ReceivedTransactions", fields: [recipientId], references: [id], map: "Transaction_recipientId_fkey")
 
-  model BankAccount {
+  @@index([userId])
+  @@index([recipientId])
+}
+
+model ReceivedTransaction {
+  id             String   @id @default(cuid())
+  date           DateTime @default(now())
+  amount         Float
+  cryptoType     String
+  senderAddress  String
+  recipientId    String
+  status         String   @default("pending")
+  transactionHash String  @unique
+  recipient      User     @relation("ReceivedCryptoTransactions", fields: [recipientId], references: [id])
+}
+
+model BankAccount {
   id            String @id @default(cuid())
   bankName      String
   accountName   String
   accountNumber String
   status        String @default("active")
- 
 }

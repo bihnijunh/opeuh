@@ -44,9 +44,10 @@ import {
 import { ChevronDownIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from "@/components/ui/sonner";
-import { createTransactionByUsername } from "@/actions/user-trf";
+
 import { getUserByUsername } from "@/actions/getUserByUsername";
 import { ConfirmTransactionModal } from "@/app/(protected)/_components/ConfirmTransactionModal";
+import { createTransactionByUsername } from "@/actions/user-trf";
 
 interface Transaction {
   id?: number;

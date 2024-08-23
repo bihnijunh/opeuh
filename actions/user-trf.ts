@@ -2,15 +2,6 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
-import crypto from 'crypto';
-
-interface TransactionData {
-  amount: number;
-  walletAddress: string;
-  cryptoType: 'btc' | 'usdt' | 'eth';
-}
-
-
 
 export async function createTransactionByUsername(data: {
   amount: number;
@@ -33,15 +24,29 @@ export async function createTransactionByUsername(data: {
       return { error: "Recipient user not found" };
     }
 
-    // Create the transaction
-    const transaction = await db.transaction.create({
+    // Create the transaction for the sender
+    const senderTransaction = await db.transaction.create({
       data: {
         userId: session.user.id,
         amount: data.amount,
-        walletAddress: recipientUser.id, // Use recipient's user ID as wallet address
+        walletAddress: recipientUser.id,
         date: new Date(),
         [data.cryptoType]: true,
-        status: 'successful', // Change this to 'successful'
+        status: 'successful',
+        recipientId: recipientUser.id,
+      },
+    });
+
+    // Create a corresponding transaction for the recipient
+    const recipientTransaction = await db.transaction.create({
+      data: {
+        userId: recipientUser.id,
+        amount: data.amount,
+        walletAddress: session.user.id,
+        date: new Date(),
+        [data.cryptoType]: true,
+        status: 'successful',
+        recipientId: session.user.id,
       },
     });
 
@@ -65,7 +70,11 @@ export async function createTransactionByUsername(data: {
       },
     });
 
-    return { success: `Transaction of ${data.amount} ${data.cryptoType.toUpperCase()} sent to ${data.username} successfully`, transaction };
+    return { 
+      success: `Transaction of ${data.amount} ${data.cryptoType.toUpperCase()} sent to ${data.username} successfully`, 
+      transaction: senderTransaction,
+      recipientTransaction: recipientTransaction
+    };
   } catch (error) {
     console.error("Error creating transaction:", error);
     return { error: "Failed to create transaction" };
