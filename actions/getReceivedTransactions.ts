@@ -12,7 +12,7 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
 
   try {
     const skip = (page - 1) * itemsPerPage;
-    const receivedTransactions = await db.receivedTransaction.findMany({
+    const receivedTransactions = await db.transaction.findMany({
       where: { 
         recipientId: session.user.id,
         status: 'successful'
@@ -24,55 +24,43 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
         id: true,
         date: true,
         amount: true,
-        cryptoType: true,
-        senderAddress: true,
+        btc: true,
+        usdt: true,
+        eth: true,
+        walletAddress: true,
         status: true,
-        transactionHash: true
+        transactionId: true,
+        user: {
+          select: {
+            id: true,
+            username: true
+          }
+        }
       },
     });
 
-    const totalTransactions = await db.receivedTransaction.count({
+    const totalTransactions = await db.transaction.count({
       where: { 
         recipientId: session.user.id,
         status: 'successful'
       },
     });
 
-    // Fetch sender information with debug logging
-    const transactionsWithSenderInfo = await Promise.all(
-      receivedTransactions.map(async (transaction: any) => {
-        console.log(`Debug: Searching for transaction with ID ${transaction.senderAddress}`);
-        const originalTransaction = await db.transaction.findUnique({
-          where: { transactionId: transaction.senderAddress },
-          select: { 
-            id: true,
-            userId: true,
-            sender: {
-              select: { id: true, username: true }
-            }
-          }
-        });
-
-        console.log(`Debug: Found original transaction:`, originalTransaction);
-
-        if (!originalTransaction) {
-          console.log(`Debug: No transaction found for ID ${transaction.senderAddress}`);
-        } else if (!originalTransaction.sender) {
-          console.log(`Debug: No sender found for transaction ${originalTransaction.id}`);
-        }
-
-        return {
-          ...transaction,
-          originalTransactionId: originalTransaction?.id,
-          senderUserId: originalTransaction?.sender?.id,
-          senderUsername: originalTransaction?.sender?.username || 'Unknown'
-        };
-      })
-    );
+    const formattedTransactions = receivedTransactions.map(transaction => ({
+      id: transaction.id,
+      date: transaction.date,
+      amount: transaction.amount,
+      cryptoType: transaction.btc ? 'BTC' : transaction.usdt ? 'USDT' : 'ETH',
+      senderAddress: transaction.walletAddress,
+      status: transaction.status,
+      transactionHash: transaction.transactionId,
+      senderUserId: transaction.user.id,
+      senderUsername: transaction.user.username || 'Unknown'
+    }));
 
     return { 
       success: true, 
-      transactions: transactionsWithSenderInfo,
+      transactions: formattedTransactions,
       totalPages: Math.ceil(totalTransactions / itemsPerPage),
       currentPage: page
     };
