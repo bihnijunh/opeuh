@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 
 export async function handleReceivedPayment(
   amount: number,
-  cryptoType: string,
+  cryptoType: 'btc' | 'usdt' | 'eth',
   senderAddress: string,
   transactionHash: string
 ) {
@@ -37,8 +37,11 @@ export async function handleReceivedPayment(
       return { error: "User not found" };
     }
 
-    let updateData: { [key: string]: number } = {};
-    updateData[cryptoType.toLowerCase()] = (user[cryptoType.toLowerCase()] as number || 0) + amount;
+    const updateData = {
+      [cryptoType]: {
+        increment: amount
+      }
+    };
 
     await db.user.update({
       where: { id: session.user.id },

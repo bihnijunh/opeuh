@@ -46,14 +46,11 @@ const cryptocurrencyOptions = [
 interface Transaction {
   id: number;
   date: Date;
-  btc: boolean;
-  usdt: boolean;
-  eth: boolean;
   amount: number;
-  walletAddress: string;
-  transactionId: string;
-  userId: string;
+  cryptoType: string;
+  senderAddress: string;
   status: string;
+  transactionHash: string;
 }
 
 export default function ReceiveComponent() {
@@ -236,20 +233,20 @@ export default function ReceiveComponent() {
                     ) : (
                       transactions.map((transaction) => (
                         <TableRow key={transaction.id}>
-                          <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.transactionId, "Transaction ID")}>
-                            {transaction.transactionId.slice(0, 8)}...
+                          <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.transactionHash, "Transaction ID")}>
+                            {transaction.transactionHash.slice(0, 8)}...
                           </TableCell>
                           <TableCell>{transaction.amount}$</TableCell>
                           <TableCell>
                             <div className="flex items-center">
-                              <div className="truncate max-w-[150px]">{transaction.walletAddress}</div>
-                              <Button variant="ghost" size="sm" onClick={() => handleCopyToClipboard(transaction.walletAddress, "Wallet address")}>
+                              <div className="truncate max-w-[150px]">{transaction.senderAddress}</div>
+                              <Button variant="ghost" size="sm" onClick={() => handleCopyToClipboard(transaction.senderAddress, "Sender address")}>
                                 <FaCopy className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>
                           <TableCell>{new Date(transaction.date).toLocaleString()}</TableCell>
-                          <TableCell>{transaction.btc ? "BTC" : transaction.usdt ? "USDT" : "ETH"}</TableCell>
+                          <TableCell>{transaction.cryptoType}</TableCell>
                           <TableCell>
                             <Badge variant={transaction.status === "pending" ? "warning" : transaction.status === "approved" ? "secondary" : "success"}>
                               {transaction.status}

@@ -20,6 +20,15 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
       orderBy: { date: 'desc' },
       take: itemsPerPage,
       skip: skip,
+      select: {
+        id: true,
+        date: true,
+        amount: true,
+        cryptoType: true,
+        senderAddress: true,
+        status: true,
+        transactionHash: true,
+      },
     });
 
     const totalTransactions = await db.receivedTransaction.count({
