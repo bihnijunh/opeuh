@@ -28,6 +28,11 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
         senderAddress: true,
         status: true,
         transactionHash: true,
+        sender: {
+          select: {
+            username: true
+          }
+        }
       },
     });
 
@@ -40,7 +45,10 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
 
     return { 
       success: true, 
-      transactions: receivedTransactions,
+      transactions: receivedTransactions.map((transaction: any) => ({
+        ...transaction,
+        senderUsername: transaction.sender?.username || 'Unknown'
+      })),
       totalPages: Math.ceil(totalTransactions / itemsPerPage),
       currentPage: page
     };

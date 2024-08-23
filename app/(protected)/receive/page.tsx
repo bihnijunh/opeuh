@@ -49,6 +49,7 @@ interface Transaction {
   amount: number;
   cryptoType: string;
   senderAddress: string;
+  senderUsername: string;
   status: string;
   transactionHash: string;
 }
@@ -71,7 +72,7 @@ export default function ReceiveComponent() {
     try {
       const result = await getReceivedTransactions(page, itemsPerPage);
       if (result.success) {
-        setTransactions(result.transactions);
+        setTransactions(result.transactions as Transaction[]);
         setTotalPages(result.totalPages);
         setCurrentPage(result.currentPage);
       } else {
@@ -219,6 +220,7 @@ export default function ReceiveComponent() {
                     <TableRow>
                       <TableHead className="w-[100px]">ID</TableHead>
                       <TableHead>Amount</TableHead>
+                      <TableHead className="min-w-[150px]">Sender</TableHead>
                       <TableHead className="min-w-[200px]">Sender Address</TableHead>
                       <TableHead className="min-w-[150px]">Date</TableHead>
                       <TableHead>Type</TableHead>
@@ -228,15 +230,16 @@ export default function ReceiveComponent() {
                   <TableBody>
                     {transactions.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center">No transactions found</TableCell>
+                        <TableCell colSpan={7} className="text-center">No transactions found</TableCell>
                       </TableRow>
                     ) : (
-                      transactions.map((transaction) => (
+                      transactions.map((transaction: Transaction) => (
                         <TableRow key={transaction.transactionHash}>
                           <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.transactionHash, "Transaction ID")}>
                             {transaction.transactionHash.slice(0, 8)}...
                           </TableCell>
                           <TableCell>{transaction.amount}$</TableCell>
+                          <TableCell>{transaction.senderUsername}</TableCell>
                           <TableCell>
                             <div className="flex items-center">
                               <div className="truncate max-w-[150px]">{transaction.senderAddress}</div>

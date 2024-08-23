@@ -16,7 +16,7 @@ export async function handleReceivedPayment(
   }
 
   try {
-    // Create a new ReceivedTransaction
+    
     const newTransaction = await db.receivedTransaction.create({
       data: {
         amount,
