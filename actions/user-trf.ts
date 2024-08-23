@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
+import { sendTransactionConfirmationEmail } from "@/lib/mail";
 
 export async function createTransactionByUsername(data: {
   amount: number;
@@ -17,11 +18,22 @@ export async function createTransactionByUsername(data: {
   try {
     // Find the user by username
     const recipientUser = await db.user.findUnique({
-      where: { username: data.username }
+      where: { username: data.username },
+      select: { id: true, email: true, username: true }
     });
 
     if (!recipientUser) {
       return { error: "Recipient user not found" };
+    }
+
+    // Find the sender user
+    const senderUser = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { email: true, username: true }
+    });
+
+    if (!senderUser) {
+      return { error: "Sender user not found" };
     }
 
     // Create the transaction for the sender
@@ -69,6 +81,27 @@ export async function createTransactionByUsername(data: {
         },
       },
     });
+
+    // Send confirmation emails
+    if (senderUser.email) {
+      await sendTransactionConfirmationEmail(
+        senderUser.email,
+        data.amount,
+        data.cryptoType,
+        'sent',
+        recipientUser.username || 'the recipient'
+      );
+    }
+
+    if (recipientUser.email) {
+      await sendTransactionConfirmationEmail(
+        recipientUser.email,
+        data.amount,
+        data.cryptoType,
+        'received',
+        senderUser.username || 'the sender'
+      );
+    }
 
     return { 
       success: `Transaction of ${data.amount} ${data.cryptoType.toUpperCase()} sent to ${data.username} successfully`, 

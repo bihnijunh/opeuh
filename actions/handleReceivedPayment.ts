@@ -2,13 +2,14 @@
 
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { sendTransactionConfirmationEmail } from "@/lib/mail";
 
 export async function handleReceivedPayment(
   amount: number,
   cryptoType: 'btc' | 'usdt' | 'eth',
   senderAddress: string,
   transactionHash: string,
-  senderUsername: string // Add this parameter
+  senderUsername: string
 ) {
   const session = await auth();
 
@@ -17,6 +18,15 @@ export async function handleReceivedPayment(
   }
 
   try {
+    const recipient = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { email: true, username: true }
+    });
+
+    if (!recipient) {
+      return { error: "Recipient user not found" };
+    }
+
     const newTransaction = await db.receivedTransaction.create({
       data: {
         amount,
@@ -25,19 +35,11 @@ export async function handleReceivedPayment(
         recipientId: session.user.id,
         status: "pending",
         transactionHash,
-        senderUsername, // Add this field
+        senderUsername,
       },
     });
 
     // Update user's crypto balance
-    const user = await db.user.findUnique({
-      where: { id: session.user.id },
-    });
-
-    if (!user) {
-      return { error: "User not found" };
-    }
-
     const updateData = {
       [cryptoType]: {
         increment: amount
@@ -48,6 +50,19 @@ export async function handleReceivedPayment(
       where: { id: session.user.id },
       data: updateData,
     });
+
+    // Send confirmation emails
+    if (recipient.email) {
+      await sendTransactionConfirmationEmail(
+        recipient.email,
+        amount,
+        cryptoType,
+        'received',
+        senderUsername
+      );
+    }
+
+    // Note: We can't send an email to the sender in this case because we don't have their email address
 
     return { success: true, transaction: newTransaction };
   } catch (error) {

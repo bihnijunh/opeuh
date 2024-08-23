@@ -143,3 +143,26 @@ export const sendVerificationEmail = async (
     html: emailTemplate(content)
   });
 };
+
+export const sendTransactionConfirmationEmail = async (
+  email: string,
+  amount: number,
+  cryptoType: string,
+  transactionType: 'sent' | 'received',
+  otherPartyUsername: string
+) => {
+  const content = `
+    <h2>Transaction ${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)} Confirmation</h2>
+    <p>Dear User,</p>
+    <p>This email confirms that you have ${transactionType} a transaction of ${amount} ${cryptoType.toUpperCase()} ${transactionType === 'sent' ? 'to' : 'from'} ${otherPartyUsername}.</p>
+    <p>Thank you for using Piedra Exchange.</p>
+    <p>Best regards,<br>The Piedra Exchange Team</p>
+  `;
+
+  await resend.emails.send({
+    from: "transactions@kaitrumpfoundation.com",
+    to: email,
+    subject: `Transaction ${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)} Confirmation - Piedra Exchange`,
+    html: emailTemplate(content)
+  });
+};
