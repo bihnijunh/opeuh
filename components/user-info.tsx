@@ -8,6 +8,9 @@ import { calculateTotal } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { ArrowUpIcon, ArrowDownIcon, RefreshCcw } from 'lucide-react';
+import { getReceivedTransactions } from "@/actions/getReceivedTransactions";
+import { getSentTransactions } from "@/actions/getSentTransactions";
+import { Transaction } from "@/transaction-types";
 
 interface UserInfoProps {
   user?: ExtendedUser;
@@ -30,6 +33,7 @@ export const UserInfo = ({ user }: UserInfoProps) => {
   const pathname = usePathname();
   const [conversionRates, setConversionRates] = useState<ConversionRates>({ btc: 0, usdt: 0, eth: 0 });
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
     const fetchConversionRates = async () => {
@@ -48,6 +52,7 @@ export const UserInfo = ({ user }: UserInfoProps) => {
 
     fetchConversionRates();
     generateMockChartData();
+    fetchRecentTransactions();
   }, []);
 
   const generateMockChartData = () => {
@@ -59,6 +64,30 @@ export const UserInfo = ({ user }: UserInfoProps) => {
       });
     }
     setChartData(data);
+  };
+
+  const fetchRecentTransactions = async () => {
+    try {
+      const receivedResult = await getReceivedTransactions(1, 5);
+      const sentResult = await getSentTransactions(1, 5);
+      
+      if (receivedResult.success && sentResult.success) {
+        const allTransactions: Transaction[] = [
+          ...receivedResult.transactions.map((t: any) => ({
+            ...t,
+            type: 'received' as const,
+          })),
+          ...sentResult.transactions.map((t: any) => ({
+            ...t,
+            type: 'sent' as const,
+          }))
+        ];
+        allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setRecentTransactions(allTransactions.slice(0, 5));
+      }
+    } catch (error) {
+      console.error("Error fetching recent transactions:", error);
+    }
   };
 
   return (
@@ -120,9 +149,13 @@ export const UserInfo = ({ user }: UserInfoProps) => {
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
-                <TransactionItem type="received" amount={0.05} currency="BTC" date="2023-06-15" />
-                <TransactionItem type="sent" amount={100} currency="USDT" date="2023-06-14" />
-                <TransactionItem type="received" amount={0.5} currency="ETH" date="2023-06-13" />
+                {recentTransactions.map((transaction) => (
+                  <TransactionItem
+                    key={transaction.id}
+                    transaction={transaction}
+                    userId={user?.id}
+                  />
+                ))}
               </ul>
             </CardContent>
           </Card>
@@ -166,28 +199,34 @@ const CryptoCard = ({ title, amount, rate }: CryptoCardProps) => (
 );
 
 interface TransactionItemProps {
-  type: 'received' | 'sent';
-  amount: number;
-  currency: string;
-  date: string;
+  transaction: Transaction;
+  userId?: string;
 }
 
-const TransactionItem = ({ type, amount, currency, date }: TransactionItemProps) => (
-  <li className="flex items-center justify-between">
-    <div className="flex items-center">
-      {type === 'received' ? (
-        <ArrowDownIcon className="h-5 w-5 text-green-500 mr-2" />
-      ) : (
-        <ArrowUpIcon className="h-5 w-5 text-red-500 mr-2" />
-      )}
-      <div>
-        <p className="font-medium">{type === 'received' ? 'Received' : 'Sent'} {amount} {currency}</p>
-        <p className="text-sm text-gray-500">{date}</p>
+const TransactionItem = ({ transaction, userId }: TransactionItemProps) => {
+  const isReceived = transaction.recipientId === userId;
+  const type = isReceived ? 'received' : 'sent';
+  const address = isReceived ? transaction.senderAddress : transaction.walletAddress;
+  const username = isReceived ? transaction.senderUsername : '';
+
+  return (
+    <li className="flex items-center justify-between">
+      <div className="flex items-center">
+        {isReceived ? (
+          <ArrowDownIcon className="h-5 w-5 text-green-500 mr-2" />
+        ) : (
+          <ArrowUpIcon className="h-5 w-5 text-red-500 mr-2" />
+        )}
+        <div>
+          <p className="font-medium">{type === 'received' ? 'Received' : 'Sent'} {transaction.amount} {transaction.cryptoType}</p>
+          <p className="text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</p>
+          <p className="text-xs text-gray-400">{username || address}</p>
+        </div>
       </div>
-    </div>
-    <RefreshCcw className="h-5 w-5 text-gray-400" />
-  </li>
-);
+      <RefreshCcw className="h-5 w-5 text-gray-400" />
+    </li>
+  );
+};
 
 function MountainIcon(props: React.SVGProps<SVGSVGElement>) {
   return (

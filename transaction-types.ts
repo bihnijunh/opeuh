@@ -3,14 +3,19 @@ import { UserRole } from "@prisma/client";
 export type Transaction = {
   id: number;
   date: Date;
-  btc: boolean;
-  usdt: boolean;
-  eth: boolean;
   amount: number;
+  cryptoType: string;
   walletAddress: string;
   transactionId: string;
   status: string;
-  userId: string; // Added userId field to reference the user
+  userId: string;
+  recipientId: string | null;
+  senderAddress?: string;
+  senderUsername?: string;
+  transactionHash?: string;
+  btc?: boolean;
+  usdt?: boolean;
+  eth?: boolean;
 };
 
 export type UserWithTransactions = {
