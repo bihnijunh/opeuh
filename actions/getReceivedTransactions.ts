@@ -12,7 +12,7 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
 
   try {
     const skip = (page - 1) * itemsPerPage;
-    const receivedTransactions = await db.transaction.findMany({
+    const receivedTransactions = await db.receivedTransaction.findMany({
       where: { 
         recipientId: session.user.id,
         status: 'successful'
@@ -20,21 +20,9 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
       orderBy: { date: 'desc' },
       take: itemsPerPage,
       skip: skip,
-      select: {
-        id: true,
-        date: true,
-        btc: true,
-        usdt: true,
-        eth: true,
-        amount: true,
-        walletAddress: true,
-        transactionId: true,
-        userId: true,
-        status: true,
-      },
     });
 
-    const totalTransactions = await db.transaction.count({
+    const totalTransactions = await db.receivedTransaction.count({
       where: { 
         recipientId: session.user.id,
         status: 'successful'
