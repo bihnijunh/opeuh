@@ -20,6 +20,7 @@ const nextConfig = {
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es', 'fr'],
+    localeDetection: true,
   },
   env: {
     EXCHANGE_RATE_API_KEY: process.env.EXCHANGE_RATE_API_KEY,

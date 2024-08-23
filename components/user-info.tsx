@@ -159,19 +159,7 @@ export const UserInfo = ({ user }: UserInfoProps) => {
               </ul>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <Button>Buy Crypto</Button>
-                <Button>Sell Crypto</Button>
-                <Button>Swap Tokens</Button>
-                <Button>View History</Button>
-              </div>
-            </CardContent>
-          </Card>
+         
         </div>
       </main>
     </div>

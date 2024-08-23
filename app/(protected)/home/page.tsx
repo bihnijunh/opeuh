@@ -34,6 +34,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLoading } from "@/components/contexts/LoadingContext";
 import { Playfair_Display } from 'next/font/google';
+import AdvertisingSection from "@/components/advertising-section";
 
 const playfair = Playfair_Display({ subsets: ['latin'] });
 
@@ -77,6 +78,7 @@ export default function Component() {
         </h1>
         <div className="flex flex-col items-center gap-4 w-full max-w-4xl">
           <UserInfo user={user} />
+          <AdvertisingSection />
         </div>
       </main>
     </div>

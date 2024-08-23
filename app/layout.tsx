@@ -8,6 +8,7 @@ import { ToastContainer } from 'react-toastify'
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { LoadingProvider } from '@/components/contexts/LoadingContext'
+import { ThemeProvider } from '@/components/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,21 +25,26 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <SessionProvider session={session}>
-      <LoadingProvider>
-        <html lang="en" className="h-full">
-          <body className={`${inter.className} flex flex-col min-h-screen`}>
-            <main className="flex-grow">
-             
-              
-              {children}
-              <Toaster />
-            </main>
-            <Analytics />
-            <SpeedInsights/>
-          </body>
-        </html>
-      </LoadingProvider>
-    </SessionProvider>
+    <ThemeProvider
+    attribute="class"
+    defaultTheme="light"
+    enableSystem
+    disableTransitionOnChange
+  >
+      <SessionProvider session={session}>
+        <LoadingProvider>
+          <html lang="en" className="h-full" suppressHydrationWarning>
+            <body className={`${inter.className} flex flex-col min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white`}>
+              <main className="flex-grow">
+                {children}
+                <Toaster />
+              </main>
+              <Analytics />
+              <SpeedInsights/>
+            </body>
+          </html>
+        </LoadingProvider>
+      </SessionProvider>
+      </ThemeProvider>
   )
 }
