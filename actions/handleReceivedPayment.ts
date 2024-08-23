@@ -7,7 +7,8 @@ export async function handleReceivedPayment(
   amount: number,
   cryptoType: 'btc' | 'usdt' | 'eth',
   senderAddress: string,
-  transactionHash: string
+  transactionHash: string,
+  senderUsername: string // Add this parameter
 ) {
   const session = await auth();
 
@@ -16,7 +17,6 @@ export async function handleReceivedPayment(
   }
 
   try {
-    
     const newTransaction = await db.receivedTransaction.create({
       data: {
         amount,
@@ -25,6 +25,7 @@ export async function handleReceivedPayment(
         recipientId: session.user.id,
         status: "pending",
         transactionHash,
+        senderUsername, // Add this field
       },
     });
 
