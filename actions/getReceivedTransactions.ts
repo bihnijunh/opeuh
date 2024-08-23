@@ -54,8 +54,7 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
       senderAddress: transaction.walletAddress,
       status: transaction.status,
       transactionHash: transaction.transactionId,
-      senderUserId: transaction.user.id,
-      senderUsername: transaction.user.username || 'Unknown'
+      senderUsername: transaction.user?.username || 'Unknown'
     }));
 
     return { 

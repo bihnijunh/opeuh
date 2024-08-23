@@ -44,7 +44,7 @@ const cryptocurrencyOptions = [
 ];
 
 interface Transaction {
-  id: string;
+  id: number;
   date: Date;
   amount: number;
   cryptoType: string;
