@@ -61,7 +61,6 @@ export const Navbar = () => {
                 </Link>
               </Button>
             ))}
-           <LanguageSwitcher />
             <UserButton />
           </div>
           <div className="md:hidden">
