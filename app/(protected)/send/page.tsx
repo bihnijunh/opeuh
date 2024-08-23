@@ -210,7 +210,7 @@ function Send() {
         setRecipientName(recipientResult.user.name || "Unknown");
         setIsConfirmModalOpen(true);
       } else {
-        toast.error("User not found");
+        toast.error("User not on Piedra Exchange");
         return;
       }
     }
@@ -312,9 +312,9 @@ function Send() {
                     <SelectValue placeholder="Select cryptocurrency" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="btc">BTC - {Math.trunc(balances.btc)} USD</SelectItem>
-                    <SelectItem value="usdt">USDT - {Math.trunc(balances.usdt)} USDT</SelectItem>
-                    <SelectItem value="eth">ETH - {Math.trunc(balances.eth)} USD</SelectItem>
+                    <SelectItem value="btc">BTC - {Math.trunc(balances.btc)} $USD</SelectItem>
+                    <SelectItem value="usdt">USDT - {Math.trunc(balances.usdt)} $USDT</SelectItem>
+                    <SelectItem value="eth">ETH - {Math.trunc(balances.eth)} $USD</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

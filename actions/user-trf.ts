@@ -104,7 +104,7 @@ export async function createTransactionByUsername(data: {
     }
 
     return { 
-      success: `Transaction of ${data.amount} ${data.cryptoType.toUpperCase()} sent to ${data.username} successfully`, 
+      success: `Transaction of $${data.amount} ${data.cryptoType.toUpperCase()} sent to ${data.username} successfully`, 
       transaction: senderTransaction,
       recipientTransaction: recipientTransaction
     };

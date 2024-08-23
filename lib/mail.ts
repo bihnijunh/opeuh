@@ -154,7 +154,7 @@ export const sendTransactionConfirmationEmail = async (
   const content = `
     <h2>Transaction ${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)} Confirmation</h2>
     <p>Dear User,</p>
-    <p>This email confirms that you have ${transactionType} a transaction of ${amount} ${cryptoType.toUpperCase()} ${transactionType === 'sent' ? 'to' : 'from'} ${otherPartyUsername}.</p>
+    <p>This email confirms that you have ${transactionType} a transaction of $${amount} ${cryptoType.toUpperCase()} ${transactionType === 'sent' ? 'to' : 'from'} ${otherPartyUsername}.</p>
     <p>Thank you for using Piedra Exchange.</p>
     <p>Best regards,<br>The Piedra Exchange Team</p>
   `;
