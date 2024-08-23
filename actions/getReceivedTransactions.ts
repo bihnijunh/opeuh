@@ -27,12 +27,7 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
         cryptoType: true,
         senderAddress: true,
         status: true,
-        transactionHash: true,
-        sender: {
-          select: {
-            username: true
-          }
-        }
+        transactionHash: true
       },
     });
 
@@ -43,12 +38,31 @@ export async function getReceivedTransactions(page = 1, itemsPerPage = 10) {
       },
     });
 
+    // Fetch sender information
+    const transactionsWithSenderInfo = await Promise.all(
+      receivedTransactions.map(async (transaction: {
+        senderAddress: string;
+        [key: string]: any;
+      }) => {
+        const originalTransaction = await db.transaction.findUnique({
+          where: { transactionId: transaction.senderAddress },
+          select: { 
+            sender: {
+              select: { username: true }
+            }
+          }
+        });
+
+        return {
+          ...transaction,
+          senderUsername: originalTransaction?.sender?.username || 'Unknown'
+        };
+      })
+    );
+
     return { 
       success: true, 
-      transactions: receivedTransactions.map((transaction: any) => ({
-        ...transaction,
-        senderUsername: transaction.sender?.username || 'Unknown'
-      })),
+      transactions: transactionsWithSenderInfo,
       totalPages: Math.ceil(totalTransactions / itemsPerPage),
       currentPage: page
     };
