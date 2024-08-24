@@ -258,8 +258,8 @@ function Send() {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
         <div className="space-y-4 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          <div className="text-blue-500">Send using piedra fast pay</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 dark:border-blue-400"></div>
+          <div className="text-blue-500 dark:text-blue-400">Send using piedra fast pay</div>
         </div>
       </div>
     );
@@ -267,15 +267,15 @@ function Send() {
 
   return (
     <div className="space-y-6 p-4 sm:p-8 max-w-7xl mx-auto">
-      <Card className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+      <Card className="bg-gradient-to-br from-blue-500 to-purple-600 text-white dark:from-blue-700 dark:to-purple-800">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Cryptocurrency Overview</CardTitle>
-          <CardDescription className="text-blue-100">Current balances</CardDescription>
+          <CardDescription className="text-blue-100 dark:text-blue-200">Current balances</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {Object.entries(balances).map(([crypto, balance]) => (
-              <div key={crypto} className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+              <div key={crypto} className="bg-white/10 dark:bg-gray-800/30 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-lg font-semibold uppercase">{crypto}</span>
                   <img src={cryptoIcons[crypto as keyof typeof cryptoIcons]} alt={`${crypto} icon`} className="w-6 h-6 opacity-70" />
@@ -288,10 +288,10 @@ function Send() {
         </CardContent>
       </Card>
 
-      <Card className="bg-white shadow-lg rounded-lg overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6">
+      <Card className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-700 dark:to-purple-800 text-white p-6">
           <CardTitle className="text-2xl font-bold">Send Cryptocurrency</CardTitle>
-          <CardDescription className="text-blue-100">Transfer funds to another wallet</CardDescription>
+          <CardDescription className="text-blue-100 dark:text-blue-200">Transfer funds to another wallet</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <motion.form
@@ -302,7 +302,7 @@ function Send() {
             transition={{ duration: 0.5 }}
           >
             <motion.div className="space-y-2" whileHover={{ scale: 1.02 }}>
-              <label htmlFor="crypto-type" className="block text-sm font-medium text-gray-700">Select Cryptocurrency</label>
+              <label htmlFor="crypto-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Cryptocurrency</label>
               <div className="relative">
                 <Select
                   value={cryptoType}
@@ -313,21 +313,21 @@ function Send() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="btc">BTC - {Math.trunc(balances.btc)} $USD</SelectItem>
-                    <SelectItem value="usdt">USDT - {Math.trunc(balances.usdt)} $USDT</SelectItem>
+                    <SelectItem value="usdt">USDT - {Math.trunc(balances.usdt)} $USD</SelectItem>
                     <SelectItem value="eth">ETH - {Math.trunc(balances.eth)} $USD</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </motion.div>
             <motion.div className="space-y-2" whileHover={{ scale: 1.02 }}>
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Amount</label>
+              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
               <Input
                 id="amount"
                 type="number"
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full no-spinner"
+                className="w-full no-spinner bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </motion.div>
             <div className="space-y-4">
@@ -365,7 +365,7 @@ function Send() {
               {/* ... rest of your inputs ... */}
             </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800">
                 <FiSend className="mr-2" /> Send {cryptoType.toUpperCase()}
               </Button>
             </motion.div>
@@ -385,7 +385,7 @@ function Send() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-gray-100 dark:bg-gray-800">
                     <TableHead className="w-[100px]">ID</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead className="min-w-[200px]">Wallet Address</TableHead>
@@ -397,11 +397,11 @@ function Send() {
                 <TableBody>
                   {transactions.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center">No transactions found</TableCell>
+                      <TableCell colSpan={6} className="text-center text-gray-500 dark:text-gray-400">No transactions found</TableCell>
                     </TableRow>
                   ) : (
                     transactions.map((transaction) => (
-                      <TableRow key={transaction.id}>
+                      <TableRow key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.transactionId, "Transaction ID")}>
                           {transaction.transactionId.slice(0, 8)}...
                         </TableCell>
