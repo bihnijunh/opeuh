@@ -34,6 +34,11 @@ model User {
   usdt Float @default(0)
   btc Float @default(0)
   eth Float @default(0)
+  referralCode String? @unique
+  referredBy String?
+  referrer User? @relation("UserReferrals", fields: [referredBy], references: [id])
+  referrals User[] @relation("UserReferrals")
+  referralRewards Referral[] @relation("ReferrerRewards")
 }
 
 model Account {
@@ -128,4 +133,15 @@ model BankAccount {
   accountName   String
   accountNumber String
   status        String @default("active")
+}
+
+model Referral {
+  id String @id @default(cuid())
+  referrerId String
+  referredUserId String
+  rewardAmount Float
+  createdAt DateTime @default(now())
+  referrer User @relation("ReferrerRewards", fields: [referrerId], references: [id])
+
+  @@unique([referrerId, referredUserId])
 }

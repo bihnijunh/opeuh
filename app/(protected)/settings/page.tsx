@@ -36,6 +36,8 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { UserRole } from "@prisma/client";
+import { ReferralCode } from "@/components/ReferralCode";
+import { UseReferralCode } from "@/components/UseReferralCode";
 
 const SettingsPage = () => {
   const user = useCurrentUser();
@@ -75,8 +77,8 @@ const SettingsPage = () => {
     });
   }
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gray-100 dark:bg-gray-900">
-      <Card className="w-full max-w-lg">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100 dark:bg-gray-900">
+      <Card className="w-full max-w-lg mb-4">
         <CardHeader>
           <p className="text-2xl font-semibold text-center">
             ⚙️ Settings
@@ -216,6 +218,20 @@ const SettingsPage = () => {
               </Button>
             </form>
           </Form>
+        </CardContent>
+      </Card>
+      
+      <Card className="w-full max-w-lg mb-4">
+        <CardHeader>
+          <p className="text-2xl font-semibold text-center">
+            🎟️ Referral System
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <ReferralCode />
+            <UseReferralCode />
+          </div>
         </CardContent>
       </Card>
     </div>
