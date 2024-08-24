@@ -1,5 +1,7 @@
+'use server'
+
 import { auth } from "@/auth";
-import {db} from "@/lib/db";
+import { db } from "@/lib/db";
 
 export const applyReferralCode = async (referralCode: string) => {
   try {
