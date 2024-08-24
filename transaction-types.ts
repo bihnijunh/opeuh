@@ -10,7 +10,12 @@ export type Transaction = {
   walletAddress: string;
   transactionId: string;
   status: string;
-  userId: string; // Added userId field to reference the user
+  userId: string;
+  recipientId: string;
+  senderAddress: string;
+  senderUsername: string;
+  cryptoType: string;
+  type?: 'received' | 'sent';
 };
 
 export type UserWithTransactions = {

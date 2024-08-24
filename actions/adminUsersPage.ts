@@ -52,9 +52,13 @@ export const updateUser = async (userId: string, values: {
         transactionId: t.transactionId,
         status: t.status,
         userId: t.userId,
+        recipientId: t.recipientId || '',
+        senderAddress: t.walletAddress,
+        senderUsername: updatedUser.username || '',
+        cryptoType: t.btc ? 'btc' : t.usdt ? 'usdt' : 'eth',
       })),
     };
-
+    
     revalidatePath("/admin");
     return { success: "User updated successfully", user: userWithTransactions };
   } catch (error) {
