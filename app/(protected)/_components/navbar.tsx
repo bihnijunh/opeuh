@@ -28,6 +28,7 @@ export const Navbar = () => {
     { href: "/send", label: "Send" },
     { href: "/exchange", label: "Buy Crypto" },
     { href: "/receive", label: "Receive" },
+    { href: "/referrals", label: "Referrals" },
     { href: "/settings", label: "Settings" },
   ];
 
