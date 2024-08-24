@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -62,6 +63,7 @@ export const Navbar = () => {
                 </Link>
               </Button>
             ))}
+            <ModeToggle />
             <UserButton />
           </div>
           <div className="md:hidden">
@@ -96,6 +98,7 @@ export const Navbar = () => {
                 </Button>
               ))}
               <div className="flex items-center justify-between pt-2">
+                <ModeToggle />
                 <UserButton />
               </div>
             </div>
