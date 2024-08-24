@@ -1,7 +1,9 @@
-import { auth } from "@/auth";
-import {db} from "@/lib/db";
+'use server'
 
-export const generateReferralCode = async () => {
+import { auth } from "@/auth";
+import { db } from "@/lib/db";
+
+export async function generateReferralCode() {
   try {
     const session = await auth();
 
@@ -21,7 +23,18 @@ export const generateReferralCode = async () => {
       return { referralCode: user.referralCode };
     }
 
-    const referralCode = generateUniqueCode();
+    let referralCode;
+    let isUnique = false;
+
+    while (!isUnique) {
+      referralCode = generateUniqueCode();
+      const existingUser = await db.user.findFirst({
+        where: { referralCode },
+      });
+      if (!existingUser) {
+        isUnique = true;
+      }
+    }
 
     const updatedUser = await db.user.update({
       where: { id: user.id },
@@ -33,7 +46,7 @@ export const generateReferralCode = async () => {
     console.error("Error generating referral code:", error);
     return { error: "Failed to generate referral code" };
   }
-};
+}
 
 function generateUniqueCode(): string {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
