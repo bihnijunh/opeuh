@@ -72,18 +72,18 @@ export default function Component() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-      <main className="p-6 flex flex-col items-center">
-        <h1 className={`${playfair.className} text-4xl md:text-6xl font-bold text-center mb-8 text-gray-800 dark:text-gray-100`}>
+      <main className="px-4 sm:px-6 py-8 flex flex-col items-center">
+        <h1 className={`${playfair.className} text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-6 sm:mb-8 text-gray-800 dark:text-gray-100`}>
           Welcome back, {user?.name || 'User'}
         </h1>
         <div className="flex flex-col items-center gap-6 w-full max-w-4xl">
           <Card className="w-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <UserInfo user={user} />
             </CardContent>
           </Card>
           <Card className="w-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <AdvertisingSection />
             </CardContent>
           </Card>
