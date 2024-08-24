@@ -93,8 +93,8 @@ export const UserInfo = ({ user }: UserInfoProps) => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <Link className="flex items-center gap-2 text-gray-900 dark:text-gray-100" href="#">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center">
+          <Link className="flex items-center gap-2 text-gray-900 dark:text-gray-100 mb-4 sm:mb-0" href="#">
             <MountainIcon className="h-8 w-8 text-indigo-600" />
             <span className="text-xl font-bold text-gray-900 dark:text-gray-100">PIEDRA Dashboard</span>
           </Link>
@@ -109,7 +109,7 @@ export const UserInfo = ({ user }: UserInfoProps) => {
         </div>
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="bg-white dark:bg-gray-800">
             <CardHeader>
               <CardTitle className="text-gray-900 dark:text-gray-100">Total Balance</CardTitle>
@@ -130,7 +130,7 @@ export const UserInfo = ({ user }: UserInfoProps) => {
             <CardTitle className="text-gray-900 dark:text-gray-100">Balance History</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
+            <div className="h-[300px] sm:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <XAxis dataKey="date" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
@@ -142,7 +142,7 @@ export const UserInfo = ({ user }: UserInfoProps) => {
             </div>
           </CardContent>
         </Card>
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
+        <div className="mt-8 grid gap-6 grid-cols-1 md:grid-cols-2">
           <Card className="bg-white dark:bg-gray-800">
             <CardHeader>
               <CardTitle className="text-gray-900 dark:text-gray-100">Recent Transactions</CardTitle>
@@ -159,7 +159,6 @@ export const UserInfo = ({ user }: UserInfoProps) => {
               </ul>
             </CardContent>
           </Card>
-         
         </div>
       </main>
     </div>
