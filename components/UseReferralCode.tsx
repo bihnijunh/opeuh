@@ -1,49 +1,39 @@
-import React, { useState, useTransition } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { applyReferralCode } from '@/actions/useReferralCode';
+"use client";
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { applyReferralCode } from "@/actions/useReferralCode";
 
 export function UseReferralCode() {
   const [code, setCode] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    startTransition(async () => {
-      try {
-        const result = await applyReferralCode(code);
-        if (result.error) {
-          setError(result.error);
-          setMessage(null);
-        } else {
-          setMessage(result.message || 'Referral code applied successfully');
-          setError(null);
-        }
-      } catch (error) {
-        console.error('Error applying referral code:', error);
-        setError('Failed to apply referral code. Please try again.');
-      }
-    });
+    const result = await applyReferralCode(code);
+    if (result.success) {
+      toast.success(result.message || "Referral code applied successfully");
+      setCode('');
+    } else if (result.error) {
+      toast.error(result.error);
+    }
   };
 
   return (
-    <div className="p-4 border rounded-md">
-      <h2 className="text-lg font-semibold mb-2">Use a Referral Code</h2>
-      <form onSubmit={handleSubmit} className="space-y-2">
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Use a Referral Code</h3>
+      <form onSubmit={handleSubmit} className="flex space-x-2">
         <Input
           type="text"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="Enter referral code"
+          className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
         />
-        <Button type="submit" disabled={isPending}>
-          {isPending ? 'Applying...' : 'Apply Code'}
+        <Button type="submit" className="bg-green-500 hover:bg-green-600 text-white">
+          Apply Code
         </Button>
       </form>
-      {message && <p className="text-green-500 mt-2">{message}</p>}
-      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 }
