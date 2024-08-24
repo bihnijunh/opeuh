@@ -38,10 +38,10 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="bg-white dark:bg-gray-800 shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
-          <Link href="/home" className="text-xl font-bold text-primary">
+          <Link href="/home" className="text-xl font-bold text-primary dark:text-white">
             PIEDRA
           </Link>
           <div className="hidden md:flex items-center space-x-4">
@@ -50,13 +50,15 @@ export const Navbar = () => {
                 key={item.href}
                 asChild
                 variant={pathname === item.href ? "default" : "ghost"}
-                className="relative"
+                className={`relative text-gray-700 dark:text-white hover:text-primary dark:hover:text-white ${
+                  pathname === item.href ? 'dark:bg-gray-700' : ''
+                }`}
               >
                 <Link href={item.href}>
                   {item.label}
                   {pathname === item.href && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary dark:bg-white"
                       layoutId="underline"
                     />
                   )}
@@ -71,6 +73,7 @@ export const Navbar = () => {
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-gray-700 dark:text-white"
             >
               {isMobileMenuOpen ? <X /> : <Menu />}
             </Button>
@@ -83,7 +86,7 @@ export const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white"
+            className="md:hidden bg-white dark:bg-gray-800"
           >
             <div className="container mx-auto px-4 py-2 space-y-2">
               {navItems.map((item) => (
@@ -91,7 +94,9 @@ export const Navbar = () => {
                   key={item.href}
                   asChild
                   variant={pathname === item.href ? "default" : "ghost"}
-                  className="w-full justify-start"
+                  className={`w-full justify-start text-gray-700 dark:text-white hover:text-primary dark:hover:text-white ${
+                    pathname === item.href ? 'dark:bg-gray-700' : ''
+                  }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Link href={item.href}>{item.label}</Link>
