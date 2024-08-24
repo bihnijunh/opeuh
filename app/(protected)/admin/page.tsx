@@ -46,6 +46,11 @@ export default async function AdminPage() {
       transactionId: t.transactionId,
       status: t.status,
       userId: t.userId,
+      recipientId: t.recipientId || '',
+      senderAddress: t.walletAddress, // Assuming sender address is the same as wallet address
+      senderUsername: user.username || '', // Using user's name as senderUsername
+      cryptoType: t.btc ? 'btc' : t.usdt ? 'usdt' : 'eth',
+      type: t.recipientId ? 'received' : 'sent',
     })),
   }));
 
