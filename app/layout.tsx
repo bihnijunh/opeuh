@@ -8,7 +8,6 @@ import { ToastContainer } from 'react-toastify'
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { LoadingProvider } from '@/components/contexts/LoadingContext'
-import { ThemeProvider } from '@/components/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,12 +24,7 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <ThemeProvider
-    attribute="class"
-    defaultTheme="light"
-    enableSystem
-    disableTransitionOnChange
-  >
+  
       <SessionProvider session={session}>
         <LoadingProvider>
           <html lang="en" className="h-full" suppressHydrationWarning>
@@ -45,6 +39,6 @@ export default async function RootLayout({
           </html>
         </LoadingProvider>
       </SessionProvider>
-      </ThemeProvider>
+  
   )
 }
