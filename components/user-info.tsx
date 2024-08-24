@@ -94,9 +94,9 @@ export const UserInfo = ({ user }: UserInfoProps) => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <Link className="flex items-center gap-2" href="#">
+          <Link className="flex items-center gap-2 text-gray-900 dark:text-gray-100" href="#">
             <MountainIcon className="h-8 w-8 text-indigo-600" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white">PIEDRA Dashboard</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">PIEDRA Dashboard</span>
           </Link>
           <div className="flex items-center gap-4">
             <Button asChild variant={pathname === "/receive" ? "default" : "outline"}>
@@ -110,12 +110,12 @@ export const UserInfo = ({ user }: UserInfoProps) => {
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800">
             <CardHeader>
-              <CardTitle>Total Balance</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Total Balance</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 ${calculateTotal(Number(user?.btc) || 0, Number(user?.eth) || 0, Number(user?.usdt) || 0).toFixed(2)}
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Available balance</p>
@@ -125,27 +125,27 @@ export const UserInfo = ({ user }: UserInfoProps) => {
           <CryptoCard title="ETH" amount={Number(user?.eth) || 0} rate={conversionRates.eth} />
           <CryptoCard title="USDT" amount={Number(user?.usdt) || 0} rate={conversionRates.usdt} />
         </div>
-        <Card className="mt-8">
+        <Card className="mt-8 bg-white dark:bg-gray-800">
           <CardHeader>
-            <CardTitle>Balance History</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-gray-100">Balance History</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
+                  <XAxis dataKey="date" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                  <Tooltip contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', color: '#fff' }} />
+                  <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
         <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800">
             <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Recent Transactions</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
@@ -173,12 +173,12 @@ interface CryptoCardProps {
 }
 
 const CryptoCard = ({ title, amount, rate }: CryptoCardProps) => (
-  <Card>
+  <Card className="bg-white dark:bg-gray-800">
     <CardHeader>
-      <CardTitle>{title}</CardTitle>
+      <CardTitle className="text-gray-900 dark:text-gray-100">{title}</CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">${amount.toFixed(2)}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">${amount.toFixed(2)}</div>
       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
         {convertToCrypto(amount, rate)} {title}
       </p>
@@ -198,20 +198,22 @@ const TransactionItem = ({ transaction, userId }: TransactionItemProps) => {
   const username = isReceived ? transaction.senderUsername : '';
 
   return (
-    <li className="flex items-center justify-between">
+    <li className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center">
         {isReceived ? (
-          <ArrowDownIcon className="h-5 w-5 text-green-500 mr-2" />
+          <ArrowDownIcon className="h-5 w-5 text-green-500 dark:text-green-400 mr-2" />
         ) : (
-          <ArrowUpIcon className="h-5 w-5 text-red-500 mr-2" />
+          <ArrowUpIcon className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
         )}
         <div>
-          <p className="font-medium">{type === 'received' ? 'Received' : 'Sent'} {transaction.amount} {transaction.cryptoType}</p>
-          <p className="text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</p>
-          <p className="text-xs text-gray-400">{username || address}</p>
+          <p className="font-medium text-gray-900 dark:text-gray-100">
+            {type === 'received' ? 'Received' : 'Sent'} {transaction.amount} {transaction.cryptoType}
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(transaction.date).toLocaleDateString()}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">{username || address}</p>
         </div>
       </div>
-      <RefreshCcw className="h-5 w-5 text-gray-400" />
+      <RefreshCcw className="h-5 w-5 text-gray-400 dark:text-gray-500" />
     </li>
   );
 };

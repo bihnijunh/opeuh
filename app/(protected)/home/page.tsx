@@ -63,22 +63,30 @@ export default function Component() {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
         <div className="space-y-4 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          <div className="text-blue-500">Loading...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 dark:border-blue-400"></div>
+          <div className="text-blue-500 dark:text-blue-400">Loading...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
       <main className="p-6 flex flex-col items-center">
-        <h1 className={`${playfair.className} text-4xl md:text-6xl font-bold text-center mb-8 text-black dark:text-white`}>
+        <h1 className={`${playfair.className} text-4xl md:text-6xl font-bold text-center mb-8 text-gray-800 dark:text-gray-100`}>
           Welcome back, {user?.name || 'User'}
         </h1>
-        <div className="flex flex-col items-center gap-4 w-full max-w-4xl">
-          <UserInfo user={user} />
-          <AdvertisingSection />
+        <div className="flex flex-col items-center gap-6 w-full max-w-4xl">
+          <Card className="w-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-200">
+            <CardContent className="p-6">
+              <UserInfo user={user} />
+            </CardContent>
+          </Card>
+          <Card className="w-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-200">
+            <CardContent className="p-6">
+              <AdvertisingSection />
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
