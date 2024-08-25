@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import crypto from 'crypto';
+import { sendTransactionDetailsEmail } from "@/lib/mail";
 
 interface TransactionData {
   amount: number;
@@ -18,16 +19,16 @@ export async function createTransaction(data: TransactionData) {
   }
 
   try {
-      const transaction = await db.transaction.create({
-          data: {
-            userId: session.user.id,
-            amount: data.amount,
-            walletAddress: data.walletAddress,
-            date: new Date(),
-            [data.cryptoType]: true,
-            status: 'pending', // Add this line
-          },
-        });
+    const transaction = await db.transaction.create({
+      data: {
+        userId: session.user.id,
+        amount: data.amount,
+        walletAddress: data.walletAddress,
+        date: new Date(),
+        [data.cryptoType]: true,
+        status: 'pending',
+      },
+    });
 
     // Update user's balance
     await db.user.update({
@@ -39,7 +40,24 @@ export async function createTransaction(data: TransactionData) {
       },
     });
 
-    return { success: `Transaction of $${data.amount}${data.cryptoType.toUpperCase()} sent successfully`, transaction };  } catch (error) {
+    // Send transaction initiated email
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { email: true },
+    });
+
+    if (user && user.email) {
+      await sendTransactionDetailsEmail(user.email, {
+        amount: data.amount,
+        cryptoType: data.cryptoType,
+        walletAddress: data.walletAddress,
+        date: transaction.date,
+        status: transaction.status,
+      });
+    }
+
+    return { success: `Transaction of $${data.amount}${data.cryptoType.toUpperCase()} sent successfully`, transaction };
+  } catch (error) {
     console.error("Error creating transaction:", error);
     return { error: "Failed to create transaction" };
   }

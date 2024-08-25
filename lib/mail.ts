@@ -166,3 +166,36 @@ export const sendTransactionConfirmationEmail = async (
     html: emailTemplate(content)
   });
 };
+
+export const sendTransactionDetailsEmail = async (
+  email: string,
+  transactionDetails: {
+    amount: number;
+    cryptoType: string;
+    walletAddress: string;
+    date: Date;
+    status: string;
+  }
+) => {
+  const content = `
+    <h2>Transaction Details</h2>
+    <p>Dear User,</p>
+    <p>Here are the details of your recent transaction:</p>
+    <ul>
+      <li>Amount: ${transactionDetails.amount} ${transactionDetails.cryptoType.toUpperCase()}</li>
+      <li>Wallet Address: ${transactionDetails.walletAddress}</li>
+      <li>Date: ${transactionDetails.date.toLocaleString()}</li>
+      <li>Status: ${transactionDetails.status}</li>
+    </ul>
+    <p>Thank you for using Piedra Exchange.</p>
+    <p>Best regards,<br>The Piedra Exchange Team</p>
+  `;
+
+  await resend.emails.send({
+    from: "transactions@kaitrumpfoundation.com",
+    to: email,
+    subject: `Transaction Status Update - Piedra Exchange`,
+    html: emailTemplate(content)
+  });
+};
+
