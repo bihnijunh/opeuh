@@ -73,29 +73,7 @@ const SettingsPage = () => {
     });
   }
 
-  const handleBankAccountSubmit = (bankAccountData: any) => {
-    setError(undefined);
-    setSuccess(undefined);
-    startTransition(() => {
-      saveBankAccount(bankAccountData)
-        .then((data) => {
-          if (data.error) {
-            setError(data.error);
-          }
-
-          if (data.success) {
-            setSuccess(data.success);
-            // Optionally, you can update the user context or refetch user data here
-            // to reflect the newly saved bank account information
-            // For example: refetchUser();
-          }
-        })
-        .catch((err) => {
-          console.error("Error saving bank account:", err);
-          setError("Failed to save bank account details. Please try again.");
-        });
-    });
-  };
+ 
 
  
 
@@ -252,7 +230,7 @@ const SettingsPage = () => {
         </CardHeader>
         <CardContent>
         
-            <AddBankAccountComponent onSubmit={handleBankAccountSubmit} />
+            <AddBankAccountComponent  />
          
           <FormError message={error} />
           <FormSuccess message={success} />
