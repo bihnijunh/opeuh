@@ -10,9 +10,15 @@ export const SettingsSchema = z.object({
   password: z.optional(z.string().min(6)),
   newPassword: z.optional(z.string().min(6)),
   btc: z.number().optional(),
-usdt: z.number().optional(),
-eth: z.number().optional(),
-status: z.enum(["pending", "successful"]).optional(),
+  usdt: z.number().optional(),
+  eth: z.number().optional(),
+  status: z.enum(["pending", "successful"]).optional(),
+  bankName: z.optional(z.string()),
+  accountNumber: z.optional(z.string()),
+  routingNumber: z.optional(z.string()),
+  accountHolderName: z.optional(z.string()),
+  iban: z.optional(z.string()),
+  swiftCode: z.optional(z.string()),
 })
   .refine((data) => {
     if (data.password && !data.newPassword) {
@@ -70,4 +76,13 @@ export const RegisterSchema = z.object({
   username: z.string().min(1, {
     message: "Username is required",
   }),
+});
+
+export const AccountSchema = z.object({
+  bankName: z.string().min(1, "Bank name is required"),
+  accountNumber: z.string().min(1, "Account number is required"),
+  routingNumber: z.string().min(1, "Routing number is required"),
+  accountHolderName: z.string().min(1, "Account holder name is required"),
+  iban: z.string().optional(),
+  swiftCode: z.string().optional(),
 });

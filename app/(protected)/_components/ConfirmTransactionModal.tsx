@@ -30,24 +30,24 @@ export const ConfirmTransactionModal: React.FC<ConfirmTransactionModalProps> = (
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="w-full max-w-md mx-auto">
         <DialogHeader>
-          <DialogTitle>Confirm Transaction</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl sm:text-2xl">Confirm Transaction</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             Please review the transaction details below:
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
-          <p className="text-lg font-semibold">
-            Send {amount} {cryptoType.toUpperCase()}
+          <p className="text-base sm:text-lg font-semibold break-words">
+           You are about to send ${amount} {cryptoType.toUpperCase()}
           </p>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600 break-words">
             To: {recipientName} ({username})
           </p>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={onConfirm}>Confirm Send</Button>
+        <DialogFooter className="flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          <Button className="w-full sm:w-auto" variant="outline" onClick={onClose}>Cancel</Button>
+          <Button className="w-full sm:w-auto" onClick={onConfirm}>Confirm Send</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

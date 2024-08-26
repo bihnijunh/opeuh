@@ -66,6 +66,7 @@ export const {
         session.user.btc = token.btc as number;
         session.user.eth = token.eth as number;
         session.user.username = token.username as string;
+       
       }
     
       
@@ -92,7 +93,6 @@ export const {
       token.btc = existingUser.btc;
       token.eth = existingUser.eth;
       token.username = existingUser.username;
-    
     
       return token;
     },

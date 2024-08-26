@@ -39,6 +39,7 @@ model User {
   referrer User? @relation("UserReferrals", fields: [referredBy], references: [id])
   referrals User[] @relation("UserReferrals")
   referralRewards Referral[] @relation("ReferrerRewards")
+  bankAccount UserBankAccount?
 
   @@index([referralCode])
 }
@@ -146,4 +147,16 @@ model Referral {
   referrer User @relation("ReferrerRewards", fields: [referrerId], references: [id])
 
   @@unique([referrerId, referredUserId])
+}
+
+model UserBankAccount {
+  id            String @id @default(cuid())
+  userId        String @unique
+  bankName      String
+  accountNumber String
+  routingNumber String
+  iban          String?
+  swiftCode     String?
+   accountHolderName String
+  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
