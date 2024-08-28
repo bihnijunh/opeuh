@@ -80,12 +80,10 @@ export const AddBankAccountComponent: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl mt-3 font-semibold text-center">
-          🔐 Bank Account 
-        </h1>
-        <p className="text-sm text-center text-muted-foreground">
-          Manage your bank account information here.
+        <p className="text-2xl mt-3 font-semibold text-center">
+        Manage your bank account information here.
         </p>
+        
       </div>
       {!isEditing && form.getValues().accountNumber ? (
         <div className="space-y-4">

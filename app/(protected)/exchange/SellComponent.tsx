@@ -1,139 +1,98 @@
-"use client";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { getExchangeRate } from "@/lib/fetExchange";
+import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { AccountSelectionComponent } from '@/components/AccountSelectionComponent';
+import { createCryptoSellTransaction } from '@/actions/cryptoSellTransaction';
 
-interface Currency {
-  code: string;
-  name: string;
-}
+type CryptoCurrency = "ETH" | "USDT" | "BTC";
 
-interface SellComponentProps {
-  SUPPORTED_CURRENCIES: Currency[];
-}
-
-export default function SellComponent({ SUPPORTED_CURRENCIES }: SellComponentProps) {
-  const [sellAmount, setSellAmount] = useState("");
-  const [receiveAmount, setReceiveAmount] = useState("");
-  const [sellCurrency, setSellCurrency] = useState("BTC");
-  const [receiveCurrency, setReceiveCurrency] = useState("USD");
-  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+export const SellComponent: React.FC = () => {
+  const { data: session, status } = useSession();
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [selectedBalance, setSelectedBalance] = useState<{ currency: CryptoCurrency; amount: number } | null>(null);
+  const [amount, setAmount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const updateReceiveAmount = (sellValue: string) => {
-    if (exchangeRate && sellValue) {
-      const received = (parseFloat(sellValue) * exchangeRate).toFixed(2);
-      setReceiveAmount(isNaN(parseFloat(received)) ? "" : received);
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      setError('You must be logged in to perform this action.');
     } else {
-      setReceiveAmount("");
+      setError(null);
     }
+  }, [status]);
+
+  const handleAccountSelect = (accountId: string) => {
+    setSelectedAccountId(accountId);
+    console.log(`Selected account ID: ${accountId}`);
   };
 
-  const handleSellAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSellAmount(value);
-    updateReceiveAmount(value);
+  const handleBalanceSelect = (currency: CryptoCurrency, amount: number) => {
+    setSelectedBalance({ currency, amount });
+    console.log(`Selected balance: ${currency}, Amount: ${amount}`);
   };
 
-  const handleReceiveAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setReceiveAmount(value);
-    if (exchangeRate) {
-      const sold = (parseFloat(value) / exchangeRate).toFixed(8);
-      setSellAmount(isNaN(parseFloat(sold)) ? "" : sold);
+  const handleAmountChange = (newAmount: number) => {
+    setAmount(newAmount);
+    console.log(`Amount changed: ${newAmount}`);
+  };
+
+  const handleTransactionCreate = async () => {
+    if (status !== 'authenticated' || !session?.user?.id) {
+      setError('You must be logged in to perform this action.');
+      return;
     }
-  };
 
-  useEffect(() => {
-    async function fetchRate() {
-      try {
-        const rate = await getExchangeRate(sellCurrency, receiveCurrency);
-        console.log("Fetched rate:", rate);
-        setExchangeRate(rate);
-        setError(null);
-        updateReceiveAmount(sellAmount);
-      } catch (error) {
-        console.error("Failed to fetch exchange rate:", error);
-        setError(`Failed to fetch exchange rate. Please try again later.`);
-        setExchangeRate(null);
+    if (!selectedAccountId || !selectedBalance || amount <= 0) {
+      setError('Please select an account, currency, and enter a valid amount.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const result = await createCryptoSellTransaction({
+        userId: session.user.id,
+        bankAccountId: selectedAccountId,
+        currency: selectedBalance.currency,
+        amount: amount
+      });
+
+      if ('error' in result) {
+        setError(result.error || 'An unknown error occurred');
+      } else {
+        setSuccessMessage(result.message || 'Transaction created successfully');
+        console.log('Transaction created:', result.transaction);
       }
+    } catch (err) {
+      console.error('Error creating transaction:', err);
+      setError(`Failed to create transaction: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setIsLoading(false);
     }
-    fetchRate();
-  }, [sellCurrency, receiveCurrency]);
-
-  useEffect(() => {
-    updateReceiveAmount(sellAmount);
-  }, [exchangeRate, sellAmount, sellCurrency, receiveCurrency]);
+  };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-sm text-gray-500 mb-1">You Sell</p>
-        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
-          <Input
-            type="text"
-            placeholder="100-50000"
-            value={sellAmount}
-            onChange={handleSellAmountChange}
-            className="w-full"
-          />
-          <Select value={sellCurrency} onValueChange={setSellCurrency}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-      {SUPPORTED_CURRENCIES.map((currency: Currency) => (
-        <SelectItem key={currency.code} value={currency.code}>
-          {currency.code} - {currency.name}
-        </SelectItem>
-      ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div>
-        <p className="text-sm text-gray-500 mb-1">You Receive</p>
-        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
-          <Input
-            type="text"
-            placeholder="100-50000"
-            value={receiveAmount}
-            onChange={handleReceiveAmountChange}
-            className="w-full"
-          />
-          <Select value={receiveCurrency} onValueChange={setReceiveCurrency}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SUPPORTED_CURRENCIES.map((currency: Currency) => (
-                <SelectItem key={currency.code} value={currency.code}>
-                  {currency.code} - {currency.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {exchangeRate && (
-        <p className="text-sm text-gray-500 break-words">
-          Estimated price: 1 {sellCurrency} ≈ {exchangeRate.toFixed(6)} {receiveCurrency}
-        </p>
-      )}
-
-      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
-
-      <Button className="w-full">Sell {sellCurrency}</Button>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Sell Cryptocurrency</h1>
+      <AccountSelectionComponent
+        onAccountSelect={handleAccountSelect}
+        onBalanceSelect={handleBalanceSelect}
+        onAmountChange={handleAmountChange}
+      />
+      {error && <p className="text-red-500 mt-2">{error}</p>}
+      {successMessage && <p className="text-green-500 mt-2">{successMessage}</p>}
+      <button
+        onClick={handleTransactionCreate}
+        disabled={isLoading || status !== 'authenticated' || !selectedAccountId || !selectedBalance || amount <= 0}
+        className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+      >
+        {isLoading ? 'Processing...' : 'Withdraw'}
+      </button>
     </div>
   );
-}
+};
+
+export default SellComponent;
