@@ -60,13 +60,14 @@ interface Transaction {
 
 export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCIES }) => {
   const { data: session, status } = useSession();
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null | undefined>(null);
   const [selectedBalance, setSelectedBalance] = useState<{ currency: CryptoCurrency; amount: number } | null>(null);
   const [amount, setAmount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[] | undefined>(undefined);
+  const [error, setError] = useState<string | null | undefined>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null | undefined>(null);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const [displayedTransactions, setDisplayedTransactions] = useState<Transaction[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -78,16 +79,34 @@ export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCI
       setError(null);
       fetchTransactions();
     }
-  }, [status, currentPage, itemsPerPage]);
+  }, [status]);
+
+  useEffect(() => {
+    updateDisplayedTransactions();
+  }, [currentPage, itemsPerPage, allTransactions]);
 
   const fetchTransactions = async () => {
-    const result = await getUserCryptoSellTransactions(currentPage, itemsPerPage);
-    if ('transactions' in result) {
-      setTransactions(result.transactions);
-      setTotalPages(result.totalPages);
-    } else if ('error' in result) {
-      setError(result.error);
+    try {
+      const result = await getUserCryptoSellTransactions();
+      if ('transactions' in result && Array.isArray(result.transactions)) {
+        setAllTransactions(result.transactions);
+        updateDisplayedTransactions();
+      } else if ('error' in result) {
+        setError(result.error);
+      } else {
+        setError('Unexpected response format from server');
+      }
+    } catch (err) {
+      console.error('Error fetching transactions:', err);
+      setError('Failed to fetch transactions');
     }
+  };
+
+  const updateDisplayedTransactions = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    setDisplayedTransactions(allTransactions.slice(startIndex, endIndex));
+    setTotalPages(Math.ceil(allTransactions.length / itemsPerPage));
   };
 
   const handleAccountSelect = (accountId: string) => {
@@ -211,12 +230,12 @@ export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCI
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {!transactions || transactions.length === 0 ? (
+                  {displayedTransactions.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center text-gray-500 dark:text-gray-400">No transactions found</TableCell>
                     </TableRow>
                   ) : (
-                    transactions.map((transaction) => (
+                    displayedTransactions.map((transaction) => (
                       <TableRow key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.id, "Transaction ID")}>
                           {transaction.id.slice(0, 8)}...
