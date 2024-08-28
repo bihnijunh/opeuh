@@ -8,6 +8,8 @@ export interface CurrencyInfo {
   name: string;
 }
 
+type CryptoCurrency = "ETH" | "USDT" | "BTC";
+
 interface SellComponentProps {
   SUPPORTED_CURRENCIES: CurrencyInfo[];
 }
@@ -15,7 +17,7 @@ interface SellComponentProps {
 export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCIES }) => {
   const { data: session, status } = useSession();
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
-  const [selectedBalance, setSelectedBalance] = useState<{ currency: string; amount: number } | null>(null);
+  const [selectedBalance, setSelectedBalance] = useState<{ currency: CryptoCurrency; amount: number } | null>(null);
   const [amount, setAmount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCI
     console.log(`Selected account ID: ${accountId}`);
   };
 
-  const handleBalanceSelect = (currency: string, amount: number) => {
+  const handleBalanceSelect = (currency: CryptoCurrency, amount: number) => {
     setSelectedBalance({ currency, amount });
     console.log(`Selected balance: ${currency}, Amount: ${amount}`);
   };
@@ -87,7 +89,6 @@ export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCI
         onAccountSelect={handleAccountSelect}
         onBalanceSelect={handleBalanceSelect}
         onAmountChange={handleAmountChange}
-        supportedCurrencies={SUPPORTED_CURRENCIES}
       />
       {error && <p className="text-red-500 mt-2">{error}</p>}
       {successMessage && <p className="text-green-500 mt-2">{successMessage}</p>}
