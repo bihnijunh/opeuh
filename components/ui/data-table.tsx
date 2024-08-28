@@ -8,22 +8,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface DataTableProps<TData, TValue> {
-  columns: any[];
+interface Column<T> {
+  accessorKey: keyof T;
+  header: string;
+  cell?: (value: any) => React.ReactNode;
+}
+
+interface DataTableProps<TData> {
+  columns: Column<TData>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
             {columns.map((column) => (
-              <TableHead key={column.accessorKey}>
+              <TableHead key={column.accessorKey.toString()}>
                 {column.header}
               </TableHead>
             ))}
@@ -33,8 +39,10 @@ export function DataTable<TData, TValue>({
           {data.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               {columns.map((column) => (
-                <TableCell key={column.accessorKey}>
-                  {row[column.accessorKey]}
+                <TableCell key={column.accessorKey.toString()}>
+                  {column.cell
+                    ? column.cell(row[column.accessorKey])
+                    : row[column.accessorKey] as React.ReactNode}
                 </TableCell>
               ))}
             </TableRow>
