@@ -140,3 +140,25 @@ export const getAdminCryptoSellTransactions = async () => {
     return { error: "Withdrawal history not found" };
   }
 };
+
+export const updateCryptoSellTransactionStatus = async (transactionId: string, newStatus: string) => {
+  const user = await currentUser();
+
+  if (!user || user.role !== "ADMIN") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const updatedTransaction = await db.cryptoSellTransaction.update({
+      where: { id: transactionId },
+      data: { status: newStatus },
+    });
+
+    revalidatePath("/admin/crypto-sell-transactions");
+
+    return { success: true, transaction: updatedTransaction };
+  } catch (error) {
+    console.error("Error in updateCryptoSellTransactionStatus:", error);
+    return { error: "Failed to update transaction status" };
+  }
+};

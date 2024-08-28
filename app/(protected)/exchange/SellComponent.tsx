@@ -190,6 +190,19 @@ export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCI
     );
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'warning';
+      case 'successful':
+        return 'success';
+      case 'failed':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Sell Cryptocurrency</h1>
@@ -252,7 +265,7 @@ export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCI
                         </TableCell>
                         <TableCell>{new Date(transaction.createdAt).toLocaleString()}</TableCell>
                         <TableCell>
-                          <Badge variant={transaction.status === "pending" ? "warning" : transaction.status === "approved" ? "secondary" : "success"}>
+                          <Badge variant={getStatusColor(transaction.status)}>
                             {transaction.status}
                           </Badge>
                         </TableCell>
