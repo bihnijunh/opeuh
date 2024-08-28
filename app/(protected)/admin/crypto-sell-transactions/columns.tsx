@@ -9,6 +9,10 @@ export type CryptoSellTransaction = {
   fiatCurrency: string;
   status: string;
   createdAt: string;
+  bankName: string;
+  accountNumber: string;
+  accountHolderName: string;
+  username: string | null;
 };
 
 export const columns: Column<CryptoSellTransaction>[] = [
@@ -21,6 +25,10 @@ export const columns: Column<CryptoSellTransaction>[] = [
     header: "User ID",
   },
   {
+    accessorKey: "username",
+    header: "Username",
+  },
+  {
     accessorKey: "cryptoAmount",
     header: "Crypto Amount",
   },
@@ -29,12 +37,32 @@ export const columns: Column<CryptoSellTransaction>[] = [
     header: "Crypto Type",
   },
   {
+    accessorKey: "fiatAmount",
+    header: "Fiat Amount",
+  },
+  {
+    accessorKey: "fiatCurrency",
+    header: "Fiat Currency",
+  },
+  {
     accessorKey: "status",
     header: "Status",
   },
   {
     accessorKey: "createdAt",
     header: "Created At",
+  },
+  {
+    accessorKey: "bankName",
+    header: "Bank Name",
+  },
+  {
+    accessorKey: "accountNumber",
+    header: "Account Number",
+  },
+  {
+    accessorKey: "accountHolderName",
+    header: "Account Holder Name",
   },
 ];
 
