@@ -3,12 +3,19 @@ import { useSession } from 'next-auth/react';
 import { AccountSelectionComponent } from '@/components/AccountSelectionComponent';
 import { createCryptoSellTransaction } from '@/actions/cryptoSellTransaction';
 
-type CryptoCurrency = "ETH" | "USDT" | "BTC";
+export interface CurrencyInfo {
+  code: string;
+  name: string;
+}
 
-export const SellComponent: React.FC = () => {
+interface SellComponentProps {
+  SUPPORTED_CURRENCIES: CurrencyInfo[];
+}
+
+export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCIES }) => {
   const { data: session, status } = useSession();
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
-  const [selectedBalance, setSelectedBalance] = useState<{ currency: CryptoCurrency; amount: number } | null>(null);
+  const [selectedBalance, setSelectedBalance] = useState<{ currency: string; amount: number } | null>(null);
   const [amount, setAmount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +34,7 @@ export const SellComponent: React.FC = () => {
     console.log(`Selected account ID: ${accountId}`);
   };
 
-  const handleBalanceSelect = (currency: CryptoCurrency, amount: number) => {
+  const handleBalanceSelect = (currency: string, amount: number) => {
     setSelectedBalance({ currency, amount });
     console.log(`Selected balance: ${currency}, Amount: ${amount}`);
   };
@@ -80,6 +87,7 @@ export const SellComponent: React.FC = () => {
         onAccountSelect={handleAccountSelect}
         onBalanceSelect={handleBalanceSelect}
         onAmountChange={handleAmountChange}
+        supportedCurrencies={SUPPORTED_CURRENCIES}
       />
       {error && <p className="text-red-500 mt-2">{error}</p>}
       {successMessage && <p className="text-green-500 mt-2">{successMessage}</p>}
