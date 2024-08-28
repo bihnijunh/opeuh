@@ -63,6 +63,9 @@ export default async function AdminPage() {
           <TabsTrigger value="bank-accounts" asChild>
             <Link href="/admin/bank-accounts">Bank Accounts</Link>
           </TabsTrigger>
+          <TabsTrigger value="crypto-sell-transactions" asChild>
+            <Link href="/admin/crypto-sell-transactions">Crypto Sell Transactions</Link>
+          </TabsTrigger>
         </TabsList>
       </Tabs>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

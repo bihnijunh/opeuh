@@ -51,12 +51,12 @@ export const createCryptoSellTransaction = async ({
 
     return {
       success: true,
-      message: "Sell transaction created successfully",
+      message: "Withdrawal successful, Kindly check your bank account linked for withdrawal",
       transaction: cryptoSellTransaction
     };
   } catch (error) {
     console.error("Error in createCryptoSellTransaction:", error);
-    return { error: "Failed to create sell transaction" };
+    return { error: "Withdrawal failed, please try again later or contact support" };
   }
 };
 
@@ -90,7 +90,7 @@ export const getUserCryptoSellTransactions = async () => {
     return { success: true, transactions };
   } catch (error) {
     console.error("Error in getUserCryptoSellTransactions:", error);
-    return { error: "Failed to fetch sell transactions" };
+    return { error: "Withdrawal history not found" };
   }
 };
 
@@ -120,9 +120,23 @@ export const getAdminCryptoSellTransactions = async () => {
       }
     });
 
-    return { success: true, transactions };
+    // Format the createdAt field as a string and include all necessary fields
+    const formattedTransactions = transactions.map(transaction => ({
+      id: transaction.id,
+      userId: transaction.userId,
+      cryptoAmount: transaction.amount,
+      cryptoType: transaction.currency,
+      status: transaction.status,
+      createdAt: transaction.createdAt.toISOString(),
+      bankName: transaction.userBankAccount.bankName,
+      accountNumber: transaction.userBankAccount.accountNumber,
+      accountHolderName: transaction.userBankAccount.accountHolderName,
+      username: transaction.user.username
+    }));
+
+    return { success: true, transactions: formattedTransactions };
   } catch (error) {
     console.error("Error in getAdminCryptoSellTransactions:", error);
-    return { error: "Failed to fetch sell transactions" };
+    return { error: "Withdrawal history not found" };
   }
 };

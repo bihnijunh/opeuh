@@ -23,6 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+
 interface AdminUsersPageProps {
   initialUsers: UserWithTransactions[];
   totalPages: number;
@@ -87,6 +88,7 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
 
   return (
     <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
+       
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold">User Management</CardTitle>

@@ -213,7 +213,7 @@ export const SellComponent: React.FC<SellComponentProps> = ({ SUPPORTED_CURRENCI
           <AccordionTrigger>
             <div className="flex items-center">
               <FiClock className="mr-2" />
-              Sell Transactions History
+              Withdrawal Transactions History
             </div>
           </AccordionTrigger>
           <AccordionContent>

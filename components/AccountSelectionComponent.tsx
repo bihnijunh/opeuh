@@ -125,8 +125,8 @@ export const AccountSelectionComponent: React.FC<{
       const numBalance = parseFloat(balance);
 
       if (['btc', 'eth', 'usdt'].includes(currency.toLowerCase())) {
-        if (numAmount < 50) {
-          setError('Minimum withdrawal for crypto is $50');
+        if (numAmount < 10) {
+          setError('Minimum withdrawal for crypto is $10');
           return;
         }
       }
