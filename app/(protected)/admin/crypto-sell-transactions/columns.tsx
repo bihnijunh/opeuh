@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table";
+import React from 'react';
 
 export type CryptoSellTransaction = {
   id: string;
@@ -11,7 +11,7 @@ export type CryptoSellTransaction = {
   createdAt: string;
 };
 
-export const columns: ColumnDef<CryptoSellTransaction>[] = [
+export const columns: Column<CryptoSellTransaction>[] = [
   {
     accessorKey: "id",
     header: "ID",
@@ -37,3 +37,9 @@ export const columns: ColumnDef<CryptoSellTransaction>[] = [
     header: "Created At",
   },
 ];
+
+interface Column<T> {
+  accessorKey: keyof T;
+  header: string;
+  cell?: (value: any) => React.ReactNode;
+}
