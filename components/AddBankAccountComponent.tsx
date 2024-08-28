@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { saveBankAccount, getBankAccount, deleteBankAccount } from '@/actions/bankAccount';
 import { toast } from 'sonner';
 import { AccountSchema } from '@/schemas';
+import { Edit, Trash2 } from 'lucide-react'; // Import icons
 
 type BankAccountFormData = z.infer<typeof AccountSchema>;
 
@@ -78,20 +79,33 @@ export const AddBankAccountComponent: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-md mx-auto">
       <div>
-        <p className="text-2xl mt-3 font-semibold text-center">
-        Manage your bank account information here.
-        </p>
-        
+        <h2 className="text-2xl font-semibold text-center mb-6">
+          Manage Your Bank Account
+        </h2>
       </div>
       {!isEditing && form.getValues().accountNumber ? (
-        <div className="space-y-4">
-          <div>
+        <div className="space-y-4 bg-gray-100 p-4 rounded-lg">
+          <div className="text-lg">
             <strong>Account Number:</strong> {form.getValues().accountNumber}
           </div>
-          <Button onClick={() => setIsEditing(true)}>Edit</Button>
-          <Button onClick={handleDelete} variant="destructive">Delete Account</Button>
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <Button
+              onClick={() => setIsEditing(true)}
+              className="flex-1 sm:flex-none"
+              variant="outline"
+            >
+              <Edit className="w-4 h-4 mr-2" /> Edit Account
+            </Button>
+            <Button
+              onClick={handleDelete}
+              className="flex-1 sm:flex-none"
+              variant="destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Delete Account
+            </Button>
+          </div>
         </div>
       ) : (
         <Form {...form}>
@@ -174,7 +188,11 @@ export const AddBankAccountComponent: React.FC = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full"
+            >
               {isSubmitting ? 'Saving...' : 'Save Bank Account'}
             </Button>
           </form>
