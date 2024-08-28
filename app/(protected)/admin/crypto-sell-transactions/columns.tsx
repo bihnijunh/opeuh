@@ -5,8 +5,6 @@ export type CryptoSellTransaction = {
   userId: string;
   cryptoAmount: number;
   cryptoType: string;
-  fiatAmount: number;
-  fiatCurrency: string;
   status: string;
   createdAt: string;
   bankName: string;
@@ -35,14 +33,6 @@ export const columns: Column<CryptoSellTransaction>[] = [
   {
     accessorKey: "cryptoType",
     header: "Crypto Type",
-  },
-  {
-    accessorKey: "fiatAmount",
-    header: "Fiat Amount",
-  },
-  {
-    accessorKey: "fiatCurrency",
-    header: "Fiat Currency",
   },
   {
     accessorKey: "status",
