@@ -38,7 +38,7 @@ export const SellComponent: React.FC = () => {
   };
 
   const handleTransactionCreate = async () => {
-    if (status !== 'authenticated' || !session?.user?.id) {
+    if (status !== 'authenticated') {
       setError('You must be logged in to perform this action.');
       return;
     }
@@ -54,7 +54,6 @@ export const SellComponent: React.FC = () => {
 
     try {
       const result = await createCryptoSellTransaction({
-        userId: session.user.id,
         bankAccountId: selectedAccountId,
         currency: selectedBalance.currency,
         amount: amount
