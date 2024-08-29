@@ -19,6 +19,7 @@ export const Navbar = () => {
     { href: "/home", label: "Home" },
     { href: "/send", label: "Send" },
     { href: "/exchange", label: "Buy Crypto" },
+    { href: "/giftcard", label: "Gift Card" },
     { href: "/receive", label: "Receive" },
     { href: "/referrals", label: "Referrals" },
     { href: "/settings", label: "Settings" },

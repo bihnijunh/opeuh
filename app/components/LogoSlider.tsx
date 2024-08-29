@@ -11,7 +11,6 @@ const logos = [
   '/brands/6.svg',
   '/brands/7.svg',
   '/brands/9.svg',
-
 ];
 
 const LogoSlider: React.FC = () => {
@@ -26,8 +25,8 @@ const LogoSlider: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full overflow-hidden ">
-      <h2 className="text-center text-2xl dark:text-white text-black font-bold mb-8">Trusted by Top Companies</h2>
+    <div className="w-full overflow-hidden">
+      <h2 className="text-center text-2xl text-white font-bold mb-8">Trusted by Top Companies</h2>
       <div className="relative w-full">
         <div
           className="flex transition-transform duration-1000 ease-linear"

@@ -39,6 +39,15 @@ export default async function RootLayout({
             s1.setAttribute('crossorigin','*');
             s0.parentNode.insertBefore(s1,s0);
             })();
+
+            Tawk_API.onLoad = function(){
+                Tawk_API.setAttributes({
+                    'widget-height': '300px',
+                    'widget-width': '280px',
+                    'widget-position': 'bottom-right',
+                    'widget-offset': '20px, 20px'
+                }, function(error){});
+            };
           `}
         </Script>
       </head>
