@@ -30,6 +30,7 @@ import { LoginButton } from "@/components/auth/login-button";
 import { Button } from "@/components/ui/button";
 import TrustedBy from "@/components/auth/trustedby";
 import CountryChanger from "@/components/auth/country-changer";
+import LogoSlider from "./components/LogoSlider";
 
 function PageApp() {
   // Initialize Firebase and get the auth instance
@@ -222,12 +223,14 @@ function PageApp() {
           </div>
           <div></div>
         </div>
+        <LogoSlider />
         <div className="bg-white py-24 sm:py-32">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl lg:text-center">
               <h2 className="text-base font-semibold leading-7 text-indigo-600">
                 The most trusted cryptocurrency platform
               </h2>
+              
               <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                 Intuitive experience managing your personal budgets.
               </p>
@@ -263,7 +266,7 @@ function PageApp() {
           </div>
         </div>
 
-        <TrustedBy />
+       
 
         <div className="bg-[#000] text-white">
           <div className="relative isolate overflow-hidden bg-gray-900 py-16 sm:py-24 lg:py-32">
@@ -274,8 +277,7 @@ function PageApp() {
                     Subscribe to our newsletter.
                   </h2>
                   <p className="mt-4 text-lg leading-8 text-gray-300">
-                    Nostrud amet eu ullamco nisi aute in ad minim nostrud
-                    adipisicing velit quis. Duis tempor incididunt dolore.
+                    
                   </p>
                   <div className="mt-6 flex max-w-md gap-x-4">
                     <label htmlFor="email-address" className="sr-only">
