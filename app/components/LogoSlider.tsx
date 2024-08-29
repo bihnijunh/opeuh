@@ -27,7 +27,7 @@ const LogoSlider: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full overflow-hidden bg-gray-100 py-10">
+    <div className="w-full overflow-hidden ">
       <h2 className="text-center text-2xl dark:text-white text-black font-bold mb-8">Trusted by Top Companies</h2>
       <div className="relative w-full">
         <div
