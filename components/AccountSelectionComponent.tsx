@@ -182,7 +182,7 @@ export const AccountSelectionComponent: React.FC<{
           <SelectContent>
             {userBalances && Object.entries(userBalances).map(([currency, amount]) => (
               <SelectItem key={currency} value={`${currency}:${amount}`}>
-                {`${currency.toUpperCase()}: ${amount}`}
+                {`${currency.toUpperCase()}: $${amount}`}
               </SelectItem>
             ))}
           </SelectContent>
