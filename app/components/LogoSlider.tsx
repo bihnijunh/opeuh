@@ -10,7 +10,6 @@ const logos = [
   '/brands/5.png',
   '/brands/6.svg',
   '/brands/7.svg',
-  '/brands/8.png',
   '/brands/9.svg',
 
 ];
