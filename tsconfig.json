@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "./.next/types/**/*.ts"
-  ],
+, "public/assets/lang-config.js", "public/assets/translation.js"  ],
   "exclude": [
     "node_modules"
   ]

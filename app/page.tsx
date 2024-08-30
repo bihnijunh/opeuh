@@ -31,10 +31,9 @@ import { Button } from "@/components/ui/button";
 import TrustedBy from "@/components/auth/trustedby";
 import CountryChanger from "@/components/auth/country-changer";
 import LogoSlider from "./components/LogoSlider";
+import { GoogleTranslate } from "./(protected)/_components/GoogleTranslate";
 
 function PageApp() {
-  // Initialize Firebase and get the auth instance
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigation = [
     { name: "Product", href: "#" },
@@ -112,12 +111,13 @@ function PageApp() {
                   </a>
                 ))}
               </div>
-              <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-              <LoginButton asChild>
-                      <Button variant="secondary" size="lg">
-                        Sign in
-                      </Button>
-                    </LoginButton>
+              <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:space-x-4">
+                <GoogleTranslate />
+                <LoginButton asChild>
+                  <Button variant="secondary" size="lg">
+                    Sign in
+                  </Button>
+                </LoginButton>
               </div>
             </nav>
             <Dialog
@@ -154,11 +154,14 @@ function PageApp() {
                         </a>
                       ))}
                     </div>
-                    <LoginButton asChild>
-                      <Button variant="secondary" size="lg">
-                        Sign in
-                      </Button>
-                    </LoginButton>
+                    <div className="py-6 space-y-4">
+                      <GoogleTranslate />
+                      <LoginButton asChild>
+                        <Button variant="secondary" size="lg" className="w-full">
+                          Sign in
+                        </Button>
+                      </LoginButton>
+                    </div>
                   </div>
                 </div>
               </Dialog.Panel>
@@ -265,8 +268,6 @@ function PageApp() {
             </div>
           </div>
         </div>
-
-       
 
         <div className="bg-[#000] text-white">
           <div className="relative isolate overflow-hidden bg-gray-900 py-16 sm:py-24 lg:py-32">

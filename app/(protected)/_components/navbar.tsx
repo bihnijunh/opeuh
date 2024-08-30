@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -7,31 +7,14 @@ import { UserButton } from "@/components/auth/user-button";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserRole } from "@prisma/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Globe } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
-
-declare global {
-  interface Window {
-    googleTranslateElementInit: () => void;
-    google: {
-      translate: {
-        TranslateElement: {
-          new (config: any, element: string): void;
-          InlineLayout: {
-            SIMPLE: string;
-          };
-        };
-      };
-    };
-  }
-}
+import { GoogleTranslate } from "./GoogleTranslate";
 
 export const Navbar = () => {
   const pathname = usePathname();
   const user = useCurrentUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isTranslateReady, setIsTranslateReady] = useState(false);
-  const googleTranslateInitialized = useRef(false);
 
   const navItems = [
     { href: "/home", label: "Home" },
@@ -46,49 +29,6 @@ export const Navbar = () => {
   if (user?.role === UserRole.ADMIN) {
     navItems.unshift({ href: "/admin", label: "Admin" });
   }
-
-  useEffect(() => {
-    document.body.style.paddingTop = '80px';
-    return () => {
-      document.body.style.paddingTop = '0px';
-    };
-  }, []);
-
-  useEffect(() => {
-    if (googleTranslateInitialized.current) return;
-
-    const script = document.createElement('script');
-    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-    script.async = true;
-
-    window.googleTranslateElementInit = function() {
-      new window.google.translate.TranslateElement({
-        pageLanguage: 'en',
-        autoDisplay: false,
-        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
-      }, 'google_translate_element');
-      setIsTranslateReady(true);
-    }
-
-    document.body.appendChild(script);
-    googleTranslateInitialized.current = true;
-
-    return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-      window.googleTranslateElementInit = () => {};
-    };
-  }, []);
-
-  const handleTranslateClick = () => {
-    if (isTranslateReady) {
-      const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-      if (selectElement) {
-        selectElement.click();
-      }
-    }
-  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow-lg z-50">
@@ -122,15 +62,7 @@ export const Navbar = () => {
               </Button>
             ))}
             <div className="flex items-center space-x-4">
-              <div id="google_translate_element" className="hidden"></div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleTranslateClick}
-                className="text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300"
-              >
-                <Globe className="h-5 w-5" />
-              </Button>
+              <GoogleTranslate />
               <ModeToggle />
               <UserButton />
             </div>
@@ -171,14 +103,7 @@ export const Navbar = () => {
                 </Button>
               ))}
               <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-800">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleTranslateClick}
-                  className="text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300"
-                >
-                  <Globe className="h-5 w-5" />
-                </Button>
+                <GoogleTranslate />
                 <ModeToggle />
                 <UserButton />
               </div>
