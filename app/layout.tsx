@@ -50,6 +50,7 @@ export default async function RootLayout({
             };
           `}
         </Script>
+        
       </head>
       <body className={inter.className}>
         <ThemeProvider
