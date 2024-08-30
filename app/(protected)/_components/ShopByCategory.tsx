@@ -10,7 +10,7 @@ const categories = [
   },
   {
     name: "Gift Cards",
-    href: "/giftcard",
+    href: "/giftcard/card",
     image:
       "https://dundle.com/cdn-cgi/image/format=auto,width=238,fit=cover,quality=85/https://cdn.dundle.com/resources/images/home-page/categories/category-gift-cards.png",
   },
