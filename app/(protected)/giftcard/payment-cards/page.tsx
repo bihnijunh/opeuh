@@ -1,108 +1,127 @@
+"use client"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import Image from "next/image"
+import { useState } from "react"
 
 export default function Component() {
+  const [selectedCard, setSelectedCard] = useState<string | null>(null)
+
+  const cards = [
+    {
+      image: "/brands/razer-gold.jpg",
+      title: "Razer Gold",
+      prices: ["$15", "$50", "$100", "$250", "$500"],
+    },
+    {
+      image: "/brands/e.avif",
+      title: "CashtoCode eVoucher",
+      prices: ["$5", "$10", "$25", "$50"],
+    },
+    {
+      image: "/brands/paysafecard.avif",
+      title: "paysafecard",
+      prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
+    },
+    {
+      image: "/brands/amex.avif",
+      title: "American Express Gift Card",
+      prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
+    },
+    {
+      image: "/brands/visa.avif",
+      title: "Visa Gift Card",
+      prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
+    },
+    {
+      image: "/brands/transcash.avif",
+      title: "Transcash Ticket",
+      prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
+    },
+  ]
+
   return (
-    <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-2 space-y-4">
-          <h1 className="text-2xl font-bold">Payment Cards & Prepaid Gift Cards</h1>
-          <p className="text-muted-foreground">
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <h1 className="text-3xl font-bold mb-4">Payment Cards & Prepaid Gift Cards</h1>
+          <p className="text-lg text-muted-foreground mb-8">
             Prepaid credit cards, e-wallet top ups, cryptocurrency vouchers and other secure online payment solutions.
           </p>
-          <div className="space-y-4">
-            {[
-              {
-                image: "/brands/razer-gold.avif",
-                title: "Razer Gold",
-                prices: ["$1", "$2", "$5", "$10"],
-              },
-              {
-                image: "/brands/e.avif",
-                title: "CashtoCode eVoucher",
-                prices: ["$5", "$10", "$25", "$50"],
-              },
-              {
-                image: "/brands/paysafecard.avif",
-                title: "paysafecard",
-                prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
-              },
-              {
-                image: "/brands/amex.avif",
-                title: "American Express Gift Card",
-                prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
-              },
-              {
-                image: "/brands/visa.avif",
-                title: "Visa Gift Card ",
-                prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
-              },
-            
-              {
-                image: "/brands/transcash.avif",
-                title: "Transcash Ticket",
-                prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
-              },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-md">
-                <div className="flex items-center space-x-4">
-                  <img src={item.image} alt={item.title} className="w-16 h-16" />
+          <div className="space-y-6">
+            {cards.map((item, index) => (
+              <div
+                key={index}
+                className="flex flex-col sm:flex-row items-center justify-between p-6 border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 ease-in-out"
+              >
+                <div className="flex flex-col sm:flex-row items-center sm:space-x-6 mb-4 sm:mb-0">
+                  <div className="w-24 h-24 relative mb-4 sm:mb-0">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      layout="fill"
+                      objectFit="contain"
+                      className="rounded-md"
+                    />
+                  </div>
                   <div>
-                    <h2 className="text-lg font-semibold">{item.title}</h2>
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <h2 className="text-xl font-semibold mb-2">{item.title}</h2>
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
                       <TruckIcon className="w-4 h-4" />
                       <MailIcon className="w-4 h-4" />
                       <span>Instant delivery</span>
                     </div>
-                    <div className="flex space-x-2 mt-2">
+                    <div className="flex flex-wrap gap-2">
                       {item.prices.map((price, i) => (
-                        <Button key={i} variant="outline" size="sm">
+                        <Button
+                          key={i}
+                          variant={selectedCard === `${index}-${i}` ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedCard(`${index}-${i}`)}
+                        >
                           {price}
                         </Button>
                       ))}
-                      <Button variant="outline" size="sm">
-                        ...
-                      </Button>
                     </div>
                   </div>
                 </div>
-                <Button variant="link" className="text-blue-500">
+                <Button variant="link" className="text-blue-500 mt-4 sm:mt-0">
                   Visit
                 </Button>
               </div>
             ))}
           </div>
         </div>
-        <div className="space-y-4">
-          <Card className="p-4">
-            <div className="flex items-center space-x-2">
-              <CircleCheckIcon className="w-6 h-6 text-green-500" />
+        <div className="space-y-6">
+          <Card className="p-6">
+            <div className="flex items-start space-x-4">
+              <CircleCheckIcon className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold">Instant delivery</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-semibold text-lg mb-2">Instant delivery</h3>
+                <p className="text-muted-foreground">
                   You will receive the code directly by email, so that you can use the credit immediately.
                 </p>
               </div>
             </div>
           </Card>
-          <Card className="p-4">
-            <div className="flex items-center space-x-2">
-              <GiftIcon className="w-6 h-6 text-green-500" />
+          <Card className="p-6">
+            <div className="flex items-start space-x-4">
+              <GiftIcon className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold">Gift card design</h3>
-                <p className="text-sm text-muted-foreground">Choose from more than 10 different templates.</p>
+                <h3 className="font-semibold text-lg mb-2">Gift card design</h3>
+                <p className="text-muted-foreground">Choose from more than 10 different templates.</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4">
-            <div className="flex items-center space-x-2">
-              <LockIcon className="w-6 h-6 text-green-500" />
+          <Card className="p-6">
+            <div className="flex items-start space-x-4">
+              <LockIcon className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold">Secure payment</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-semibold text-lg mb-2">Secure payment</h3>
+                <p className="text-muted-foreground mb-4">
                   Complete the checkout process safely and quickly with a choice of more than 60 payment methods.
                 </p>
-                <div className="flex space-x-2 mt-2">
+                <div className="flex flex-wrap gap-4">
                   <ShoppingCartIcon className="w-6 h-6" />
                   <ViewIcon className="w-6 h-6" />
                   <CreditCardIcon className="w-6 h-6" />
@@ -115,12 +134,11 @@ export default function Component() {
               </div>
             </div>
           </Card>
-          <Card className="p-4">
-            <h3 className="font-semibold">Payment Cards</h3>
-            <p className="text-sm text-muted-foreground">
+          <Card className="p-6">
+            <h3 className="font-semibold text-lg mb-2">Payment Cards</h3>
+            <p className="text-muted-foreground">
               Online payment cards are an easy and affordable alternative to debit and credit cards. All you have to do
               is choose the amount that you would like to load and we will email the prepaid gift card to you instantly!
-              Once...
             </p>
           </Card>
         </div>
@@ -149,7 +167,6 @@ function AppleIcon(props: any) {
   )
 }
 
-
 function BadgeIcon(props: any) {
   return (
     <svg
@@ -169,7 +186,6 @@ function BadgeIcon(props: any) {
   )
 }
 
-
 function BitcoinIcon(props: any) {
   return (
     <svg
@@ -188,7 +204,6 @@ function BitcoinIcon(props: any) {
     </svg>
   )
 }
-
 
 function CircleCheckIcon(props: any) {
   return (
@@ -210,7 +225,6 @@ function CircleCheckIcon(props: any) {
   )
 }
 
-
 function CreditCardIcon(props: any) {
   return (
     <svg
@@ -230,7 +244,6 @@ function CreditCardIcon(props: any) {
     </svg>
   )
 }
-
 
 function EraserIcon(props: any) {
   return (
@@ -252,7 +265,6 @@ function EraserIcon(props: any) {
     </svg>
   )
 }
-
 
 function GiftIcon(props: any) {
   return (
@@ -276,7 +288,6 @@ function GiftIcon(props: any) {
   )
 }
 
-
 function ImageIcon(props: any) {
   return (
     <svg
@@ -298,7 +309,6 @@ function ImageIcon(props: any) {
   )
 }
 
-
 function LockIcon(props: any) {
   return (
     <svg
@@ -318,7 +328,6 @@ function LockIcon(props: any) {
     </svg>
   )
 }
-
 
 function MailIcon(props: any) {
   return (
@@ -340,8 +349,7 @@ function MailIcon(props: any) {
   )
 }
 
-
- function ShoppingCartIcon(props: any) {
+function ShoppingCartIcon(props: any) {
   return (
     <svg
       {...props}
@@ -362,8 +370,7 @@ function MailIcon(props: any) {
   )
 }
 
-
-    function TruckIcon(props: any) {
+function TruckIcon(props: any) {
   return (
     <svg
       {...props}
@@ -385,7 +392,6 @@ function MailIcon(props: any) {
     </svg>
   )
 }
-
 
 function ViewIcon(props: any) {
   return (
