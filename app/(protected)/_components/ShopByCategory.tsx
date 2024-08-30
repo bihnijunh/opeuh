@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 const categories = [
   {
     name: "Payment Cards",
-    href: "/payment-cards",
+    href: "/giftcard/payment-cards",
     image:
       "https://dundle.com/cdn-cgi/image/format=auto,width=238,fit=cover,quality=85/https://cdn.dundle.com/resources/images/home-page/categories/category-payment-cards.png",
   },
@@ -25,7 +25,7 @@ const categories = [
 export function ShopByCategory() {
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-bold mb-4">Shop by Category</h2>
+      <h2 className="text-2xl font-bold mb-4">Buy Cards</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {categories.map((category) => (
           <Link href={category.href} key={category.name}>

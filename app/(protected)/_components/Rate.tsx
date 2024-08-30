@@ -13,7 +13,18 @@ export default function RateChange() {
     { name: 'Steam', subname: 'Steam-GBP', sub: 'GBP', nairaRate: '₦1371', trend: 'hot' },
     { name: 'Steam', subname: 'Steam-CHF', sub: 'CHF', nairaRate: '₦1371', trend: 'hot' },
     { name: 'Steam', subname: 'Steam-USD', sub: 'USD', nairaRate: '₦1371', trend: 'hot' },
-    { name: 'Steam', subname: 'Steam-USD', sub: 'USD', nairaRate: '₦1371', trend: 'hot' },
+    { name: 'Walmart Visa', subname: 'WA-4034/4358/511332/4912', sub: '[400~500]', nairaRate: '₦1177', trend: 'hot' },
+    { name: 'Walmart Visa', subname: 'WA-4034/4358/511332/4912', sub: '[100~399]', nairaRate: '₦1177', trend: 'hot' },
+    { name: 'Razer Gold ', subname: '', sub: '[25~500]', nairaRate: '₦1209', trend: 'hot' },
+    { name: 'Footlocker', subname: 'Footlocker-pic', sub: '[100~500]', nairaRate: '₦1144', trend: 'hot' },
+    { name: 'Macys', subname: '', sub: '[100~300]', nairaRate: '₦1047', trend: 'hot' },
+    { name: 'Sephora', subname: '', sub: '[100~500]', nairaRate: '₦1026', trend: 'hot' },
+    { name: 'Nordstrom', subname: '', sub: '[100~500]', nairaRate: '₦1026', trend: 'hot' },
+    { name: 'American Express', subname: 'AMEX-3779', sub: '[500]', nairaRate: '₦1112', trend: 'hot' },
+    { name: 'Walmart Visa', subname: 'WA-5181/4020/5273/4373/4143', sub: '[300~500]', nairaRate: '₦1177', trend: 'hot' },
+    { name: 'Google Play', subname: 'Google Play-GBP', sub: '[Ask how much you can sell]', nairaRate: '₦1144', trend: 'hot' },
+    { name: 'Ebay', subname: '', sub: '[100~200]', nairaRate: '₦1101', trend: 'hot' },
+    {name: 'Nike', subname:'', sub:'[100~500]', nairaRate: '₦1026', trend: 'hot'},
 
   ];
 
@@ -26,7 +37,10 @@ export default function RateChange() {
 
   return (
     <div className="p-4">
+              <h2 className="text-2xl font-bold mb-4">Sell Rate </h2>
+
       <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl shadow-lg p-6">
+
         <Table>
           <TableHeader>
             <TableRow>
