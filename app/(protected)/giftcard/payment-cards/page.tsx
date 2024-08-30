@@ -42,7 +42,7 @@ export default function Component() {
   ]
 
   const handleBuy = (itemName: string, price: string) => {
-    console.log(`Buying ${itemName} for ${price}`);
+   
   };
 
   return (
