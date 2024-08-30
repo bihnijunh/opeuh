@@ -9,7 +9,7 @@ export default function Component() {
 
   const cards = [
     {
-      image: "/brands/apple.jpg",
+      image: "/brands/apple.webp",
       title: "Apple Gift Card",
       prices: ["$25", "$50", "$100", "$250", "$500"],
     },
@@ -19,25 +19,21 @@ export default function Component() {
       prices: ["$25", "$50", "$75", "$100", "$150", ],
     },
     {
-      image: "/brands/paysafecard.avif",
-      title: "paysafecard",
+      image: "/brands/ebay.avif",
+      title: "Ebay Gift Card",
+      prices: ["\u20AC15", "\u20AC50", "\u20AC150", "\u20AC200"],
+    },
+    {
+      image: "/brands/googleplay.webp",
+      title: "Google Play Gift Card",
       prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
     },
     {
-      image: "/brands/amex.avif",
-      title: "American Express Gift Card",
-      prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
+      image: "/brands/mastercard.webp",
+      title: "Mastercard Gift Card",
+      prices: ["\u20AC25", "\u20AC50", "\u20AC100", "\u20AC200"],
     },
-    {
-      image: "/brands/visa.avif",
-      title: "Visa Gift Card",
-      prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
-    },
-    {
-      image: "/brands/transcash.avif",
-      title: "Transcash Ticket",
-      prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
-    },
+   
   ]
 
   return (
@@ -135,10 +131,11 @@ export default function Component() {
             </div>
           </Card>
           <Card className="p-6">
-            <h3 className="font-semibold text-lg mb-2">Payment Cards</h3>
+            <h3 className="font-semibold text-lg mb-2">Gift Cards</h3>
             <p className="text-muted-foreground">
-              Online payment cards are an easy and affordable alternative to debit and credit cards. All you have to do
-              is choose the amount that you would like to load and we will email the prepaid gift card to you instantly!
+            If you need a last-minute gift, you dont have to go to the store to find a gift card. Piedra (US) has a variety of popular gift cards to choose from online that will be sent directly to the email of your choice. Whether you&apos;re looking for a music streaming service, like Spotify or a video streaming service, like Netflix, we have the perfect card for you. We also carry other online gift cards for Amazon, iTunes and Google Play credits. Piedra (US)&apos;s gift cards are safe, secure and easy to use. Simply enter the emailed code into the desired website and start shopping, listening or watching online.
+
+Not only are gift cards fantastic gifts, they can also be an easy way to shop without having to use your credit card. Our prepaid cards allow you to shop or play games online without entering your credit or debit card information. All you need is the code that we&apos;ll email to you and the gift card you bought is ready to go
             </p>
           </Card>
         </div>

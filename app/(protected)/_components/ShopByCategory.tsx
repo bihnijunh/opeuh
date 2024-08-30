@@ -14,12 +14,7 @@ const categories = [
     image:
       "https://dundle.com/cdn-cgi/image/format=auto,width=238,fit=cover,quality=85/https://cdn.dundle.com/resources/images/home-page/categories/category-gift-cards.png",
   },
-  {
-    name: "Gaming Credits",
-    href: "/gaming-credits",
-    image:
-      "https://dundle.com/cdn-cgi/image/format=auto,width=238,fit=cover,quality=85/https://cdn.dundle.com/resources/images/home-page/categories/category-gaming-credits.png",
-  },
+  
 ];
 
 export function ShopByCategory() {
