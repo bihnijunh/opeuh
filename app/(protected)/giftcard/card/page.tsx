@@ -11,12 +11,12 @@ export default function Component() {
     {
       image: "/brands/apple.jpg",
       title: "Apple Gift Card",
-      prices: ["$15", "$50", "$100", "$250", "$500"],
+      prices: ["$25", "$50", "$100", "$250", "$500"],
     },
     {
-      image: "/brands/e.avif",
-      title: "CashtoCode eVoucher",
-      prices: ["$5", "$10", "$25", "$50"],
+      image: "/brands/amazon.png",
+      title: "Amazon Gift Card",
+      prices: ["$25", "$50", "$75", "$100", "$150", ],
     },
     {
       image: "/brands/paysafecard.avif",
@@ -86,7 +86,7 @@ export default function Component() {
                   </div>
                 </div>
                 <Button variant="link" className="text-blue-500 mt-4 sm:mt-0">
-                  Visit
+                  Buy
                 </Button>
               </div>
             ))}
