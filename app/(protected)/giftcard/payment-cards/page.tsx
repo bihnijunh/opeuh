@@ -86,7 +86,7 @@ export default function Component() {
                   </div>
                 </div>
                 <Button variant="link" className="text-blue-500 mt-4 sm:mt-0">
-                  Visit
+                  Buy
                 </Button>
               </div>
             ))}
