@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import Image from "next/image"
 import { useState } from "react"
+import BuyModal from "../../_components/BuyModal"
 
 export default function Component() {
-  const [selectedCard, setSelectedCard] = useState<string | null>(null)
+  const [selectedCard, setSelectedCard] = useState<{ cardIndex: number, priceIndex: number } | null>(null)
 
   const cards = [
     {
@@ -40,6 +41,10 @@ export default function Component() {
     },
   ]
 
+  const handleBuy = (itemName: string, price: string) => {
+    console.log(`Buying ${itemName} for ${price}`);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -49,9 +54,9 @@ export default function Component() {
             Prepaid credit cards, e-wallet top ups, cryptocurrency vouchers and other secure online payment solutions.
           </p>
           <div className="space-y-6">
-            {cards.map((item, index) => (
+            {cards.map((item, cardIndex) => (
               <div
-                key={index}
+                key={cardIndex}
                 className="flex flex-col sm:flex-row items-center justify-between p-6 border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 ease-in-out"
               >
                 <div className="flex flex-col sm:flex-row items-center sm:space-x-6 mb-4 sm:mb-0">
@@ -72,12 +77,12 @@ export default function Component() {
                       <span>Instant delivery</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {item.prices.map((price, i) => (
+                      {item.prices.map((price, priceIndex) => (
                         <Button
-                          key={i}
-                          variant={selectedCard === `${index}-${i}` ? "default" : "outline"}
+                          key={priceIndex}
+                          variant={selectedCard?.cardIndex === cardIndex && selectedCard?.priceIndex === priceIndex ? "default" : "outline"}
                           size="sm"
-                          onClick={() => setSelectedCard(`${index}-${i}`)}
+                          onClick={() => setSelectedCard({ cardIndex, priceIndex })}
                         >
                           {price}
                         </Button>
@@ -85,9 +90,11 @@ export default function Component() {
                     </div>
                   </div>
                 </div>
-                <Button variant="link" className="text-blue-500 mt-4 sm:mt-0">
-                  Buy
-                </Button>
+                <BuyModal
+                  itemName={item.title}
+                  price={parseFloat((selectedCard?.cardIndex === cardIndex ? item.prices[selectedCard.priceIndex] : item.prices[0]).replace(/[^\d.-]/g, ''))}
+                  onBuy={() => handleBuy(item.title, selectedCard?.cardIndex === cardIndex ? item.prices[selectedCard.priceIndex] : item.prices[0])}
+                />
               </div>
             ))}
           </div>
