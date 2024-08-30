@@ -29,8 +29,16 @@ export const Navbar = () => {
     navItems.unshift({ href: "/admin", label: "Admin" });
   }
 
+  useEffect(() => {
+    // Add padding to the body to prevent content from being hidden behind the fixed navbar
+    document.body.style.paddingTop = '80px'; // Adjust this value based on your navbar height
+    return () => {
+      document.body.style.paddingTop = '0px';
+    };
+  }, []);
+
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-lg">
+    <nav className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow-lg z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-6">
           <Link href="/home" className="text-2xl font-bold text-primary dark:text-white transition-colors duration-300 hover:text-primary-dark">
