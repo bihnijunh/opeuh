@@ -32,6 +32,7 @@ import TrustedBy from "@/components/auth/trustedby";
 import CountryChanger from "@/components/auth/country-changer";
 import LogoSlider from "./components/LogoSlider";
 import { GoogleTranslate } from "./(protected)/_components/GoogleTranslate";
+import { ModeToggle } from "@/components/mode-toggle";
 
 function PageApp() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -71,7 +72,7 @@ function PageApp() {
   return (
     <>
       <div className="space-y-10 ">
-        <div className="bg-white">
+        <div className="bg-white dark:bg-gray-900">
           <header className="absolute inset-x-0 top-0 z-50">
             <nav
               className="flex items-center justify-between p-6 lg:px-8"
@@ -93,7 +94,7 @@ function PageApp() {
               <div className="flex lg:hidden">
                 <button
                   type="button"
-                  className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+                  className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-gray-300"
                   onClick={() => setMobileMenuOpen(true)}
                 >
                   <span className="sr-only">Open main menu</span>
@@ -105,7 +106,7 @@ function PageApp() {
                   <a
                     key={item.name}
                     href={item.href}
-                    className="text-sm font-semibold leading-6 text-gray-900"
+                    className="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100"
                   >
                     {item.name}
                   </a>
@@ -113,6 +114,7 @@ function PageApp() {
               </div>
               <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:space-x-4">
                 <GoogleTranslate />
+                <ModeToggle />
                 <LoginButton asChild>
                   <Button variant="secondary" size="lg">
                     Sign in
@@ -127,14 +129,14 @@ function PageApp() {
               onClose={setMobileMenuOpen}
             >
               <div className="fixed inset-0 z-50" />
-              <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+              <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
                 <div className="flex items-center justify-between">
                   <a href="#" className="-m-1.5 p-1.5">
                     <span className="sr-only">Your Company</span>
                   </a>
                   <button
                     type="button"
-                    className="-m-2.5 rounded-md p-2.5 text-gray-700"
+                    className="-m-2.5 rounded-md p-2.5 text-gray-700 dark:text-gray-300"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span className="sr-only">Close menu</span>
@@ -148,7 +150,7 @@ function PageApp() {
                         <a
                           key={item.name}
                           href={item.href}
-                          className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                          className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800"
                         >
                           {item.name}
                         </a>
@@ -156,6 +158,7 @@ function PageApp() {
                     </div>
                     <div className="py-6 space-y-4">
                       <GoogleTranslate />
+                      <ModeToggle />
                       <LoginButton asChild>
                         <Button variant="secondary" size="lg" className="w-full">
                           Sign in
@@ -183,19 +186,19 @@ function PageApp() {
             </div>
             <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
               <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-                <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
+                <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 dark:text-gray-400 ring-1 ring-gray-900/10 hover:ring-gray-900/20 dark:ring-gray-100/10 dark:hover:ring-gray-100/20">
                   Announcing our next round of funding.{" "}
-                  <a href="#" className="font-semibold text-indigo-600">
+                  <a href="#" className="font-semibold text-indigo-600 dark:text-indigo-400">
                     <span className="absolute inset-0" aria-hidden="true" />
                     Read more <span aria-hidden="true">&rarr;</span>
                   </a>
                 </div>
               </div>
               <div className="text-center">
-                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-6xl">
                   PIEDRA THE SIMPLEST WAY TRADING CRYPTO IN <CountryChanger />
                 </h1>
-                <p className="mt-6 text-lg leading-8 text-gray-600 font-[600]">
+                <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400 font-[600]">
                   is here to guide you on your journey to buy and sell Bitcoin
                   and other <br />
                   cryptocurrencies online with 100% smooth transaction. With
@@ -227,17 +230,17 @@ function PageApp() {
           <div></div>
         </div>
         <LogoSlider />
-        <div className="bg-white py-24 sm:py-32">
+        <div className="bg-white dark:bg-gray-900 py-24 sm:py-32">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl lg:text-center">
-              <h2 className="text-base font-semibold leading-7 text-indigo-600">
+              <h2 className="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">
                 The most trusted cryptocurrency platform
               </h2>
               
-              <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl">
                 Intuitive experience managing your personal budgets.
               </p>
-              <p className="mt-6 text-lg leading-8 text-gray-600 font-[400]">
+              <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400 font-[400]">
                 Piedra is a cryptocurrency brokerage that allows you to buy,
                 sell, swap and store Bitcoin, Ethereum, And{" "}
                 <span className="text-[#6366F1] font-[400]">70+</span>
@@ -250,7 +253,7 @@ function PageApp() {
               <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
                 {features.map((feature) => (
                   <div key={feature.name} className="relative pl-16">
-                    <dt className="text-base font-semibold leading-7 text-gray-900">
+                    <dt className="text-base font-semibold leading-7 text-gray-900 dark:text-gray-100">
                       <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
                         <feature.icon
                           className="h-6 w-6 text-white"
@@ -259,7 +262,7 @@ function PageApp() {
                       </div>
                       {feature.name}
                     </dt>
-                    <dd className="mt-2 text-base leading-7 text-gray-600">
+                    <dd className="mt-2 text-base leading-7 text-gray-600 dark:text-gray-400">
                       {feature.description}
                     </dd>
                   </div>
