@@ -41,6 +41,7 @@ model User {
   referralRewards Referral[] @relation("ReferrerRewards")
   bankAccount UserBankAccount?
   cryptoSellTransactions CryptoSellTransaction[]
+  giftCardWithdrawals GiftCardWithdrawal[]
 
   @@index([referralCode])
 }
@@ -178,4 +179,18 @@ model CryptoSellTransaction {
 
   @@index([userId])
   @@index([bankAccountId])
+}
+
+model GiftCardWithdrawal {
+  id          String @id @default(cuid())
+  userId      String
+  giftCardName String
+  amount      Float
+  cryptoType  String // This will be 'usdt', 'btc', or 'eth'
+  status      String @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
