@@ -86,7 +86,9 @@ function PageApp() {
                 </Link>
                 <div className="p-5">
                   <Link href="/">
-                    <div className="text-[#FDD6B0] font-[600] ">PIEDRA</div>
+                    <div className="text-[#FDD6B0] font-[600]">
+                      <span className="translate-none">PIEDRA</span>
+                    </div>
                   </Link>
                 </div>
               </div>
@@ -196,7 +198,7 @@ function PageApp() {
               </div>
               <div className="text-center">
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-6xl">
-                  PIEDRA THE SIMPLEST WAY TRADING CRYPTO IN <CountryChanger />
+                  <span className="translate-none">PIEDRA</span> THE SIMPLEST WAY TRADING CRYPTO IN <CountryChanger />
                 </h1>
                 <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400 font-[600]">
                   is here to guide you on your journey to buy and sell Bitcoin
@@ -241,11 +243,11 @@ function PageApp() {
                 Intuitive experience managing your personal budgets.
               </p>
               <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400 font-[400]">
-                Piedra is a cryptocurrency brokerage that allows you to buy,
+                <span className="translate-none">Piedra</span> is a cryptocurrency brokerage that allows you to buy,
                 sell, swap and store Bitcoin, Ethereum, And{" "}
                 <span className="text-[#6366F1] font-[400]">70+</span>
                 other cryptocurrencies online. With offices across the North
-                America, Piedra provides its services at financial institution
+                America, <span className="translate-none">Piedra</span> provides its services at financial institution
                 standard.
               </p>
             </div>
@@ -354,7 +356,7 @@ function PageApp() {
               <div>
                 <Link href="/">
                   <div className="hidden 800px:h-[50px] 800px:my-[20px] 800px:flex items-center justify-between text-[#FDD6B0] font-[600] ">
-                    PIEDRA
+                    <span className="translate-none">PIEDRA</span>
                   </div>
                 </Link>
               </div>
