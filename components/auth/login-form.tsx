@@ -25,8 +25,8 @@ import { login } from "@/actions/login";
 
 export const LoginForm = () => {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl");
-  const urlError = searchParams.get("error") === "OAuthAccountNotLinked"
+  const callbackUrl = searchParams?.get("callbackUrl") || undefined;
+  const urlError = searchParams?.get("error") === "OAuthAccountNotLinked"
     ? "Email already in use with different provider!"
     : "";
 
@@ -134,23 +134,23 @@ export const LoginForm = () => {
                           type="password"
                         />
                       </FormControl>
-                      <Button
-                        size="sm"
-                        variant="link"
-                        asChild
-                        className="px-0 font-normal"
-                      >
-                        <Link href="/auth/reset">
-                          Forgot password?
-                        </Link>
-                      </Button>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-            </>
-          )}
+              </>
+            )}
           </div>
+          <Button
+            size="sm"
+            variant="link"
+            asChild
+            className="px-0 font-normal"
+          >
+            <Link href="/auth/reset">
+              Forgot password?
+            </Link>
+          </Button>
           <FormError message={error || urlError} />
           <FormSuccess message={success} />
           <Button
