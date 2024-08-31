@@ -8,7 +8,7 @@ import Image from 'next/image';
 const languages = [
   { label: "English", value: "en", src: "https://flagcdn.com/h20/us.png" },
   { label: "Español", value: "es", src: "https://flagcdn.com/h20/es.png" },
-  { label: "Français", value: "fr", src: "https://flagcdn.com/h20/fr.png" },
+  { label: "Português", value: "pt", src: "https://flagcdn.com/h20/pt.png" },
 ];
 
 const includedLanguages = languages.map(lang => lang.value).join(",");
