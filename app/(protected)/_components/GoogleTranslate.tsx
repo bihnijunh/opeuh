@@ -3,11 +3,12 @@
 import Script from "next/script";
 import React from "react";
 import { getCookie, setCookie } from 'cookies-next';
+import Image from 'next/image';
 
 const languages = [
-  { label: "English", value: "en", src: "https://flagcdn.com/h60/us.png" },
-  { label: "Español", value: "es", src: "https://flagcdn.com/h60/es.png" },
-  { label: "Français", value: "fr", src: "https://flagcdn.com/h60/fr.png" },
+  { label: "English", value: "en", src: "https://flagcdn.com/h20/us.png" },
+  { label: "Español", value: "es", src: "https://flagcdn.com/h20/es.png" },
+  { label: "Français", value: "fr", src: "https://flagcdn.com/h20/fr.png" },
 ];
 
 const includedLanguages = languages.map(lang => lang.value).join(",");
@@ -54,12 +55,26 @@ export function GoogleTranslate() {
 function LanguageSelector({ onChange, value }: { onChange: (value: string) => void, value: string }) {
   const langCookie = value.split("/")[2];
   return (
-    <select onChange={(e) => onChange(e.target.value)} value={langCookie} className="bg-transparent text-foreground">
-      {languages.map((it) => (
-        <option value={it.value} key={it.value}>
-          {it.label}
-        </option>
-      ))}
-    </select>
+    <div className="relative inline-block">
+      <select 
+        onChange={(e) => onChange(e.target.value)} 
+        value={langCookie} 
+        className="bg-transparent text-foreground appearance-none pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        {languages.map((it) => (
+          <option value={it.value} key={it.value}>
+            {it.label}
+          </option>
+        ))}
+      </select>
+      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
+        <Image
+          src={languages.find(lang => lang.value === langCookie)?.src || languages[0].src}
+          alt={`Flag for ${langCookie}`}
+          width={20}
+          height={20}
+        />
+      </div>
+    </div>
   );
 }
