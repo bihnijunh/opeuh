@@ -87,7 +87,7 @@ function PageApp() {
                 <div className="p-5">
                   <Link href="/">
                     <div className="text-[#FDD6B0] font-[600]">
-                      <span className="translate-none">PIEDRA</span>
+                      <span className="notranslate ">PIEDRA</span>
                     </div>
                   </Link>
                 </div>

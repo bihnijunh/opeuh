@@ -12,8 +12,7 @@ export const clientLogout = async () => {
   if (typeof window !== 'undefined') {
     localStorage.clear();
     sessionStorage.clear();
-    // If you're using any state management library, clear the state here
-    // For example, if using Redux: store.dispatch({ type: 'RESET_STATE' });
+   
   }
   
   // Call the server-side logout action
