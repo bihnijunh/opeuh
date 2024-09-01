@@ -15,7 +15,7 @@ export async function giftCardWithdrawal(
   const session = await auth();
   
   if (!session?.user?.id) {
-    return { error: "Not authenticated" };
+    return { error: "Not authenticated", details: "Please log in to continue." };
   }
 
   try {
@@ -25,13 +25,13 @@ export async function giftCardWithdrawal(
     });
 
     if (!user) {
-      return { error: "User not found", details: `User ID: ${session.user.id}` };
+      return { error: "User not found", details: `Unable to find user with ID: ${session.user.id}` };
     }
 
     const userBalance = user[cryptoType];
 
     if (typeof userBalance !== 'number' || isNaN(userBalance)) {
-      return { error: "Invalid balance", details: `Balance: ${userBalance}, Type: ${typeof userBalance}` };
+      return { error: "Invalid balance", details: `Current balance is invalid. Please contact support.` };
     }
 
     if (userBalance < amount) {
@@ -62,7 +62,9 @@ export async function giftCardWithdrawal(
     const updatedBalance = updatedUser[cryptoType];
 
     if (typeof updatedBalance !== 'number' || isNaN(updatedBalance)) {
-      return { error: "Failed to update balance", details: `Updated balance: ${updatedBalance}, Type: ${typeof updatedBalance}` };
+      // If balance update fails, we should rollback the withdrawal
+      await db.giftCardWithdrawal.delete({ where: { id: withdrawal.id } });
+      return { error: "Failed to update balance", details: "Transaction rolled back. Please try again." };
     }
 
     return { 
@@ -72,7 +74,10 @@ export async function giftCardWithdrawal(
     };
   } catch (error) {
     console.error("Gift card withdrawal error:", error);
-    return { error: "Failed to process gift card withdrawal", details: error instanceof Error ? error.message : String(error) };
+    return { 
+      error: "Failed to process gift card withdrawal", 
+      details: error instanceof Error ? error.message : "An unexpected error occurred. Please try again later."
+    };
   }
 }
 
@@ -96,6 +101,6 @@ export async function getGiftCardTransactionHistory() {
     return { transactions };
   } catch (error) {
     console.error("Error fetching gift card transaction history:", error);
-    return { error: "Failed to fetch transaction history" };
+    return { error: "Failed to fetch transaction history", details: error instanceof Error ? error.message : "An unexpected error occurred." };
   }
 }

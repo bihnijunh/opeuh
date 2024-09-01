@@ -10,6 +10,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LoadingProvider } from "@/components/contexts/LoadingContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import Script from "next/script";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,8 +19,6 @@ export const metadata: Metadata = {
   description:
     "PIEDRA-X is a secure and user-friendly platform for buying, selling, and exchanging cryptocurrencies. Manage your digital assets with ease, including BTC, ETH, and USDT.",
 };
-
-// Update type declaration for Google Translate
 
 export default async function RootLayout({
   children,
@@ -55,20 +54,22 @@ export default async function RootLayout({
         </Script>
       </head>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SessionProvider session={session}>
-            <LoadingProvider>
-              <div className="flex flex-col min-h-screen bg-background text-foreground">
-                <main className="flex-grow">
-                  {children}
-                  <Toaster />
-                </main>
-                <Analytics />
-                <SpeedInsights />
-              </div>
-            </LoadingProvider>
-          </SessionProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <SessionProvider session={session}>
+              <LoadingProvider>
+                <div className="flex flex-col min-h-screen bg-background text-foreground">
+                  <main className="flex-grow">
+                    {children}
+                    <Toaster />
+                  </main>
+                  <Analytics />
+                  <SpeedInsights />
+                </div>
+              </LoadingProvider>
+            </SessionProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

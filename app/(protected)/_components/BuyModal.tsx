@@ -24,6 +24,7 @@ const BuyModal: React.FC<BuyModalProps> = ({ itemName, price }) => {
   const [selectedCrypto, setSelectedCrypto] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const user = useCurrentUser();
 
@@ -44,12 +45,14 @@ const BuyModal: React.FC<BuyModalProps> = ({ itemName, price }) => {
       }
     } catch (error) {
       console.error("Error fetching user balances:", error);
+      setError("Failed to fetch user balances. Please try again later.");
       toast.error("Failed to fetch user balances. Please try again later.");
     }
   };
 
   const handleBuy = async () => {
     if (!user) {
+      setError("User not authenticated. Please log in to continue.");
       toast.error("User not authenticated. Please log in to continue.");
       return;
     }
@@ -58,24 +61,25 @@ const BuyModal: React.FC<BuyModalProps> = ({ itemName, price }) => {
       const balance = balances[selectedCrypto as keyof UserBalances];
       if (balance >= price) {
         setIsProcessing(true);
+        setError(null);
         try {
           const result = await giftCardWithdrawal(itemName, price, selectedCrypto as 'usdt' | 'btc' | 'eth');
           if ('error' in result) {
-            console.error("Gift card withdrawal error:", result.error, "Details:", result.details);
-            toast.error(`Failed to process gift card withdrawal: ${result.error}${result.details ? `. ${result.details}` : ''}`);
+            throw new Error(`${result.error}${result.details ? `. ${result.details}` : ''}`);
           } else {
             toast.success(result.success);
-            setIsOpen(false); // Close the modal
-            // Redirect to the success page
+            setIsOpen(false);
             router.push(`/giftcard/success?itemName=${encodeURIComponent(itemName)}&price=${price}`);
           }
         } catch (error) {
-          console.error("Unexpected error during gift card withdrawal:", error);
-          toast.error("An unexpected error occurred. Please try again later.");
+          console.error("Error during gift card withdrawal:", error);
+          setError(error instanceof Error ? error.message : "An unexpected error occurred. Please try again later.");
+          toast.error(error instanceof Error ? error.message : "An unexpected error occurred. Please try again later.");
         } finally {
           setIsProcessing(false);
         }
       } else {
+        setError(`Insufficient ${selectedCrypto.toUpperCase()} balance. You need $${price.toFixed(2)}, but you only have $${balance.toFixed(2)}.`);
         toast.error(`Insufficient ${selectedCrypto.toUpperCase()} balance. You need $${price.toFixed(2)}, but you only have $${balance.toFixed(2)}.`);
       }
     }
@@ -83,41 +87,43 @@ const BuyModal: React.FC<BuyModalProps> = ({ itemName, price }) => {
 
   const handleBalanceChange = (value: string) => {
     setSelectedCrypto(value);
+    setError(null);
   };
 
   return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          <Button variant="default" onClick={() => setIsOpen(true)}>Buy</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Confirm Purchase</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <p>Are you sure you want to buy {itemName} for ${price}?</p>
-            {balances ? (
-              <Select onValueChange={handleBalanceChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select cryptocurrency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(balances).map(([currency, amount]) => (
-                    <SelectItem key={currency} value={currency}>
-                      {`${currency.toUpperCase()}: $${amount.toFixed(2)}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <p>Loading balances...</p>
-            )}
-            <Button onClick={handleBuy} disabled={!selectedCrypto || isProcessing}>
-              {isProcessing ? 'Processing...' : 'Confirm Purchase'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="default" onClick={() => setIsOpen(true)}>Buy</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Confirm Purchase</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <p>Are you sure you want to buy {itemName} for ${price}?</p>
+          {balances ? (
+            <Select onValueChange={handleBalanceChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select cryptocurrency" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(balances).map(([currency, amount]) => (
+                  <SelectItem key={currency} value={currency}>
+                    {`${currency.toUpperCase()}: $${amount.toFixed(2)}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p>Loading balances...</p>
+          )}
+          {error && <p className="text-red-500">{error}</p>}
+          <Button onClick={handleBuy} disabled={!selectedCrypto || isProcessing}>
+            {isProcessing ? 'Processing...' : 'Confirm Purchase'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
