@@ -6,9 +6,9 @@ import { GiftCardTransactionHistory } from './_components/GiftCardTransactionHis
 const GiftCardPage: React.FC = () => {
   return (
     <div>
-    <ShopByCategory />
-    <GiftCardTransactionHistory />
-    <RateChange />
+      <ShopByCategory />
+        <GiftCardTransactionHistory />
+      <RateChange />
     </div>
   );
 };

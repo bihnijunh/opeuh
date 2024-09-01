@@ -33,24 +33,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLoading } from '@/components/contexts/LoadingContext';
+import { getGiftCardTransactionHistory } from "@/actions/giftCardWithdrawal";
 
 interface GiftCardTransaction {
   id: string;
   amount: number;
-  cardType: string;
-  date: Date;
-  status: "pending" | "approved" | "successful" | string;
-}
-
-// This function should be implemented in your actions folder
-async function getGiftCardTransactions(page: number, itemsPerPage: number) {
-  // Implement the API call to fetch gift card transactions
-  // Return an object with transactions, totalPages, and currentPage
-  return {
-    transactions: [],
-    totalPages: 1,
-    currentPage: 1,
-  };
+  giftCardName: string;
+  cryptoType: string;
+  createdAt: Date;
+  status: string;
 }
 
 export function GiftCardTransactionHistory() {
@@ -60,13 +51,20 @@ export function GiftCardTransactionHistory() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const { isLoading, setIsLoading } = useLoading();
 
-  const fetchTransactions = async (page = currentPage) => {
+  const fetchTransactions = async () => {
     setIsLoading(true);
     try {
-      const result = await getGiftCardTransactions(page, itemsPerPage);
-      setTransactions(result.transactions);
-      setTotalPages(result.totalPages);
-      setCurrentPage(result.currentPage);
+      const result = await getGiftCardTransactionHistory();
+      if ('error' in result) {
+        toast.error(result.error);
+      } else {
+        const formattedTransactions = result.transactions.map(transaction => ({
+          ...transaction,
+          createdAt: new Date(transaction.createdAt)
+        }));
+        setTransactions(formattedTransactions);
+        setTotalPages(Math.ceil(formattedTransactions.length / itemsPerPage));
+      }
     } catch (error) {
       console.error("Error fetching gift card transactions:", error);
       toast.error("Failed to fetch gift card transactions. Please try again later.");
@@ -77,24 +75,13 @@ export function GiftCardTransactionHistory() {
 
   useEffect(() => {
     fetchTransactions();
-  }, [itemsPerPage]);
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      fetchTransactions(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      fetchTransactions(currentPage + 1);
-    }
-  };
+  }, []);
 
   const handleItemsPerPageChange = (value: string) => {
     const newItemsPerPage = parseInt(value, 10);
     setItemsPerPage(newItemsPerPage);
-    fetchTransactions(1);
+    setCurrentPage(1);
+    setTotalPages(Math.ceil(transactions.length / newItemsPerPage));
   };
 
   const handleCopyToClipboard = (text: string, label: string) => {
@@ -106,6 +93,12 @@ export function GiftCardTransactionHistory() {
         toast.error(`Failed to copy ${label}. Please try again.`);
       }
     );
+  };
+
+  const getPaginatedTransactions = () => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return transactions.slice(start, end);
   };
 
   if (isLoading) {
@@ -120,7 +113,7 @@ export function GiftCardTransactionHistory() {
     <Card className="mt-6">
       <CardHeader>
         <CardTitle>Gift Card Transaction History</CardTitle>
-        <CardDescription>View your past gift card purchases</CardDescription>
+        <CardDescription>View your past gift card withdrawals</CardDescription>
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible>
@@ -138,27 +131,29 @@ export function GiftCardTransactionHistory() {
                     <TableRow className="bg-gray-100 dark:bg-gray-800">
                       <TableHead className="w-[100px]">ID</TableHead>
                       <TableHead>Amount</TableHead>
-                      <TableHead>Card Type</TableHead>
+                      <TableHead>Gift Card</TableHead>
+                      <TableHead>Crypto</TableHead>
                       <TableHead className="min-w-[150px]">Date</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {transactions.length === 0 ? (
+                    {getPaginatedTransactions().length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center text-gray-500 dark:text-gray-400">No transactions found</TableCell>
+                        <TableCell colSpan={6} className="text-center text-gray-500 dark:text-gray-400">No transactions found</TableCell>
                       </TableRow>
                     ) : (
-                      transactions.map((transaction) => (
+                      getPaginatedTransactions().map((transaction) => (
                         <TableRow key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                           <TableCell className="font-medium cursor-pointer hover:text-blue-500" onClick={() => handleCopyToClipboard(transaction.id, "Transaction ID")}>
                             {transaction.id.slice(0, 8)}...
                           </TableCell>
                           <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                          <TableCell>{transaction.cardType}</TableCell>
-                          <TableCell>{new Date(transaction.date).toLocaleString()}</TableCell>
+                          <TableCell>{transaction.giftCardName}</TableCell>
+                          <TableCell>{transaction.cryptoType.toUpperCase()}</TableCell>
+                          <TableCell>{transaction.createdAt.toLocaleString()}</TableCell>
                           <TableCell>
-                            <Badge variant={transaction.status === "pending" ? "warning" : transaction.status === "approved" ? "secondary" : "success"}>
+                            <Badge variant={transaction.status === "pending" ? "warning" : transaction.status === "successful" ? "success" : "secondary"}>
                               {transaction.status}
                             </Badge>
                           </TableCell>
@@ -183,14 +178,14 @@ export function GiftCardTransactionHistory() {
                   </SelectContent>
                 </Select>
                 <div className="flex items-center space-x-2">
-                  <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
+                  <Button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
                     Previous
                   </Button>
                   <span className="flex items-center">
                     Page {currentPage} of {totalPages}
                   </span>
                   <Button
-                    onClick={handleNextPage}
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
                   >
                     Next

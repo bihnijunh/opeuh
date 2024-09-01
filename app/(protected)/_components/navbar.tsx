@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { GoogleTranslate } from "./GoogleTranslate";
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -29,6 +30,7 @@ export const Navbar = () => {
   if (user?.role === UserRole.ADMIN) {
     navItems.unshift({ href: "/admin", label: "Admin" });
   }
+
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow-lg z-50">
@@ -79,38 +81,40 @@ export const Navbar = () => {
           </div>
         </div>
       </div>
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"
-          >
-            <div className="container mx-auto px-4 py-4 space-y-3">
-              {navItems.map((item) => (
-                <Button
-                  key={item.href}
-                  asChild
-                  variant="ghost"
-                  className={`w-full justify-start text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-white transition-colors duration-300 ${
-                    pathname === item.href ? 'bg-gray-100 dark:bg-gray-800 font-semibold' : ''
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Link href={item.href}>{item.label}</Link>
-                </Button>
-              ))}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-800">
-                <GoogleTranslate />
-                <ModeToggle />
-                <UserButton />
+      <ErrorBoundary>
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"
+            >
+              <div className="container mx-auto px-4 py-4 space-y-3">
+                {navItems.map((item) => (
+                  <Button
+                    key={item.href}
+                    asChild
+                    variant="ghost"
+                    className={`w-full justify-start text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-white transition-colors duration-300 ${
+                      pathname === item.href ? 'bg-gray-100 dark:bg-gray-800 font-semibold' : ''
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Link href={item.href}>{item.label}</Link>
+                  </Button>
+                ))}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <GoogleTranslate />
+                  <ModeToggle />
+                  <UserButton />
+                </div>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </ErrorBoundary>
     </nav>
   );
 };
