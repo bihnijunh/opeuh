@@ -54,7 +54,6 @@ export default async function RootLayout({
         </Script>
       </head>
       <body className={inter.className}>
-        <ErrorBoundary>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <SessionProvider session={session}>
               <LoadingProvider>
@@ -69,7 +68,6 @@ export default async function RootLayout({
               </LoadingProvider>
             </SessionProvider>
           </ThemeProvider>
-        </ErrorBoundary>
       </body>
     </html>
   );

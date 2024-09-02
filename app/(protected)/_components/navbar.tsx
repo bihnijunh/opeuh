@@ -10,7 +10,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { GoogleTranslate } from "./GoogleTranslate";
-import ErrorBoundary from '@/components/ErrorBoundary';
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -81,7 +80,6 @@ export const Navbar = () => {
           </div>
         </div>
       </div>
-      <ErrorBoundary>
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -114,7 +112,6 @@ export const Navbar = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </ErrorBoundary>
     </nav>
   );
 };

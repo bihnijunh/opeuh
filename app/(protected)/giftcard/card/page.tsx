@@ -1,12 +1,19 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import Image from "next/image"
-import { useState } from "react"
-import BuyModal from "../../_components/BuyModal"
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import Image from "next/image";
+import { useState } from "react";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import BuyModal from "../../_components/BuyModal";
 
 export default function Component() {
-  const [selectedCard, setSelectedCard] = useState<{ cardIndex: number, priceIndex: number } | null>(null)
+  const [selectedCard, setSelectedCard] = useState<{
+    cardIndex: number;
+    priceIndex: number;
+  } | null>(null);
+
+  const user = useCurrentUser();
 
   const cards = [
     {
@@ -17,25 +24,24 @@ export default function Component() {
     {
       image: "/brands/amazon.png",
       title: "Amazon Gift Card",
-      prices: ["$25", "$50", "$75", "$100", "$150", ],
+      prices: ["$25", "$50", "$75", "$100", "$150"],
     },
     {
       image: "/brands/ebay.avif",
       title: "Ebay Gift Card",
-      prices: ["\u20AC15", "\u20AC50", "\u20AC150", "\u20AC200"],
+      prices: ["€15", "€50", "€150", "€200"],
     },
     {
       image: "/brands/googleplay.webp",
       title: "Google Play Gift Card",
-      prices: ["\u20AC10", "\u20AC25", "\u20AC50", "\u20AC100"],
+      prices: ["€10", "€25", "€50", "€100"],
     },
     {
       image: "/brands/mastercard.webp",
       title: "Mastercard Gift Card",
-      prices: ["\u20AC25", "\u20AC50", "\u20AC100", "\u20AC200"],
+      prices: ["€25", "€50", "€100", "€200"],
     },
-   
-  ]
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -43,7 +49,8 @@ export default function Component() {
         <div className="lg:col-span-2 space-y-6">
           <h1 className="text-3xl font-bold mb-4">Gift Cards & Credits</h1>
           <p className="text-lg text-muted-foreground mb-8">
-          Digital gift cards and vouchers for online stores and entertainment services to shop online directly or top up your account balance.
+            Digital gift cards and vouchers for online stores and entertainment
+            services to shop online directly or top up your account balance. 
           </p>
           <div className="space-y-6">
             {cards.map((item, cardIndex) => (
@@ -72,9 +79,16 @@ export default function Component() {
                       {item.prices.map((price, priceIndex) => (
                         <Button
                           key={priceIndex}
-                          variant={selectedCard?.cardIndex === cardIndex && selectedCard?.priceIndex === priceIndex ? "default" : "outline"}
+                          variant={
+                            selectedCard?.cardIndex === cardIndex &&
+                            selectedCard?.priceIndex === priceIndex
+                              ? "default"
+                              : "outline"
+                          }
                           size="sm"
-                          onClick={() => setSelectedCard({ cardIndex, priceIndex })}
+                          onClick={() =>
+                            setSelectedCard({ cardIndex, priceIndex })
+                          }
                         >
                           {price}
                         </Button>
@@ -84,7 +98,10 @@ export default function Component() {
                 </div>
                 <BuyModal
                   itemName={item.title}
-                  price={parseFloat((selectedCard?.cardIndex === cardIndex ? item.prices[selectedCard.priceIndex] : item.prices[0]).replace(/[^\d.-]/g, ''))}
+                  price={parseFloat((selectedCard?.cardIndex === cardIndex
+                    ? item.prices[selectedCard.priceIndex]
+                    : item.prices[0]).replace(/[^\d.-]/g, ""))}
+                  giftCardName={item.title}
                 />
               </div>
             ))}
@@ -97,7 +114,8 @@ export default function Component() {
               <div>
                 <h3 className="font-semibold text-lg mb-2">Instant delivery</h3>
                 <p className="text-muted-foreground">
-                  You will receive the code directly by email, so that you can use the credit immediately.
+                  You will receive the code directly by email, so that you can
+                  use the credit immediately.
                 </p>
               </div>
             </div>
@@ -107,7 +125,9 @@ export default function Component() {
               <GiftIcon className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
               <div>
                 <h3 className="font-semibold text-lg mb-2">Gift card design</h3>
-                <p className="text-muted-foreground">Choose from more than 10 different templates.</p>
+                <p className="text-muted-foreground">
+                  Choose from more than 10 different templates.
+                </p>
               </div>
             </div>
           </Card>
@@ -117,7 +137,8 @@ export default function Component() {
               <div>
                 <h3 className="font-semibold text-lg mb-2">Secure payment</h3>
                 <p className="text-muted-foreground mb-4">
-                  Complete the checkout process safely and quickly with a choice of more than 60 payment methods.
+                  Complete the checkout process safely and quickly with a choice
+                  of more than 60 payment methods.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <ShoppingCartIcon className="w-6 h-6" />
@@ -135,15 +156,27 @@ export default function Component() {
           <Card className="p-6">
             <h3 className="font-semibold text-lg mb-2">Gift Cards</h3>
             <p className="text-muted-foreground">
-            If you need a last-minute gift, you dont have to go to the store to find a gift card. Piedra (US) has a variety of popular gift cards to choose from online that will be sent directly to the email of your choice. Whether you&apos;re looking for a music streaming service, like Spotify or a video streaming service, like Netflix, we have the perfect card for you. We also carry other online gift cards for Amazon, iTunes and Google Play credits. Piedra (US)&apos;s gift cards are safe, secure and easy to use. Simply enter the emailed code into the desired website and start shopping, listening or watching online.
-
-Not only are gift cards fantastic gifts, they can also be an easy way to shop without having to use your credit card. Our prepaid cards allow you to shop or play games online without entering your credit or debit card information. All you need is the code that we&apos;ll email to you and the gift card you bought is ready to go
+              If you need a last-minute gift, you dont have to go to the store
+              to find a gift card. Piedra (US) has a variety of popular gift
+              cards to choose from online that will be sent directly to the
+              email of your choice. Whether youre looking for a music
+              streaming service, like Spotify or a video streaming service, like
+              Netflix, we have the perfect card for you. We also carry other
+              online gift cards for Amazon, iTunes and Google Play credits.
+              Piedra (US)s gift cards are safe, secure and easy to use.
+              Simply enter the emailed code into the desired website and start
+              shopping, listening or watching online. Not only are gift cards
+              fantastic gifts, they can also be an easy way to shop without
+              having to use your credit card. Our prepaid cards allow you to
+              shop or play games online without entering your credit or debit
+              card information. All you need is the code that well email
+              to you and the gift card you bought is ready to go
             </p>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function AppleIcon(props: any) {
@@ -163,7 +196,7 @@ function AppleIcon(props: any) {
       <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z" />
       <path d="M10 2c1 .5 2 2 2 5" />
     </svg>
-  )
+  );
 }
 
 function BadgeIcon(props: any) {
@@ -182,7 +215,7 @@ function BadgeIcon(props: any) {
     >
       <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
     </svg>
-  )
+  );
 }
 
 function BitcoinIcon(props: any) {
@@ -201,7 +234,7 @@ function BitcoinIcon(props: any) {
     >
       <path d="M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-3.94-.694m5.155-6.2L8.29 4.26m5.908 1.042.348-1.97M7.48 20.364l3.126-17.727" />
     </svg>
-  )
+  );
 }
 
 function CircleCheckIcon(props: any) {
@@ -221,7 +254,7 @@ function CircleCheckIcon(props: any) {
       <circle cx="12" cy="12" r="10" />
       <path d="m9 12 2 2 4-4" />
     </svg>
-  )
+  );
 }
 
 function CreditCardIcon(props: any) {
@@ -241,7 +274,7 @@ function CreditCardIcon(props: any) {
       <rect width="20" height="14" x="2" y="5" rx="2" />
       <line x1="2" x2="22" y1="10" y2="10" />
     </svg>
-  )
+  );
 }
 
 function EraserIcon(props: any) {
@@ -262,7 +295,7 @@ function EraserIcon(props: any) {
       <path d="M22 21H7" />
       <path d="m5 11 9 9" />
     </svg>
-  )
+  );
 }
 
 function GiftIcon(props: any) {
@@ -284,7 +317,7 @@ function GiftIcon(props: any) {
       <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
       <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" />
     </svg>
-  )
+  );
 }
 
 function ImageIcon(props: any) {

@@ -6,11 +6,11 @@ import { useRouter } from 'next/navigation';
 import { getUserBalances } from '@/actions/getBalances';
 import { giftCardWithdrawal } from '@/actions/giftCardWithdrawal';
 import { toast } from 'sonner';
-import { useCurrentUser } from "@/hooks/use-current-user";
 
 interface BuyModalProps {
   itemName: string;
   price: number;
+  giftCardName: string;
 }
 
 interface UserBalances {
@@ -19,18 +19,19 @@ interface UserBalances {
   eth: number;
 }
 
-const BuyModal: React.FC<BuyModalProps> = ({ itemName, price }) => {
+const BuyModal: React.FC<BuyModalProps> = ({ itemName, price, giftCardName }) => {
   const [balances, setBalances] = useState<UserBalances | null>(null);
   const [selectedCrypto, setSelectedCrypto] = useState<string>('');
+  const [showSuccessPage, setShowSuccessPage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const user = useCurrentUser();
 
   useEffect(() => {
-    fetchUserBalances();
-  }, []);
+    if (isOpen) {
+      fetchUserBalances();
+    }
+  }, [isOpen]);
 
   const fetchUserBalances = async () => {
     try {
@@ -45,41 +46,32 @@ const BuyModal: React.FC<BuyModalProps> = ({ itemName, price }) => {
       }
     } catch (error) {
       console.error("Error fetching user balances:", error);
-      setError("Failed to fetch user balances. Please try again later.");
       toast.error("Failed to fetch user balances. Please try again later.");
     }
   };
 
   const handleBuy = async () => {
-    if (!user) {
-      setError("User not authenticated. Please log in to continue.");
-      toast.error("User not authenticated. Please log in to continue.");
-      return;
-    }
-
     if (balances && selectedCrypto) {
       const balance = balances[selectedCrypto as keyof UserBalances];
       if (balance >= price) {
-        setIsProcessing(true);
-        setError(null);
+        setIsLoading(true);
         try {
-          const result = await giftCardWithdrawal(itemName, price, selectedCrypto as 'usdt' | 'btc' | 'eth');
+          const result = await giftCardWithdrawal(giftCardName, price, selectedCrypto as 'usdt' | 'btc' | 'eth');
           if ('error' in result) {
-            throw new Error(`${result.error}${result.details ? `. ${result.details}` : ''}`);
-          } else {
-            toast.success(result.success);
-            setIsOpen(false);
-            router.push(`/giftcard/success?itemName=${encodeURIComponent(itemName)}&price=${price}`);
+            throw new Error(result.error);
           }
+          setBalances(prevBalances => ({
+            ...prevBalances!,
+            [selectedCrypto]: result.updatedBalance!
+          }));
+          setShowSuccessPage(true);
         } catch (error) {
-          console.error("Error during gift card withdrawal:", error);
-          setError(error instanceof Error ? error.message : "An unexpected error occurred. Please try again later.");
-          toast.error(error instanceof Error ? error.message : "An unexpected error occurred. Please try again later.");
+          console.error("Error processing gift card withdrawal:", error);
+          toast.error("Failed to process the purchase. Please try again later.");
         } finally {
-          setIsProcessing(false);
+          setIsLoading(false);
         }
       } else {
-        setError(`Insufficient ${selectedCrypto.toUpperCase()} balance. You need $${price.toFixed(2)}, but you only have $${balance.toFixed(2)}.`);
         toast.error(`Insufficient ${selectedCrypto.toUpperCase()} balance. You need $${price.toFixed(2)}, but you only have $${balance.toFixed(2)}.`);
       }
     }
@@ -87,40 +79,65 @@ const BuyModal: React.FC<BuyModalProps> = ({ itemName, price }) => {
 
   const handleBalanceChange = (value: string) => {
     setSelectedCrypto(value);
-    setError(null);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setShowSuccessPage(false);
+    setSelectedCrypto('');
+  };
+
+  const handleReturnToGiftCard = () => {
+    handleClose();
+    router.push('/giftcard');
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" onClick={() => setIsOpen(true)}>Buy</Button>
+        <Button onClick={() => setIsOpen(true)}> Buy </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirm Purchase</DialogTitle>
+          <DialogTitle>{showSuccessPage ? "Purchase Successful" : "Confirm Purchase"}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <p>Are you sure you want to buy {itemName} for ${price}?</p>
-          {balances ? (
-            <Select onValueChange={handleBalanceChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select cryptocurrency" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(balances).map(([currency, amount]) => (
-                  <SelectItem key={currency} value={currency}>
-                    {`${currency.toUpperCase()}: $${amount.toFixed(2)}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {showSuccessPage ? (
+            <div className="text-center">
+              <p className="text-xl text-gray-700 mb-8">
+                You have successfully purchased {itemName} for ${price}.
+              </p>
+              <Button
+                onClick={handleReturnToGiftCard}
+                className="bg-green-500 hover:bg-green-600 text-white"
+              >
+                Return to Gift card
+              </Button>
+            </div>
           ) : (
-            <p>Loading balances...</p>
+            <>
+              <p>Are you sure you want to buy {itemName} for ${price}?</p>
+              {balances ? (
+                <Select onValueChange={handleBalanceChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select cryptocurrency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(balances).map(([currency, amount]) => (
+                      <SelectItem key={currency} value={currency}>
+                        {`${currency.toUpperCase()}: $${amount.toFixed(2)}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p>Loading balances...</p>
+              )}
+              <Button onClick={handleBuy} disabled={!selectedCrypto || isLoading}>
+                {isLoading ? 'Processing...' : 'Confirm Purchase'}
+              </Button>
+            </>
           )}
-          {error && <p className="text-red-500">{error}</p>}
-          <Button onClick={handleBuy} disabled={!selectedCrypto || isProcessing}>
-            {isProcessing ? 'Processing...' : 'Confirm Purchase'}
-          </Button>
         </div>
       </DialogContent>
     </Dialog>

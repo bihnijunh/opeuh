@@ -1,17 +1,21 @@
 'use client'
 
 import React from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaCheckCircle, FaGift, FaArrowLeft } from 'react-icons/fa';
 
 const SuccessPage: React.FC = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const itemName = searchParams?.get('itemName') ?? 'your item';
   const price = searchParams?.get('price') ?? 'N/A';
+
+  const handleReturn = () => {
+    router.push('/giftcard');
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100 p-4">
@@ -43,11 +47,12 @@ const SuccessPage: React.FC = () => {
             >
               <FaGift className="text-4xl text-purple-500" />
             </motion.div>
-            <Link href="/giftcard" className="block">
-              <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all duration-300">
-                <FaArrowLeft className="mr-2" /> Return to Gift Cards
-              </Button>
-            </Link>
+            <Button 
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
+              onClick={handleReturn}
+            >
+              <FaArrowLeft className="mr-2" /> Return to Gift Cards
+            </Button>
           </CardContent>
         </Card>
       </motion.div>

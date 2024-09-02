@@ -11,6 +11,7 @@ const logos = [
   '/brands/6.svg',
   '/brands/7.svg',
   '/brands/9.svg',
+  '/brands/amazon.png'
 ];
 
 const LogoSlider: React.FC = () => {
