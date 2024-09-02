@@ -1,17 +1,17 @@
 "use client"
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-interface SuccessPageProps {
-  title: string;
-  message: string;
-  ctaText: string;
-  ctaLink: string;
-}
-
-const SuccessPage: React.FC<SuccessPageProps> = ({ title, message, ctaText, ctaLink }) => {
+const SuccessPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get the values from URL search params or use defaults
+  const title = searchParams?.get('title') || 'Success!';
+  const message = searchParams?.get('message') || 'Your action was completed successfully.';
+  const ctaText = searchParams?.get('ctaText') || 'Continue';
+  const ctaLink = searchParams?.get('ctaLink') || '/';
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-green-50">
