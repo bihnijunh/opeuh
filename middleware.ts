@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
 
 import authConfig from "@/auth.config";
 import {
@@ -17,6 +18,7 @@ export default auth((req) => {
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isAdminRoute = nextUrl.pathname.startsWith("/admin");
 
   if (isApiAuthRoute) {
     return null;
@@ -41,6 +43,13 @@ export default auth((req) => {
       `/auth/login?callbackUrl=${encodedCallbackUrl}`,
       nextUrl
     ));
+  }
+
+  if (isAdminRoute) {
+    const user = req.auth?.user;
+    if (user?.role !== "ADMIN") {
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+    }
   }
 
   return null;
