@@ -13,7 +13,7 @@ export const {
   auth,
   signIn,
   signOut,
-  update,
+  // Remove the 'update' property as it doesn't exist in NextAuthResult
 } = NextAuth({
   pages: {
     signIn: "/auth/login",
@@ -32,7 +32,8 @@ export const {
       // Allow OAuth without email verification
       if (account?.provider !== "credentials") return true;
 
-      const existingUser = await getUserById(user.id);
+      const existingUser = await getUserById(user.id!);
+      // Add a non-null assertion (!) to user.id
 
       // Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false;

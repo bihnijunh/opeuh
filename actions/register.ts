@@ -10,7 +10,6 @@ import { sendVerificationEmail } from "@/lib/mail";
 import { generateVerificationToken } from "@/lib/tokens";
 
 export const register = async (values: any) => {
-
   // Validate input
   const validated = RegisterSchema.safeParse(values) 
   if(!validated.success) {
@@ -41,19 +40,16 @@ export const register = async (values: any) => {
       password: hashedPassword,
       btc: 0.0,
       usdt: 0.0,
-      eth: 0.0,
-     
+      eth: 0.0
     }
   })
-
 
   // Generate and send verification email
   const verificationToken = await generateVerificationToken(email)
   await sendVerificationEmail(email, verificationToken.token)
 
-  // Return user and balance  
+  // Return success message
   return {
     message: "Registration successful check email to verify account",  
   }
-
 }

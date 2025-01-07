@@ -19,11 +19,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'flagcdn.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+      },
     ],
-  },
- 
-  env: {
-    EXCHANGE_RATE_API_KEY: process.env.EXCHANGE_RATE_API_KEY,
   },
 }
 

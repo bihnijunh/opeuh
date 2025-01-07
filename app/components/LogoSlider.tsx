@@ -4,14 +4,12 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 const logos = [
-  '/brands/1.jpg',
-  '/brands/2.png',
-  '/brands/4.png',
-  '/brands/5.png',
-  '/brands/6.svg',
-  '/brands/7.svg',
-  '/brands/9.svg',
-  '/brands/amazon.png'
+  "/logo.png",
+  "/logo.png",
+  "/logo.png",
+  "/logo.png",
+  "/logo.png",
+  "/logo.png",
 ];
 
 const LogoSlider: React.FC = () => {

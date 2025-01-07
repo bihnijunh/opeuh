@@ -4,8 +4,23 @@ import { useBankAccounts } from '@/hooks/use-bank-accounts';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from "@/lib/utils";
+
+const AdminTab = ({ href, isActive, children }: { href: string; isActive: boolean; children: React.ReactNode }) => (
+  <Link
+    href={href}
+    className={cn(
+      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      isActive
+        ? "bg-background text-foreground shadow-sm"
+        : "text-muted-foreground hover:text-foreground"
+    )}
+  >
+    {children}
+  </Link>
+);
 
 export default function BankAccountsPage() {
   const { 
@@ -16,22 +31,35 @@ export default function BankAccountsPage() {
     handleDelete 
   } = useBankAccounts();
 
+  const pathname = usePathname();
+
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-      <Tabs defaultValue="bank-accounts" className="mb-8">
-        <TabsList>
-          <TabsTrigger value="users" asChild>
-            <Link href="/admin">Users</Link>
-          </TabsTrigger>
-          <TabsTrigger value="bank-accounts">Bank Accounts</TabsTrigger>
-          <TabsTrigger value="crypto-sell-transactions" asChild>
-            <Link href="/admin/crypto-sell-transactions">Crypto Sell Transactions</Link>
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Admin Dashboard</h1>
+      
+      <div className="mb-6 md:mb-8 overflow-x-auto">
+        <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+          <AdminTab href="/admin" isActive={pathname === '/admin'}>
+            Users
+          </AdminTab>
+          
+          <AdminTab href="/admin/flights" isActive={false}>
+            Create Flights
+          </AdminTab>
+          <AdminTab href="/admin/booked-flights" isActive={false}>
+            Booked Flights
+          </AdminTab>
+          <AdminTab href="/admin/flight-status" isActive={false}>
+            Flight Status
+          </AdminTab>
+          <AdminTab href="/admin/payment-methods" isActive={false}>
+            Payment Methods
+          </AdminTab>
+        </div>
+      </div>
+
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle>Manage Bank Accounts</CardTitle>

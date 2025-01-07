@@ -10,7 +10,7 @@ const emailTemplate = (content: string) => `
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piedra Exchange</title>
+    <title>Milano Shipping Logistics</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -27,7 +27,7 @@ const emailTemplate = (content: string) => `
         box-sizing: border-box;
       }
       .header { 
-        background-color: #4a90e2; 
+        background-color: #d40511; 
         color: white; 
         padding: 20px; 
         text-align: center; 
@@ -40,7 +40,7 @@ const emailTemplate = (content: string) => `
       .button { 
         display: inline-block; 
         padding: 10px 20px; 
-        background-color: #4a90e2; 
+        background-color: #d40511; 
         color: white; 
         text-decoration: none; 
         border-radius: 5px; 
@@ -68,7 +68,7 @@ const emailTemplate = (content: string) => `
   <body>
     <div class="container">
       <div class="header">
-        <h1 style="margin: 0; font-size: 24px;">Piedra Exchange</h1>
+        <h1 style="margin: 0; font-size: 24px;">Milano Shipping Logistics</h1>
       </div>
       <div class="content">
         ${content}
@@ -91,111 +91,65 @@ export const sendTwoFactorTokenEmail = async (
   `;
 
   await resend.emails.send({
-    from: "mail@kaitrumpfoundation.com",
+    from: "mail@milanosailexpress.com",
     to: email,
-    subject: "Your 2FA Code - Piedra Exchange",
+    subject: "Your 2FA Code - Milano Shipping Logistics",
     html: emailTemplate(content)
   });
 };
 
 export const sendPasswordResetEmail = async (
   email: string,
-  token: string,
+  token: string
 ) => {
   const resetLink = `${domain}/auth/new-password?token=${token}`;
+
   const content = `
     <h2>Reset Your Password</h2>
-    <p>You've requested to reset your password. Click the button below to set a new password:</p>
-    <p style="text-align: center;">
-      <a href="${resetLink}" class="button">Reset Password</a>
-    </p>
-    <p>If you didn't request a password reset, you can safely ignore this email.</p>
+    <p>Click the button below to reset your password:</p>
+    <a href="${resetLink}" class="button">Reset Password</a>
+    <p>If you didn't request a password reset, please ignore this email.</p>
     <p>This link will expire in 1 hour.</p>
   `;
 
   await resend.emails.send({
-    from: "reset@kaitrumpfoundation.com",
+    from: "mail@milanosailexpress.com",
     to: email,
-    subject: "Reset Your Password - Piedra Exchange",
+    subject: "Reset Your Password - Milano Shipping Logistics",
     html: emailTemplate(content)
   });
 };
 
-export const sendVerificationEmail = async (
-  email: string, 
-  token: string
-) => {
-  const confirmLink = `${domain}/auth/new-verification?token=${token}`;
-  const content = `
-    <h2>Verify Your Email Address</h2>
-    <p>Thank you for registering with Piedra Exchange. Please click the button below to verify your email address:</p>
-    <p style="text-align: center;">
-      <a href="${confirmLink}" class="button">Verify Email</a>
-    </p>
-    <p>If you didn't create an account with us, you can safely ignore this email.</p>
-    <p>This link will expire in 24 hours.</p>
-  `;
-
-  await resend.emails.send({
-    from: "verify@kaitrumpfoundation.com",
-    to: email,
-    subject: "Verify Your Email - Piedra Exchange",
-    html: emailTemplate(content)
-  });
-};
-
-export const sendTransactionConfirmationEmail = async (
+export const sendFlightBookingConfirmationEmail = async (
   email: string,
-  amount: number,
-  cryptoType: string,
-  transactionType: 'sent' | 'received',
-  otherPartyUsername: string
+  ticketNumber: string,
+  flightDetails: {
+    departure: string;
+    arrival: string;
+    date: string;
+    time: string;
+  },
+  passengerName: string
 ) => {
   const content = `
-    <h2>Transaction ${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)} Confirmation</h2>
-    <p>Dear User,</p>
-    <p>This email confirms that you have ${transactionType} a transaction of $${amount} ${cryptoType.toUpperCase()} ${transactionType === 'sent' ? 'to' : 'from'} ${otherPartyUsername}.</p>
-    <p>Thank you for using Piedra Exchange.</p>
-    <p>Best regards,<br>The Piedra Exchange Team</p>
+    <h2>Flight Booking Confirmation</h2>
+    <p>Dear ${passengerName},</p>
+    <p>Your flight booking has been confirmed. Here are your flight details:</p>
+    <div style="background-color: #e9e9e9; padding: 15px; margin: 15px 0; border-radius: 5px;">
+      <p><strong>Ticket Number:</strong> ${ticketNumber}</p>
+      <p><strong>Departure:</strong> ${flightDetails.departure}</p>
+      <p><strong>Arrival:</strong> ${flightDetails.arrival}</p>
+      <p><strong>Date:</strong> ${flightDetails.date}</p>
+      <p><strong>Time:</strong> ${flightDetails.time}</p>
+    </div>
+    <p>Please arrive at the airport at least 2 hours before your scheduled departure time.</p>
+    <p>Thank you for choosing Milano Shipping Logistics!</p>
   `;
 
   await resend.emails.send({
-    from: "transactions@kaitrumpfoundation.com",
+    from: "mail@milanosailexpress.com",
     to: email,
-    subject: `Transaction ${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)} Confirmation - Piedra Exchange`,
+    subject: "Flight Booking Confirmation - Milano Shipping Logistics",
     html: emailTemplate(content)
   });
 };
-
-export const sendTransactionDetailsEmail = async (
-  email: string,
-  transactionDetails: {
-    amount: number;
-    cryptoType: string;
-    walletAddress: string;
-    date: Date;
-    status: string;
-  }
-) => {
-  const content = `
-    <h2>Transaction Details</h2>
-    <p>Dear User,</p>
-    <p>Here are the details of your recent transaction:</p>
-    <ul>
-      <li>Amount: ${transactionDetails.amount} ${transactionDetails.cryptoType.toUpperCase()}</li>
-      <li>Wallet Address: ${transactionDetails.walletAddress}</li>
-      <li>Date: ${transactionDetails.date.toLocaleString()}</li>
-      <li>Status: ${transactionDetails.status}</li>
-    </ul>
-    <p>Thank you for using Piedra Exchange.</p>
-    <p>Best regards,<br>The Piedra Exchange Team</p>
-  `;
-
-  await resend.emails.send({
-    from: "transactions@kaitrumpfoundation.com",
-    to: email,
-    subject: `Transaction Status Update - Piedra Exchange`,
-    html: emailTemplate(content)
-  });
-};
-
