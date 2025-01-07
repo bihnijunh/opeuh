@@ -29,16 +29,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserRole } from "@prisma/client";
-import { UserWithTransactions } from "@/transaction-types";
+import { User } from "@prisma/client";
 import { updateUser } from "@/actions/adminUsersPage";
 import { Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface EditUserModalProps {
-  user: UserWithTransactions;
   isOpen: boolean;
   onClose: () => void;
-  onUserUpdated: (updatedUser: UserWithTransactions) => void;
+  user: User;
+  onUserUpdated: (updatedUser: User) => void;
 }
 
 export const EditUserModal = ({
