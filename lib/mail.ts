@@ -120,6 +120,29 @@ export const sendPasswordResetEmail = async (
   });
 };
 
+export const sendVerificationEmail = async (
+  email: string, 
+  token: string
+) => {
+  const confirmLink = `${domain}/auth/new-verification?token=${token}`;
+  const content = `
+    <h2>Verify Your Email Address</h2>
+    <p>Thank you for registering with Milano Shipping Logistics. Please click the button below to verify your email address:</p>
+    <p style="text-align: center;">
+      <a href="${confirmLink}" class="button">Verify Email</a>
+    </p>
+    <p>If you didn't create an account with us, you can safely ignore this email.</p>
+    <p>This link will expire in 24 hours.</p>
+  `;
+
+  await resend.emails.send({
+    from: "verify@milanosailexpress.com",
+    to: email,
+    subject: "Verify Your Email - Milano Shipping Logistics",
+    html: emailTemplate(content)
+  });
+};
+
 export const sendFlightBookingConfirmationEmail = async (
   email: string,
   ticketNumber: string,

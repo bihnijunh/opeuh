@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { currentRole } from "@/lib/auth";
 import { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { Transaction, UserWithTransactions } from "@/transaction-types";
+import { Transaction, UserWithTransactions } from "@/types/transaction-types";
 
 export const updateUser = async (userId: string, values: {
   name?: string;

@@ -3,7 +3,7 @@
 import * as z from "zod";
 import bcrypt from "bcryptjs";
 
-import { update } from "@/auth";
+import { auth, signOut, update } from "@/auth";
 import { db } from "@/lib/db";
 import { SettingsSchema } from "@/schemas";
 import { getUserByEmail, getUserById } from "@/data/user";
@@ -11,6 +11,7 @@ import { currentUser } from "@/lib/auth";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { Prisma } from "@prisma/client";
+
 export const settings = async (
   values: z.infer<typeof SettingsSchema>
 ) => {
@@ -81,14 +82,8 @@ export const settings = async (
     }
   });
 
-  update({
-    user: {
-      name: updatedUser.name,
-      email: updatedUser.email,
-      isTwoFactorEnabled: updatedUser.isTwoFactorEnabled,
-     
-    }
-  });
+  // Instead of using update, we'll sign out and let the user sign in again
+  await signOut();
 
-  return { success: "Settings Updated!" }
+  return { success: "Settings Updated! Please sign in again." }
 }
