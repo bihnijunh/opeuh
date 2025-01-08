@@ -1,8 +1,8 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 
 const CountryChanger = () => {
-  const names = [
+  const names = useMemo(() => [
     "CUBA",
     "SPAIN",
     "PARAGUAY",
@@ -25,15 +25,15 @@ const CountryChanger = () => {
     "GIBRALTAR",
     "PHILIPPINES",
     "BRAZIL",
-
     "PORTUGAL",
-  ];
+  ], []);
+
   const [newName, setnewName] = useState("");
 
   const shuffle = useCallback(() => {
     const index = Math.floor(Math.random() * names.length);
     setnewName(names[index]);
-  }, []);
+  }, [names]);
 
   useEffect(() => {
     const intervalID = setInterval(shuffle, 3000);

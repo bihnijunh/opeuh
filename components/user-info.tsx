@@ -4,13 +4,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card";
 import { usePathname } from 'next/navigation';
-import { calculateTotal } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { ArrowUpIcon, ArrowDownIcon, RefreshCcw } from 'lucide-react';
-import { getReceivedTransactions } from "@/actions/getReceivedTransactions";
-import { getSentTransactions } from "@/actions/getSentTransactions";
-import { Transaction } from "@/transaction-types";
 
 interface UserInfoProps {
   user?: ExtendedUser;
@@ -33,7 +29,7 @@ export const UserInfo = ({ user }: UserInfoProps) => {
   const pathname = usePathname();
   const [conversionRates, setConversionRates] = useState<ConversionRates>({ btc: 0, usdt: 0, eth: 0 });
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchConversionRates = async () => {
@@ -52,7 +48,6 @@ export const UserInfo = ({ user }: UserInfoProps) => {
 
     fetchConversionRates();
     generateMockChartData();
-    fetchRecentTransactions();
   }, []);
 
   const generateMockChartData = () => {
@@ -64,30 +59,6 @@ export const UserInfo = ({ user }: UserInfoProps) => {
       });
     }
     setChartData(data);
-  };
-
-  const fetchRecentTransactions = async () => {
-    try {
-      const receivedResult = await getReceivedTransactions(1, 5);
-      const sentResult = await getSentTransactions(1, 5);
-      
-      if (receivedResult.success && sentResult.success) {
-        const allTransactions: Transaction[] = [
-          ...receivedResult.transactions.map((t: any) => ({
-            ...t,
-            type: 'received' as const,
-          })),
-          ...sentResult.transactions.map((t: any) => ({
-            ...t,
-            type: 'sent' as const,
-          }))
-        ];
-        allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setRecentTransactions(allTransactions.slice(0, 5));
-      }
-    } catch (error) {
-      console.error("Error fetching recent transactions:", error);
-    }
   };
 
   return (
@@ -116,14 +87,14 @@ export const UserInfo = ({ user }: UserInfoProps) => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                ${calculateTotal(Number(user?.btc) || 0, Number(user?.eth) || 0, Number(user?.usdt) || 0).toFixed(2)}
+                ${0.00}
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Available balance</p>
             </CardContent>
           </Card>
-          <CryptoCard title="BTC" amount={Number(user?.btc) || 0} rate={conversionRates.btc} />
-          <CryptoCard title="ETH" amount={Number(user?.eth) || 0} rate={conversionRates.eth} />
-          <CryptoCard title="USDT" amount={Number(user?.usdt) || 0} rate={conversionRates.usdt} />
+          <CryptoCard title="BTC" amount={0} rate={conversionRates.btc} />
+          <CryptoCard title="ETH" amount={0} rate={conversionRates.eth} />
+          <CryptoCard title="USDT" amount={0} rate={conversionRates.usdt} />
         </div>
         <Card className="mt-8 bg-white dark:bg-gray-800">
           <CardHeader>
@@ -142,24 +113,6 @@ export const UserInfo = ({ user }: UserInfoProps) => {
             </div>
           </CardContent>
         </Card>
-        <div className="mt-8 grid gap-6 grid-cols-1 md:grid-cols-2">
-          <Card className="bg-white dark:bg-gray-800">
-            <CardHeader>
-              <CardTitle className="text-gray-900 dark:text-gray-100">Recent Transactions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {recentTransactions.map((transaction) => (
-                  <TransactionItem
-                    key={transaction.id}
-                    transaction={transaction}
-                    userId={user?.id}
-                  />
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
       </main>
     </div>
   );
@@ -184,38 +137,6 @@ const CryptoCard = ({ title, amount, rate }: CryptoCardProps) => (
     </CardContent>
   </Card>
 );
-
-interface TransactionItemProps {
-  transaction: Transaction;
-  userId?: string;
-}
-
-const TransactionItem = ({ transaction, userId }: TransactionItemProps) => {
-  const isReceived = transaction.recipientId === userId;
-  const type = isReceived ? 'received' : 'sent';
-  const address = isReceived ? transaction.senderAddress : transaction.walletAddress;
-  const username = isReceived ? transaction.senderUsername : '';
-
-  return (
-    <li className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex items-center">
-        {isReceived ? (
-          <ArrowDownIcon className="h-5 w-5 text-green-500 dark:text-green-400 mr-2" />
-        ) : (
-          <ArrowUpIcon className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
-        )}
-        <div>
-          <p className="font-medium text-gray-900 dark:text-gray-100">
-            {type === 'received' ? 'Received' : 'Sent'} {transaction.amount} {transaction.cryptoType}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(transaction.date).toLocaleDateString()}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">{username || address}</p>
-        </div>
-      </div>
-      <RefreshCcw className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-    </li>
-  );
-};
 
 function MountainIcon(props: React.SVGProps<SVGSVGElement>) {
   return (

@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { AddBankAccountComponent } from "@/components/AddBankAccountComponent";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 import { Switch } from "@/components/ui/switch";
@@ -17,7 +16,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { settings } from "@/actions/settings";
-import { saveBankAccount } from "@/actions/bankAccount";
 import {
   Form,
   FormField,
@@ -30,7 +28,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-import { BankAccount } from "@/banAccount-type";
 
 const SettingsPage = () => {
   const user = useCurrentUser();
@@ -38,10 +35,6 @@ const SettingsPage = () => {
   const [success, setSuccess] = useState<string | undefined>();
   const { update } = useSession();
   const [isPending, startTransition] = useTransition();
-  const [hasAccount, setHasAccount] = useState(false);
-  const [accounts, setAccounts] = useState<BankAccount[]>([]);
-
-  
 
   const form = useForm<z.infer<typeof SettingsSchema>>({
     resolver: zodResolver(SettingsSchema),
@@ -72,10 +65,6 @@ const SettingsPage = () => {
         .catch(() => setError("Something went wrong!"));
     });
   }
-
- 
-
- 
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100 dark:bg-gray-900">
@@ -219,21 +208,6 @@ const SettingsPage = () => {
               </Button>
             </form>
           </Form>
-        </CardContent>
-      </Card>
-
-      <Card className="w-full max-w-lg mt-4">
-        <CardHeader>
-          <p className="text-2xl font-semibold text-center">
-            🏦 Bank Account Information
-          </p>
-        </CardHeader>
-        <CardContent>
-        
-            <AddBankAccountComponent  />
-         
-          <FormError message={error} />
-          <FormSuccess message={success} />
         </CardContent>
       </Card>
     </div>

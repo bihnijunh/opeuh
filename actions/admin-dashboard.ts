@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
+import { ExtendedUser } from "@/next-auth";
 
 export async function getDashboardDataForUser(userId: string) {
   const session = await auth();
@@ -34,28 +35,38 @@ export async function updateDashboardData(userId: string, data: {
     throw new Error('Unauthorized');
   }
 
-  await db.dashboardData.upsert({
+  return await db.dashboardData.upsert({
     where: { userId },
-    update: data,
     create: {
       userId,
       ...data,
     },
+    update: data,
   });
 }
 
 export async function getCurrentUser() {
   const session = await auth();
   
-  if (!session?.user || session.user.role !== 'ADMIN') {
-    throw new Error('Unauthorized');
+  if (!session?.user?.id) {
+    return null;
   }
 
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      transactions: true,
+      bankAccount: true,
+      cryptoSellTransactions: true,
+    }
+  });
+
+  if (!user) return null;
+
   return {
-    id: session.user.id,
-    role: session.user.role,
-    // Add any other necessary fields here
-  };
+    ...user,
+    isOAuth: !user.password,
+  } as ExtendedUser;
 }
 
 export async function getAllUsers() {
@@ -70,7 +81,11 @@ export async function getAllUsers() {
       id: true,
       name: true,
       email: true,
-    },
+      role: true,
+      emailVerified: true,
+      isTwoFactorEnabled: true,
+      username: true,
+    }
   });
 
   return users;

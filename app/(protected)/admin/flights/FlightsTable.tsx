@@ -29,7 +29,7 @@ export function FlightsTable() {
         const result = await getFlights();
         if (result.error) {
           toast.error(result.error);
-        } else {
+        } else if (result.data) {
           // Format dates for display
           const formattedFlights = result.data.map((flight: any) => ({
             ...flight,
@@ -59,7 +59,7 @@ export function FlightsTable() {
 
   return (
     <DataTable 
-      searchKey="fromCity" 
+      searchKey="fromCity"
       columns={columns} 
       data={flights} 
     />

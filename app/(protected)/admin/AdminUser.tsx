@@ -19,6 +19,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
+import { UserRole } from "@prisma/client";
 
 interface AdminUsersPageProps {
   users: User[];
@@ -131,7 +132,7 @@ export default function AdminUsersPage({ users: initialUsers }: AdminUsersPagePr
                         <TableCell>
                           <span className={`
                             px-2 py-1 rounded-full text-xs font-medium
-                            ${user.role === "admin" 
+                            ${user.role === UserRole.ADMIN 
                               ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                               : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
                             }`
