@@ -66,11 +66,9 @@ export default function FlightStatusPage() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Flight Status Management</h1>
-      
-      <div className="mb-6">
-        <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+    <div className="p-6 space-y-8">
+      <div className="overflow-x-auto">
+        <div className="inline-flex min-w-full gap-1 rounded-lg bg-muted/50 p-1 text-muted-foreground">
           <AdminTab href="/admin" isActive={false}>
             Users
           </AdminTab>
@@ -88,7 +86,6 @@ export default function FlightStatusPage() {
           </AdminTab>
         </div>
       </div>
-
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Search Flight</CardTitle>
@@ -141,7 +138,7 @@ export default function FlightStatusPage() {
           <CardHeader>
             <CardTitle>Flight Status</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <FlightStatusForm
               flightId={flight.id}
               initialData={{

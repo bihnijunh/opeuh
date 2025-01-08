@@ -86,3 +86,8 @@ export const AccountSchema = z.object({
   iban: z.string().optional(),
   swiftCode: z.string().optional(),
 });
+
+export const editUserSchema = z.object({
+  userId: z.string(),
+  role: z.enum(["USER", "ADMIN"]),
+});

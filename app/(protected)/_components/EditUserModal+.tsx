@@ -61,12 +61,26 @@ export const EditUserModal = ({
 
   const onSubmit = async (values: any) => {
     try {
-      const result = await updateUser(user.id, values);
+      setError(undefined);
+      setSuccess(undefined);
+      
+      const result = await updateUser(user.id, {
+        name: values.name,
+        email: values.email,
+        role: values.role as UserRole,
+        btc: parseFloat(values.btc),
+        usdt: parseFloat(values.usdt),
+        eth: parseFloat(values.eth),
+      });
+
       if (result.error) {
         setError(result.error);
       } else if (result.success && result.user) {
         setSuccess(result.success);
         onUserUpdated(result.user);
+        setTimeout(() => {
+          onClose();
+        }, 1000);
       }
     } catch (error) {
       setError("An unexpected error occurred");

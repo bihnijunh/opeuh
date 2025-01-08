@@ -3,14 +3,27 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminTab } from "../../_components/AdminTab";
-import Link from "next/link";
 import { BookedFlightTable } from "./table";
 
 interface BookedFlightsClientProps {
-  formattedBookings: any[];
+  formattedBookings: {
+    id: string;
+    ticketNumber: string;
+    passengerName: string;
+    passengerEmail: string;
+    flightNumber: string;
+    departure: string;
+    arrival: string;
+    departureTime: string;
+    arrivalTime: string;
+    status: string;
+    amount: number;
+    paymentMethod: string;
+    createdAt: string;
+  }[];
 }
 
-export default function BookedFlightsClient({ formattedBookings }: BookedFlightsClientProps) {
+export function BookedFlightsClient({ formattedBookings }: BookedFlightsClientProps) {
   return (
     <div className="p-6 space-y-8">
       <div className="overflow-x-auto">
