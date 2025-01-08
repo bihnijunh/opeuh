@@ -5,7 +5,14 @@ import { usePathname } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminTab } from "../../_components/AdminTab";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { 
+  UserIcon, 
+  PlaneTakeoffIcon, 
+  CalendarCheckIcon, 
+  ActivityIcon, 
+  CreditCardIcon,
+  Plus 
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FlightsTable } from "./FlightsTable";
 
@@ -17,19 +24,19 @@ export default function FlightsPage() {
     <div className="p-6 space-y-8">
       <div className="overflow-x-auto">
         <div className="inline-flex min-w-full gap-1 rounded-lg bg-muted/50 p-1 text-muted-foreground">
-          <AdminTab href="/admin" isActive={pathname === '/admin'}>
+          <AdminTab href="/admin" isActive={pathname === '/admin'} icon={UserIcon}>
             Users
           </AdminTab>
-          <AdminTab href="/admin/flights" isActive={pathname.includes('/admin/flights')}>
+          <AdminTab href="/admin/flights" isActive={pathname.includes('/admin/flights')} icon={PlaneTakeoffIcon}>
             Create Flights
           </AdminTab>
-          <AdminTab href="/admin/booked-flights" isActive={false}>
+          <AdminTab href="/admin/booked-flights" isActive={false} icon={CalendarCheckIcon}>
             Booked Flights
           </AdminTab>
-          <AdminTab href="/admin/flight-status" isActive={false}>
+          <AdminTab href="/admin/flight-status" isActive={false} icon={ActivityIcon}>
             Flight Status
           </AdminTab>
-          <AdminTab href="/admin/payment-methods" isActive={false}>
+          <AdminTab href="/admin/payment-methods" isActive={false} icon={CreditCardIcon}>
             Payment Methods
           </AdminTab>
         </div>

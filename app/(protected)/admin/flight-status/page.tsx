@@ -9,6 +9,14 @@ import { getFlightStatusByParams } from '@/actions/flight';
 import { FlightStatusForm } from '@/components/admin/flight-status-form';
 import Link from 'next/link';
 import { cn } from "@/lib/utils";
+import { AdminTab } from "../../_components/AdminTab";
+import { 
+  UserIcon, 
+  PlaneTakeoffIcon, 
+  CalendarCheckIcon, 
+  ActivityIcon, 
+  CreditCardIcon 
+} from "lucide-react";
 
 // Extended Flight type with status fields
 interface FlightWithStatus extends Flight {
@@ -24,20 +32,6 @@ interface FlightWithStatus extends Flight {
   scheduledDepartureTime: Date | null;
   scheduledArrivalTime: Date | null;
 }
-
-const AdminTab = ({ href, isActive, children }: { href: string; isActive: boolean; children: React.ReactNode }) => (
-  <Link
-    href={href}
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-      isActive
-        ? "bg-background text-foreground shadow-sm"
-        : "text-muted-foreground hover:text-foreground"
-    )}
-  >
-    {children}
-  </Link>
-);
 
 export default function FlightStatusPage() {
   const [searchParams, setSearchParams] = useState({
@@ -69,19 +63,19 @@ export default function FlightStatusPage() {
     <div className="p-6 space-y-8">
       <div className="overflow-x-auto">
         <div className="inline-flex min-w-full gap-1 rounded-lg bg-muted/50 p-1 text-muted-foreground">
-          <AdminTab href="/admin" isActive={false}>
+          <AdminTab href="/admin" isActive={false} icon={UserIcon}>
             Users
           </AdminTab>
-          <AdminTab href="/admin/flights" isActive={false}>
+          <AdminTab href="/admin/flights" isActive={false} icon={PlaneTakeoffIcon}>
             Create Flights
           </AdminTab>
-          <AdminTab href="/admin/booked-flights" isActive={false}>
+          <AdminTab href="/admin/booked-flights" isActive={false} icon={CalendarCheckIcon}>
             Booked Flights
           </AdminTab>
-          <AdminTab href="/admin/flight-status" isActive={true}>
+          <AdminTab href="/admin/flight-status" isActive={true} icon={ActivityIcon}>
             Flight Status
           </AdminTab>
-          <AdminTab href="/admin/payment-methods" isActive={false}>
+          <AdminTab href="/admin/payment-methods" isActive={false} icon={CreditCardIcon}>
             Payment Methods
           </AdminTab>
         </div>

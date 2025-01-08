@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { UserRole } from "@prisma/client";
-import { Search, MoreHorizontal, UserIcon, DollarSignIcon, ActivityIcon, CreditCardIcon, UsersIcon, PlaneIcon } from "lucide-react";
+import { Search, MoreHorizontal, UserIcon, DollarSignIcon, ActivityIcon, CreditCardIcon, UsersIcon, PlaneIcon, PlaneTakeoffIcon, CalendarCheckIcon } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -302,19 +302,19 @@ export default function AdminPageClient({ users, totalUsers }: AdminPageProps) {
     >
       <div className="overflow-x-auto">
         <div className="inline-flex min-w-full gap-1 rounded-lg bg-muted/50 p-1 text-muted-foreground">
-          <AdminTab href="/admin" isActive={pathname === "/admin"}>
+          <AdminTab href="/admin" isActive={pathname === "/admin"} icon={UserIcon}>
             Users
           </AdminTab>
-          <AdminTab href="/admin/flights" isActive={pathname.includes("/admin/flights")}>
+          <AdminTab href="/admin/flights" isActive={pathname.includes("/admin/flights")} icon={PlaneTakeoffIcon}>
             Create Flights
           </AdminTab>
-          <AdminTab href="/admin/booked-flights" isActive={pathname.includes("/admin/booked-flights")}>
+          <AdminTab href="/admin/booked-flights" isActive={pathname.includes("/admin/booked-flights")} icon={CalendarCheckIcon}>
             Booked Flights
           </AdminTab>
-          <AdminTab href="/admin/flight-status" isActive={pathname.includes("/admin/flight-status")}>
+          <AdminTab href="/admin/flight-status" isActive={pathname.includes("/admin/flight-status")} icon={ActivityIcon}>
             Flight Status
           </AdminTab>
-          <AdminTab href="/admin/payment-methods" isActive={pathname.includes("/admin/payment-methods")}>
+          <AdminTab href="/admin/payment-methods" isActive={pathname.includes("/admin/payment-methods")} icon={CreditCardIcon}>
             Payment Methods
           </AdminTab>
         </div>

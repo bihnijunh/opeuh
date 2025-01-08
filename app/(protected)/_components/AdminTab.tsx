@@ -22,8 +22,8 @@ interface AdminTabProps {
 const tabVariants = {
   initial: { opacity: 0, y: -10 },
   animate: { opacity: 1, y: 0 },
-  hover: { y: -2 },
-  tap: { scale: 0.98 }
+  hover: { scale: 1.05, y: -2 },
+  tap: { scale: 0.95 }
 };
 
 const getTabIcon = (label: string) => {
@@ -58,35 +58,30 @@ export const AdminTab = ({ href, isActive, children, icon: IconProp }: AdminTabP
       <Link
         href={href}
         className={cn(
-          "relative flex flex-col items-center gap-1 px-3 py-2 text-sm font-medium transition-all",
-          "rounded-lg hover:bg-accent",
+          "relative flex min-w-[72px] flex-col items-center gap-1 px-3 py-2 text-sm font-medium transition-all",
+          "rounded-lg",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-          "sm:flex-row sm:gap-2 sm:px-6 sm:py-3",
+          "sm:min-w-[100px] sm:flex-row sm:gap-2 sm:px-6 sm:py-3",
           isActive
-            ? "bg-primary text-primary-foreground shadow-lg"
-            : "text-muted-foreground hover:text-foreground"
+            ? "bg-primary/10 text-primary shadow-sm"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         )}
       >
         {TabIcon && (
           <TabIcon className={cn(
             "h-5 w-5 flex-shrink-0",
-            "sm:h-4 sm:w-4 md:h-5 md:w-5"
+            "sm:h-4 sm:w-4 md:h-5 md:w-5",
+            isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
           )} />
         )}
         <span className={cn(
           "text-[10px] font-medium leading-tight",
-          "sm:text-sm sm:leading-normal"
+          "sm:text-sm sm:leading-normal",
+          isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
         )}>
           {children}
         </span>
       </Link>
-      {isActive && (
-        <motion.div
-          layoutId="activeTab"
-          className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-primary"
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        />
-      )}
     </motion.div>
   );
 };
