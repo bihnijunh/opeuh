@@ -54,7 +54,7 @@ export default async function RootLayout({
         </Script>
       </head>
       <body className={inter.className}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
             <SessionProvider session={session}>
               <LoadingProvider>
                 <div className="flex flex-col min-h-screen bg-background text-foreground">
