@@ -13,24 +13,7 @@ interface UserWithBalance extends User {
   password: string | null;
   role: UserRole;
   isTwoFactorEnabled: boolean;
-  
-  usdt: number;
-  btc: number;
-  eth: number;
 }
-
-export const updateUserBalance = async (id: string, balances: { btc: number, usdt: number, eth: number }) => {
-  try {
-    const updatedUser = await db.user.update({
-      where: { id },
-      data: balances,
-    });
-    return updatedUser;
-  } catch (error) {
-    console.error("Error updating user balance:", error);
-    return null;
-  }
-};
 
 export const getUserByEmail = async (email: string) => {
   try {
@@ -57,18 +40,12 @@ export const getUserById = async (id: string): Promise<UserWithBalance | null> =
         password: true,
         role: true,
         isTwoFactorEnabled: true,
-        usdt: true,
-        btc: true,
-        eth: true,
       },
     });
 
     if (userWithBalance) {
       return {
         ...userWithBalance,
-        usdt: Number(userWithBalance.usdt),
-        btc: Number(userWithBalance.btc),
-        eth: Number(userWithBalance.eth),
         isOAuth: false, // Set this based on your logic
       } as UserWithBalance;
     }

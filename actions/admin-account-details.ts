@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { currentUser } from "@/lib/auth";
 
 export type AccountDetails = {
+  id?: string;
+  userId?: string;
   accountNumber: string;
   currency: string;
   accountType: string;
@@ -42,7 +44,10 @@ export async function getAccountDetails(userId?: string): Promise<AccountDetails
       return getDefaultAccountDetails();
     }
 
-    return accountDetails as AccountDetails
+    return {
+      ...accountDetails,
+      status: accountDetails.status || "active"
+    } as AccountDetails;
   } catch (error) {
     console.error("Error fetching account details:", error)
     return { error: "An unexpected error occurred" };
@@ -108,12 +113,12 @@ export const updateAccountDetails = async (
   }
 };
 
-function getDefaultAccountDetails(): AccountDetails {
+export async function getDefaultAccountDetails(): Promise<AccountDetails> {
   return {
-    accountNumber: "0000000000",
+    accountNumber: "",
     currency: "USD",
     accountType: "Checking",
-    status: "Active",
-    accountLimit: 1000,
-  }
+    status: "inactive",
+    accountLimit: 0
+  };
 }

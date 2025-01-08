@@ -145,34 +145,40 @@ export const sendVerificationEmail = async (
 
 export const sendFlightBookingConfirmationEmail = async (
   email: string,
-  ticketNumber: string,
-  flightDetails: {
-    departure: string;
-    arrival: string;
-    date: string;
-    time: string;
-  },
-  passengerName: string
+  bookingDetails: {
+    ticketNumber: string;
+    passengerName: string;
+    flightNumber: string;
+    departureAirport: string;
+    arrivalAirport: string;
+    departureTime: Date;
+    arrivalTime: Date;
+  }
 ) => {
-  const content = `
-    <h2>Flight Booking Confirmation</h2>
-    <p>Dear ${passengerName},</p>
-    <p>Your flight booking has been confirmed. Here are your flight details:</p>
-    <div style="background-color: #e9e9e9; padding: 15px; margin: 15px 0; border-radius: 5px;">
-      <p><strong>Ticket Number:</strong> ${ticketNumber}</p>
-      <p><strong>Departure:</strong> ${flightDetails.departure}</p>
-      <p><strong>Arrival:</strong> ${flightDetails.arrival}</p>
-      <p><strong>Date:</strong> ${flightDetails.date}</p>
-      <p><strong>Time:</strong> ${flightDetails.time}</p>
-    </div>
-    <p>Please arrive at the airport at least 2 hours before your scheduled departure time.</p>
-    <p>Thank you for choosing Milano Shipping Logistics!</p>
-  `;
+  const { ticketNumber, passengerName, flightNumber, departureAirport, arrivalAirport, departureTime, arrivalTime } = bookingDetails;
 
   await resend.emails.send({
-    from: "mail@milanosailexpress.com",
+    from: "Milano Shipping Logistics <noreply@milanoship.com>",
     to: email,
-    subject: "Flight Booking Confirmation - Milano Shipping Logistics",
-    html: emailTemplate(content)
+    subject: "Flight Booking Confirmation",
+    html: emailTemplate(`
+      <div class="header">
+        <h1>Flight Booking Confirmation</h1>
+      </div>
+      <div class="content">
+        <h2>Dear ${passengerName},</h2>
+        <p>Your flight booking has been confirmed. Here are your flight details:</p>
+        <ul>
+          <li>Ticket Number: ${ticketNumber}</li>
+          <li>Flight Number: ${flightNumber}</li>
+          <li>From: ${departureAirport}</li>
+          <li>To: ${arrivalAirport}</li>
+          <li>Departure: ${departureTime.toLocaleString()}</li>
+          <li>Arrival: ${arrivalTime.toLocaleString()}</li>
+        </ul>
+        <p>Please arrive at the airport at least 2 hours before your scheduled departure time.</p>
+        <p>Thank you for choosing Milano Shipping Logistics!</p>
+      </div>
+    `)
   });
 };

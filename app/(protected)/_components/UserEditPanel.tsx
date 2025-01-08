@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserRole } from "@prisma/client";
-import { UserWithTransactions } from "@/transaction-types";
+import { UserWithTransactions } from "@/types";
 import { updateUser } from "@/actions/adminUsersPage";
 import { X, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
@@ -55,9 +55,6 @@ export const UserEditPanel = ({
       name: user?.name || "",
       email: user?.email || "",
       role: user?.role || UserRole.USER,
-      btc: user?.btc || 0,
-      usdt: user?.usdt || 0,
-      eth: user?.eth || 0,
     },
   });
 
@@ -146,32 +143,6 @@ export const UserEditPanel = ({
                   </FormItem>
                 )}
               />
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {["btc", "usdt", "eth"].map((currency) => (
-                  <FormField
-                    key={currency}
-                    control={form.control}
-                    name={currency as "btc" | "usdt" | "eth"}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{currency.toUpperCase()} Balance</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            step={currency === "usdt" ? "0.01" : "0.00000001"}
-                            value={field.value || 0}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                            className="w-full"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </div>
 
               <SheetFooter className="flex justify-end space-x-4 mt-6">
                 <Button

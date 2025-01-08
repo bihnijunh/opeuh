@@ -1,4 +1,5 @@
 export enum PaymentMethodType {
-  CRYPTO = "CRYPTO",
-  FIAT = "FIAT"
+  BANK_TRANSFER = "BANK_TRANSFER",
+  CREDIT_CARD = "CREDIT_CARD",
+  DEBIT_CARD = "DEBIT_CARD"
 }

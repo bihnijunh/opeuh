@@ -17,20 +17,12 @@ model User {
   password                   String?
   role                       UserRole                @default(USER)
   isTwoFactorEnabled         Boolean                 @default(false)
-  btc                        Float                   @default(0)
-  eth                        Float                   @default(0)
-  usdt                       Float                   @default(0)
   username                   String?                 @unique
   accounts                   Account[]
   accountDetails             AccountDetails?
   cardData                   CardData?
-  cryptoSellTransactions     CryptoSellTransaction[]
   dashboardData              DashboardData?
   flights                    Flight[]
-  giftCardWithdrawals        GiftCardWithdrawal[]
-  receivedCryptoTransactions ReceivedTransaction[]   @relation("ReceivedCryptoTransactions")
-  receivedTransactions       Transaction[]           @relation("ReceivedTransactions")
-  transactions               Transaction[]           @relation("UserTransactions")
   twoFactorConfirmation      TwoFactorConfirmation?
   bankAccount                UserBankAccount?
   wireTransfers              WireTransfer[]
@@ -87,38 +79,6 @@ model TwoFactorConfirmation {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Transaction {
-  id            Int      @id @default(autoincrement())
-  date          DateTime
-  amount        Float
-  userId        String
-  btc           Boolean  @default(false)
-  eth           Boolean  @default(false)
-  transactionId String   @unique @default(cuid())
-  usdt          Boolean  @default(false)
-  walletAddress String
-  status        String   @default("pending")
-  recipientId   String?
-  recipient     User?    @relation("ReceivedTransactions", fields: [recipientId], references: [id], map: "recipient_transactions_fkey")
-  user          User     @relation("UserTransactions", fields: [userId], references: [id], map: "user_transactions_fkey")
-
-  @@index([userId])
-  @@index([recipientId])
-}
-
-model ReceivedTransaction {
-  id              String   @id @default(cuid())
-  date            DateTime @default(now())
-  amount          Float
-  cryptoType      String
-  senderAddress   String
-  recipientId     String
-  senderUsername  String
-  status          String   @default("pending")
-  transactionHash String   @unique
-  recipient       User     @relation("ReceivedCryptoTransactions", fields: [recipientId], references: [id])
-}
-
 model BankAccount {
   id            String @id @default(cuid())
   bankName      String
@@ -128,47 +88,15 @@ model BankAccount {
 }
 
 model UserBankAccount {
-  id                     String                  @id @default(cuid())
-  userId                 String                  @unique
-  bankName               String
-  accountNumber          String
-  routingNumber          String
-  iban                   String?
-  swiftCode              String?
-  accountHolderName      String
-  cryptoSellTransactions CryptoSellTransaction[]
-  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model CryptoSellTransaction {
-  id              String          @id @default(cuid())
-  userId          String
-  bankAccountId   String
-  currency        String
-  amount          Float
-  status          String          @default("pending")
-  paid            Boolean         @default(false)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  userBankAccount UserBankAccount @relation(fields: [bankAccountId], references: [id])
-  user            User            @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([bankAccountId])
-}
-
-model GiftCardWithdrawal {
-  id           String   @id @default(cuid())
-  userId       String
-  giftCardName String
-  amount       Float
-  cryptoType   String
-  status       String   @default("pending")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id])
-
-  @@index([userId])
+  id                String @id @default(cuid())
+  userId            String @unique
+  bankName          String
+  accountNumber     String
+  routingNumber     String
+  iban              String?
+  swiftCode         String?
+  accountHolderName String
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model DashboardData {
@@ -199,105 +127,26 @@ model AccountDetails {
   accountNumber        String
   currency             String
   accountType          String
-  status               String
-  accountLimit         Float
-  transactionCount     Int      @default(0)
-  lastTransactionReset DateTime @default(now())
+  accountLimit         Float    @default(0)
+  status              String    @default("active")
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model WireTransfer {
-  id                  String   @id @default(cuid())
-  userId              String
-  destinationCurrency String
-  bankName            String
-  accountName         String
-  accountNumber       String
-  accountCountry      String
-  swiftCode           String
-  routingNumber       String
-  accountType         String
-  amount              Float
-  remarks             String?
-  status              String   @default("pending")
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  user                User     @relation(fields: [userId], references: [id])
+  id                String   @id @default(cuid())
+  userId            String
+  beneficiaryName   String
+  beneficiaryBank   String
+  accountNumber     String
+  swiftCode         String
+  amount            Float
+  status            String   @default("pending")
+  reference         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
-}
-
-model PaymentMethod {
-  id            String            @id @default(cuid())
-  name          String
-  type          PaymentMethodType
-  instructions  String
-  accountInfo   String?
-  walletAddress String?
-  isActive      Boolean           @default(true)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  bookings      FlightBooking[]
-}
-
-model Flight {
-  id                   String          @id @default(cuid())
-  fromCity            String
-  toCity              String
-  departureDate       DateTime
-  returnDate          DateTime?
-  price               Float
-  availableSeats      Int
-  flightNumber        String
-  airline             String
-  minPrice            Float?
-  maxPrice            Float?
-  minSeats            Int?
-  maxSeats            Int?
-  hoursBetween        Int?
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
-  userId              String
-  baseFlightId        String?
-  status              String?         @default("On Time")
-  departureTerminal   String?
-  arrivalTerminal     String?
-  departureGate       String?
-  arrivalGate         String?
-  baggageClaim        String?
-  actualDepartureTime DateTime?
-  estimatedArrivalTime DateTime?
-  scheduledDepartureTime DateTime?
-  scheduledArrivalTime DateTime?
-  aircraftModel       String?
-  aircraftType        String?
-  baseFlight          Flight?         @relation("FlightVariations", fields: [baseFlightId], references: [id])
-  variations          Flight[]        @relation("FlightVariations")
-  user                User            @relation(fields: [userId], references: [id])
-  bookings            FlightBooking[]
-
-  @@index([userId])
-  @@index([baseFlightId])
-}
-
-model FlightBooking {
-  id                 String        @id @default(cuid())
-  ticketNumber       String        @unique @default(dbgenerated("('TKT'::text || lpad((floor((random() * (100000)::double precision)))::text, 6, '0'::text))"))
-  flightId           String
-  paymentMethodId    String
-  amount             Float
-  passengerName      String
-  email              String
-  status             String        @default("PENDING")
-  paymentConfirmedAt DateTime?
-  approvedAt         DateTime?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  flight             Flight        @relation(fields: [flightId], references: [id])
-  paymentMethod      PaymentMethod @relation(fields: [paymentMethodId], references: [id])
-
-  @@index([flightId])
-  @@index([paymentMethodId])
 }
 
 enum UserRole {
@@ -306,6 +155,71 @@ enum UserRole {
 }
 
 enum PaymentMethodType {
-  CRYPTO
-  FIAT
+  BANK_TRANSFER
+  CREDIT_CARD
+  DEBIT_CARD
+}
+
+model PaymentMethod {
+  id            String            @id @default(cuid())
+  name          String
+  type          PaymentMethodType
+  instructions  String?
+  walletAddress String?
+  accountInfo   String?
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  bookings      FlightBooking[]
+}
+
+model Flight {
+  id                 String        @id @default(cuid())
+  flightNumber       String        @unique
+  airline            String
+  fromCity           String
+  toCity             String
+  departureAirport   String
+  arrivalAirport     String
+  departureTime      DateTime
+  arrivalTime        DateTime
+  departureDate      DateTime
+  returnDate         DateTime?
+  price             Float
+  userId            String
+  status            String        @default("scheduled")
+  availableSeats    Int          @default(100)
+  departureTerminal  String?
+  arrivalTerminal    String?
+  departureGate      String?
+  arrivalGate        String?
+  baggageClaim       String?
+  aircraftModel      String?
+  aircraftType       String?
+  actualDepartureTime DateTime?
+  estimatedArrivalTime DateTime?
+  scheduledDepartureTime DateTime?
+  scheduledArrivalTime DateTime?
+  user              User          @relation(fields: [userId], references: [id])
+  bookings          FlightBooking[]
+
+  @@index([userId])
+}
+
+model FlightBooking {
+  id                 String        @id @default(cuid())
+  ticketNumber       String        @unique @default(dbgenerated("('TKT'::text || lpad((floor((random() * (100000)::double precision)))::text, 6, '0'::text))"))
+  flightId           String
+  status             String        @default("pending")
+  passengerName      String?
+  email              String?
+  amount             Float
+  paymentMethodId    String
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  flight             Flight        @relation(fields: [flightId], references: [id])
+  paymentMethod      PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  @@index([flightId])
+  @@index([paymentMethodId])
 }

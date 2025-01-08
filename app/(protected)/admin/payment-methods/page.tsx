@@ -29,10 +29,9 @@ interface PaymentMethod {
   id: string;
   name: string;
   type: PaymentMethodType;
-  instructions: string;
+  instructions: string | null;
   walletAddress: string | null;
   accountInfo: string | null;
-  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,10 +40,16 @@ interface FormData {
   name: string;
   type: PaymentMethodType;
   instructions: string;
-  accountInfo: string;
-  walletAddress: string;
+  accountInfo: string | null;
+  walletAddress: string | null;
   isActive: boolean;
 }
+
+const paymentMethodTypes = [
+  { label: "Bank Transfer", value: PaymentMethodType.BANK_TRANSFER },
+  { label: "Credit Card", value: PaymentMethodType.CREDIT_CARD },
+  { label: "Debit Card", value: PaymentMethodType.DEBIT_CARD },
+];
 
 export default function PaymentMethodsPage() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -53,10 +58,10 @@ export default function PaymentMethodsPage() {
   const [currentMethod, setCurrentMethod] = useState<PaymentMethod | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: "",
-    type: PaymentMethodType.FIAT,
+    type: PaymentMethodType.BANK_TRANSFER,
     instructions: "",
-    accountInfo: "",
-    walletAddress: "",
+    accountInfo: null,
+    walletAddress: null,
     isActive: true,
   });
 
@@ -70,7 +75,10 @@ export default function PaymentMethodsPage() {
       if (methods.data) {
         setPaymentMethods(methods.data.map(method => ({
           ...method,
-          type: method.type as PaymentMethodType
+          instructions: method.instructions || null,
+          walletAddress: method.walletAddress || null,
+          accountInfo: method.accountInfo || null,
+          type: method.type as PaymentMethodType,
         })));
       }
     } catch (error) {
@@ -83,9 +91,17 @@ export default function PaymentMethodsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const submitData = {
+        name: formData.name,
+        type: formData.type,
+        instructions: formData.instructions || "",
+        accountInfo: formData.type === PaymentMethodType.BANK_TRANSFER ? formData.accountInfo : null,
+        walletAddress: formData.type === PaymentMethodType.CREDIT_CARD || formData.type === PaymentMethodType.DEBIT_CARD ? formData.walletAddress : null,
+      };
+
       const result = isEditing
-        ? await updatePaymentMethod(currentMethod!.id, formData)
-        : await createPaymentMethod(formData);
+        ? await updatePaymentMethod(currentMethod!.id, submitData)
+        : await createPaymentMethod(submitData);
 
       if (result.error) {
         toast.error(result.error);
@@ -109,10 +125,10 @@ export default function PaymentMethodsPage() {
     setFormData({
       name: method.name,
       type: method.type,
-      instructions: method.instructions,
-      accountInfo: method.accountInfo || "",
-      walletAddress: method.walletAddress || "",
-      isActive: method.isActive,
+      instructions: method.instructions || "",
+      accountInfo: method.accountInfo,
+      walletAddress: method.walletAddress,
+      isActive: true,
     });
   };
 
@@ -137,10 +153,10 @@ export default function PaymentMethodsPage() {
     setCurrentMethod(null);
     setFormData({
       name: "",
-      type: PaymentMethodType.FIAT,
+      type: PaymentMethodType.BANK_TRANSFER,
       instructions: "",
-      accountInfo: "",
-      walletAddress: "",
+      accountInfo: null,
+      walletAddress: null,
       isActive: true,
     });
   };
@@ -180,8 +196,11 @@ export default function PaymentMethodsPage() {
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={PaymentMethodType.CRYPTO}>Cryptocurrency</SelectItem>
-                <SelectItem value={PaymentMethodType.FIAT}>Fiat/Traditional</SelectItem>
+                {paymentMethodTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -198,32 +217,24 @@ export default function PaymentMethodsPage() {
             />
           </div>
 
-          {formData.type === PaymentMethodType.CRYPTO && (
+          {(formData.type === PaymentMethodType.CREDIT_CARD || formData.type === PaymentMethodType.DEBIT_CARD) && (
             <div>
               <label className="block text-sm font-medium mb-1">Wallet Address</label>
               <Input
-                value={formData.walletAddress}
+                value={formData.walletAddress || ''}
                 onChange={(e) =>
                   setFormData({ ...formData, walletAddress: e.target.value })
                 }
-                placeholder="Enter wallet address for crypto payments"
+                placeholder="Enter wallet address for card payments"
               />
-              {formData.walletAddress && (
-                <div className="mt-4">
-                  <div className="flex justify-center">
-                    <QRCodeSVG value={formData.walletAddress} size={200} />
-                  </div>
-                  <p className="text-xs mt-1 text-gray-500 break-all">{formData.walletAddress}</p>
-                </div>
-              )}
             </div>
           )}
 
-          {formData.type === PaymentMethodType.FIAT && (
+          {(formData.type === PaymentMethodType.BANK_TRANSFER) && (
             <div>
               <label className="block text-sm font-medium mb-1">Account Information</label>
               <Textarea
-                value={formData.accountInfo}
+                value={formData.accountInfo || ''}
                 onChange={(e) =>
                   setFormData({ ...formData, accountInfo: e.target.value })
                 }
@@ -284,7 +295,7 @@ export default function PaymentMethodsPage() {
                 </div>
               </div>
               <p className="text-sm">{method.instructions}</p>
-              {method.type === PaymentMethodType.CRYPTO && method.walletAddress && (
+              {(method.type === PaymentMethodType.CREDIT_CARD || method.type === PaymentMethodType.DEBIT_CARD) && method.walletAddress && (
                 <div className="mt-2">
                   <div className="flex justify-center">
                     <QRCodeSVG value={method.walletAddress} size={150} />
@@ -292,17 +303,20 @@ export default function PaymentMethodsPage() {
                   <p className="text-xs mt-1 text-gray-500 break-all">{method.walletAddress}</p>
                 </div>
               )}
-              {method.type === PaymentMethodType.FIAT && method.accountInfo && (
+              {(method.type === PaymentMethodType.BANK_TRANSFER) && method.accountInfo && (
                 <p className="text-sm text-gray-600">{method.accountInfo}</p>
               )}
               <div className="flex items-center space-x-2">
                 <Switch
-                  checked={method.isActive}
+                  checked={true}
                   onCheckedChange={async (checked) => {
                     try {
                       await updatePaymentMethod(method.id, {
-                        ...method,
-                        isActive: checked,
+                        name: method.name,
+                        type: method.type,
+                        instructions: method.instructions || "",
+                        accountInfo: method.accountInfo,
+                        walletAddress: method.walletAddress,
                       });
                       fetchPaymentMethods();
                     } catch (error) {
@@ -311,7 +325,7 @@ export default function PaymentMethodsPage() {
                   }}
                 />
                 <span className="text-sm">
-                  {method.isActive ? "Active" : "Inactive"}
+                  Active
                 </span>
               </div>
             </div>

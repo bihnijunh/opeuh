@@ -17,9 +17,6 @@ export const updateUser = async (userId: string, values: {
   email?: string;
   role?: UserRole;
   isTwoFactorEnabled?: boolean;
-  btc?: number;
-  usdt?: number;
-  eth?: number;
   status?: string;
 }): Promise<{ error?: string; success?: string; user?: any }> => {
   try {
@@ -33,29 +30,12 @@ export const updateUser = async (userId: string, values: {
       return { error: "User ID is required" };
     }
 
-    // Validate numeric values
-    if (values.btc !== undefined && isNaN(values.btc)) {
-      return { error: "Invalid BTC value" };
-    }
-    if (values.usdt !== undefined && isNaN(values.usdt)) {
-      return { error: "Invalid USDT value" };
-    }
-    if (values.eth !== undefined && isNaN(values.eth)) {
-      return { error: "Invalid ETH value" };
-    }
-
     const updatedUser = await db.user.update({
       where: { id: userId },
       data: {
         name: values.name,
         email: values.email,
         role: values.role,
-        btc: values.btc,
-        usdt: values.usdt,
-        eth: values.eth,
-      },
-      include: {
-        transactions: true,
       }
     });
 
@@ -63,13 +43,7 @@ export const updateUser = async (userId: string, values: {
 
     return { 
       success: "User updated successfully!", 
-      user: {
-        ...updatedUser,
-        transactions: updatedUser.transactions.map(t => ({
-          ...t,
-          date: t.date?.toISOString(),
-        }))
-      }
+      user: updatedUser
     };
   } catch (error) {
     console.error("Error updating user:", error);
@@ -100,8 +74,8 @@ export const editUser = async (data: z.infer<typeof editUserSchema>) => {
       throw new Error("Failed to update user");
     }
 
-    return response.json();
+    return { success: "User updated!" };
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Something went wrong");
+    return { error: "Something went wrong!" };
   }
 };

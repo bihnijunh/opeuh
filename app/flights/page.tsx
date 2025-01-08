@@ -24,10 +24,10 @@ interface FlightWithVariations extends PrismaFlight {
 
 interface DisplayFlight {
   id: string;
-  airline: string;
-  fromCity: string;
-  toCity: string;
-  departureDate: string;
+  departureAirport: string;
+  arrivalAirport: string;
+  departureTime: string;
+  arrivalTime: string;
   price: number;
   availableSeats: number;
 }
@@ -72,9 +72,9 @@ export default function FlightsPage() {
     const searchFlights = async () => {
       try {
         const result = await getFlights({
-          fromCity: searchParams.get("from") || "",
-          toCity: searchParams.get("to") || "",
-          ...(isOneWay ? {} : { departureDate: searchParams.get("departureDate") || "" }),
+          departureAirport: searchParams.get("from") || "",
+          arrivalAirport: searchParams.get("to") || "",
+          ...(isOneWay ? {} : { departureTime: searchParams.get("departureDate") || "" }),
         });
 
         if (result.error) {
@@ -83,17 +83,17 @@ export default function FlightsPage() {
           // Convert PrismaFlight to DisplayFlight
           const displayFlights: DisplayFlight[] = result.data.map(flight => ({
             id: flight.id,
-            airline: flight.airline,
-            fromCity: flight.fromCity,
-            toCity: flight.toCity,
-            departureDate: flight.departureDate.toISOString(),
+            departureAirport: flight.departureAirport,
+            arrivalAirport: flight.arrivalAirport,
+            departureTime: flight.departureTime.toISOString(),
+            arrivalTime: flight.arrivalTime.toISOString(),
             price: flight.price,
             availableSeats: flight.availableSeats,
           }));
 
           // Group flights by date
           const grouped = displayFlights.reduce((acc: GroupedFlights[], flight) => {
-            const date = parseISO(flight.departureDate);
+            const date = parseISO(flight.departureTime);
             const existingGroup = acc.find((group) =>
               isSameDay(group.date, date)
             );
@@ -133,7 +133,13 @@ export default function FlightsPage() {
       try {
         const result = await getPaymentMethods();
         if (result.data) {
-          setPaymentMethods(result.data.filter(method => method.isActive));
+          setPaymentMethods(result.data.map(method => ({
+            ...method,
+            isActive: true,
+            instructions: method.instructions || '',
+            walletAddress: method.walletAddress || null,
+            accountInfo: method.accountInfo || null
+          })).filter(method => method.isActive));
         } else if (result.error) {
           toast.error("Failed to load payment methods");
         }
@@ -196,9 +202,9 @@ export default function FlightsPage() {
         // Refresh flights list
         const searchParams = new URLSearchParams(window.location.search);
         const flightsResult = await getFlights({
-          fromCity: searchParams.get("from") || "",
-          toCity: searchParams.get("to") || "",
-          ...(isOneWay ? {} : { departureDate: searchParams.get("departureDate") || "" }),
+          departureAirport: searchParams.get("from") || "",
+          arrivalAirport: searchParams.get("to") || "",
+          ...(isOneWay ? {} : { departureTime: searchParams.get("departureDate") || "" }),
         });
 
         if (flightsResult.error) {
@@ -206,10 +212,10 @@ export default function FlightsPage() {
         } else if (flightsResult.data) {
           const displayFlights: DisplayFlight[] = flightsResult.data.map(flight => ({
             id: flight.id,
-            airline: flight.airline,
-            fromCity: flight.fromCity,
-            toCity: flight.toCity,
-            departureDate: flight.departureDate.toISOString(),
+            departureAirport: flight.departureAirport,
+            arrivalAirport: flight.arrivalAirport,
+            departureTime: flight.departureTime.toISOString(),
+            arrivalTime: flight.arrivalTime.toISOString(),
             price: flight.price,
             availableSeats: flight.availableSeats,
           }));
@@ -295,23 +301,23 @@ export default function FlightsPage() {
                           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div className="flex-1 space-y-4">
                               <div className="flex items-center gap-3">
-                                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{flight.airline}</h3>
+                                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{flight.departureAirport}</h3>
                                 <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full">
                                   Direct
                                 </span>
                               </div>
                               <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
                                 <div className="flex flex-col">
-                                  <span className="text-lg font-medium">{flight.fromCity}</span>
+                                  <span className="text-lg font-medium">{flight.departureAirport}</span>
                                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                                    {format(parseISO(flight.departureDate), "h:mm a")}
+                                    {format(parseISO(flight.departureTime), "h:mm a")}
                                   </span>
                                 </div>
                                 <ArrowLongRightIcon className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                                 <div className="flex flex-col">
-                                  <span className="text-lg font-medium">{flight.toCity}</span>
+                                  <span className="text-lg font-medium">{flight.arrivalAirport}</span>
                                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                                    {format(addDays(parseISO(flight.departureDate), 0), "h:mm a")}
+                                    {format(parseISO(flight.arrivalTime), "h:mm a")}
                                   </span>
                                 </div>
                               </div>
@@ -354,23 +360,23 @@ export default function FlightsPage() {
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div className="flex-1 space-y-4">
                           <div className="flex items-center gap-3">
-                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{flight.airline}</h3>
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{flight.departureAirport}</h3>
                             <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full">
                               Direct
                             </span>
                           </div>
                           <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
                             <div className="flex flex-col">
-                              <span className="text-lg font-medium">{flight.fromCity}</span>
+                              <span className="text-lg font-medium">{flight.departureAirport}</span>
                               <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {format(parseISO(flight.departureDate), "h:mm a")}
+                                {format(parseISO(flight.departureTime), "h:mm a")}
                               </span>
                             </div>
                             <ArrowLongRightIcon className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                             <div className="flex flex-col">
-                              <span className="text-lg font-medium">{flight.toCity}</span>
+                              <span className="text-lg font-medium">{flight.arrivalAirport}</span>
                               <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {format(addDays(parseISO(flight.departureDate), 0), "h:mm a")}
+                                {format(parseISO(flight.arrivalTime), "h:mm a")}
                               </span>
                             </div>
                           </div>
@@ -424,16 +430,22 @@ export default function FlightsPage() {
                       <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl mt-2">
                         <div className="space-y-1">
                           <span className="text-gray-500 text-sm">From</span>
-                          <p className="font-semibold text-lg">{selectedFlight.fromCity}</p>
+                          <p className="font-semibold text-lg">{selectedFlight.departureAirport}</p>
                         </div>
                         <div className="space-y-1">
                           <span className="text-gray-500 text-sm">To</span>
-                          <p className="font-semibold text-lg">{selectedFlight.toCity}</p>
+                          <p className="font-semibold text-lg">{selectedFlight.arrivalAirport}</p>
                         </div>
                         <div className="space-y-1">
-                          <span className="text-gray-500 text-sm">Date</span>
+                          <span className="text-gray-500 text-sm">Departure Time</span>
                           <p className="font-semibold">
-                            {format(parseISO(selectedFlight.departureDate), "MMM d, yyyy")}
+                            {format(parseISO(selectedFlight.departureTime), "MMM d, yyyy h:mm a")}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-gray-500 text-sm">Arrival Time</span>
+                          <p className="font-semibold">
+                            {format(parseISO(selectedFlight.arrivalTime), "MMM d, yyyy h:mm a")}
                           </p>
                         </div>
                         <div className="space-y-1">

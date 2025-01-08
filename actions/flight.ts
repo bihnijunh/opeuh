@@ -35,34 +35,29 @@ interface FlightStatus {
 }
 
 export async function getFlights(params?: {
-  fromCity?: string;
-  toCity?: string;
-  departureDate?: string;
-  returnDate?: string;
-  airline?: string;
+  departureAirport?: string;
+  arrivalAirport?: string;
+  departureTime?: string;
+  arrivalTime?: string;
   includeVariations?: boolean;
 }): Promise<{ data?: FlightWithVariations[]; error?: string }> {
   try {
     const where: Prisma.FlightWhereInput = {};
     
-    if (params?.fromCity) {
-      where.fromCity = params.fromCity;
+    if (params?.departureAirport) {
+      where.departureAirport = params.departureAirport;
     }
     
-    if (params?.toCity) {
-      where.toCity = params.toCity;
+    if (params?.arrivalAirport) {
+      where.arrivalAirport = params.arrivalAirport;
     }
     
-    if (params?.airline) {
-      where.airline = params.airline;
-    }
-    
-    if (params?.departureDate) {
-      const date = new Date(params.departureDate);
+    if (params?.departureTime) {
+      const date = new Date(params.departureTime);
       const nextDay = new Date(date);
       nextDay.setDate(nextDay.getDate() + 1);
       
-      where.departureDate = {
+      where.departureTime = {
         gte: date,
         lt: nextDay,
       };
@@ -71,7 +66,7 @@ export async function getFlights(params?: {
     const flights = await db.flight.findMany({
       where,
       orderBy: {
-        departureDate: "asc",
+        departureTime: "asc",
       },
     });
 
@@ -80,9 +75,9 @@ export async function getFlights(params?: {
         flights.map(async (flight) => {
           const variations = await db.flight.findMany({
             where: {
-              fromCity: flight.fromCity,
-              toCity: flight.toCity,
-              departureDate: {
+              departureAirport: flight.departureAirport,
+              arrivalAirport: flight.arrivalAirport,
+              departureTime: {
                 gte: new Date(),
               },
               NOT: {
@@ -91,7 +86,7 @@ export async function getFlights(params?: {
             },
             take: 3,
             orderBy: {
-              departureDate: "asc",
+              departureTime: "asc",
             },
           });
           return { ...flight, variations };
@@ -102,8 +97,8 @@ export async function getFlights(params?: {
 
     return { data: flights };
   } catch (error) {
-    console.error("[GET_FLIGHTS]", error);
-    return { error: "Failed to fetch flights" };
+    console.error("Error getting flights:", error);
+    return { error: "Failed to get flights" };
   }
 }
 
@@ -123,9 +118,9 @@ export async function getFlight(
     if (includeVariations) {
       const variations = await db.flight.findMany({
         where: {
-          fromCity: flight.fromCity,
-          toCity: flight.toCity,
-          departureDate: {
+          departureAirport: flight.departureAirport,
+          arrivalAirport: flight.arrivalAirport,
+          departureTime: {
             gte: new Date(),
           },
           NOT: {
@@ -134,50 +129,60 @@ export async function getFlight(
         },
         take: 3,
         orderBy: {
-          departureDate: "asc",
+          departureTime: "asc",
         },
       });
+
       return { data: { ...flight, variations } };
     }
 
     return { data: flight };
   } catch (error) {
-    console.error("[GET_FLIGHT]", error);
-    return { error: "Failed to fetch flight" };
+    console.error("Error getting flight:", error);
+    return { error: "Failed to get flight" };
   }
 }
 
 function generateRandomInRange(min: number, max: number, isInteger: boolean = false): number {
   const random = Math.random() * (max - min) + min;
-  return isInteger ? Math.floor(random) : Number(random.toFixed(2));
+  return isInteger ? Math.floor(random) : random;
 }
 
-async function createFlightVariations(
+export async function createFlightVariations(
   baseFlight: Flight,
   params: FlightVariationParams
 ): Promise<Flight[]> {
   const variations: Flight[] = [];
-  const numberOfFlights = params.numberOfFlights || 3;
-  const minPrice = params.minPrice || baseFlight.price * 0.8;
-  const maxPrice = params.maxPrice || baseFlight.price * 1.2;
-  const minSeats = params.minSeats || 10;
-  const maxSeats = params.maxSeats || 200;
-  const hoursBetween = params.hoursBetween || 2;
+  const {
+    numberOfFlights = 3,
+    minPrice = baseFlight.price * 0.8,
+    maxPrice = baseFlight.price * 1.2,
+    minSeats = 50,
+    maxSeats = 200,
+    hoursBetween = 2
+  } = params;
 
   for (let i = 0; i < numberOfFlights; i++) {
-    const departureDate = new Date(baseFlight.departureDate);
-    departureDate.setHours(departureDate.getHours() + i * hoursBetween);
+    const departureTime = new Date(baseFlight.departureTime);
+    departureTime.setHours(departureTime.getHours() + (i * hoursBetween));
+    
+    const arrivalTime = new Date(departureTime);
+    arrivalTime.setHours(arrivalTime.getHours() + 2); // Assuming 2-hour flights
 
     const variation = await db.flight.create({
       data: {
+        flightNumber: `${baseFlight.flightNumber}-${i + 1}`,
+        departureAirport: baseFlight.departureAirport,
+        arrivalAirport: baseFlight.arrivalAirport,
+        departureTime,
+        arrivalTime,
+        departureDate: departureTime,
+        price: generateRandomInRange(minPrice, maxPrice),
+        availableSeats: generateRandomInRange(minSeats, maxSeats, true),
+        userId: baseFlight.userId,
         airline: baseFlight.airline,
         fromCity: baseFlight.fromCity,
         toCity: baseFlight.toCity,
-        departureDate,
-        price: generateRandomInRange(minPrice, maxPrice),
-        availableSeats: generateRandomInRange(minSeats, maxSeats, true),
-        flightNumber: `${baseFlight.flightNumber}-${i + 1}`,
-        userId: baseFlight.userId,
       },
     });
 
@@ -188,44 +193,40 @@ async function createFlightVariations(
 }
 
 export async function createFlight(data: {
-  fromCity: string;
-  toCity: string;
-  departureDate: string;
-  returnDate?: string;
+  departureAirport: string;
+  arrivalAirport: string;
+  departureTime: string;
+  arrivalTime: string;
   price: number;
   availableSeats: number;
   flightNumber: string;
+  userId: string;
   airline: string;
+  fromCity: string;
+  toCity: string;
   variations?: FlightVariationParams;
 }): Promise<{ data?: Flight; variations?: Flight[]; error?: string }> {
   try {
-    // Create or find the default admin user
-    const DEFAULT_ADMIN_ID = "default-admin";
-    const adminUser = await db.user.upsert({
-      where: { id: DEFAULT_ADMIN_ID },
-      update: {},
-      create: {
-        id: DEFAULT_ADMIN_ID,
-        role: "ADMIN",
-        email: "admin@example.com",
-      }
-    });
-
+    const departureTime = new Date(data.departureTime);
     const flight = await db.flight.create({
       data: {
-        fromCity: data.fromCity,
-        toCity: data.toCity,
-        departureDate: new Date(data.departureDate),
-        returnDate: data.returnDate ? new Date(data.returnDate) : null,
+        flightNumber: data.flightNumber,
+        departureAirport: data.departureAirport,
+        arrivalAirport: data.arrivalAirport,
+        departureTime: departureTime,
+        arrivalTime: new Date(data.arrivalTime),
+        departureDate: departureTime,
         price: data.price,
         availableSeats: data.availableSeats,
-        flightNumber: data.flightNumber,
+        userId: data.userId,
         airline: data.airline,
-        userId: adminUser.id,
+        fromCity: data.fromCity,
+        toCity: data.toCity,
       },
     });
 
     let variations: Flight[] | undefined;
+
     if (data.variations) {
       variations = await createFlightVariations(flight, data.variations);
     }
@@ -233,7 +234,7 @@ export async function createFlight(data: {
     revalidatePath("/flights");
     return { data: flight, variations };
   } catch (error) {
-    console.error("[CREATE_FLIGHT]", error);
+    console.error("Error creating flight:", error);
     return { error: "Failed to create flight" };
   }
 }
@@ -241,36 +242,41 @@ export async function createFlight(data: {
 export async function updateFlight(
   id: string,
   data: {
-    fromCity: string;
-    toCity: string;
-    departureDate: string;
-    returnDate?: string;
+    departureAirport: string;
+    arrivalAirport: string;
+    departureTime: string;
+    arrivalTime: string;
     price: number;
     availableSeats: number;
     flightNumber: string;
+    userId: string;
     airline: string;
-    variations?: FlightVariationParams;
+    fromCity: string;
+    toCity: string;
   }
 ): Promise<{ data?: Flight; error?: string }> {
   try {
     const flight = await db.flight.update({
       where: { id },
       data: {
-        fromCity: data.fromCity,
-        toCity: data.toCity,
-        departureDate: new Date(data.departureDate),
-        returnDate: data.returnDate ? new Date(data.returnDate) : null,
+        flightNumber: data.flightNumber,
+        departureAirport: data.departureAirport,
+        arrivalAirport: data.arrivalAirport,
+        departureTime: new Date(data.departureTime),
+        arrivalTime: new Date(data.arrivalTime),
         price: data.price,
         availableSeats: data.availableSeats,
-        flightNumber: data.flightNumber,
+        userId: data.userId,
         airline: data.airline,
+        fromCity: data.fromCity,
+        toCity: data.toCity,
       },
     });
 
     revalidatePath("/flights");
     return { data: flight };
   } catch (error) {
-    console.error("[UPDATE_FLIGHT]", error);
+    console.error("Error updating flight:", error);
     return { error: "Failed to update flight" };
   }
 }
@@ -284,54 +290,44 @@ export async function deleteFlight(id: string): Promise<{ success?: boolean; err
     revalidatePath("/flights");
     return { success: true };
   } catch (error) {
-    console.error("[DELETE_FLIGHT]", error);
+    console.error("Error deleting flight:", error);
     return { error: "Failed to delete flight" };
   }
 }
 
 export async function searchFlights(params: {
-  fromCity: string;
-  toCity: string;
-  departureDate: string;
-  returnDate?: string;
+  departureAirport: string;
+  arrivalAirport: string;
+  departureTime: string;
+  arrivalTime?: string;
 }): Promise<{ data?: { outbound: Flight[]; return: Flight[] }; error?: string }> {
   try {
-    const departureDate = new Date(params.departureDate);
-    const nextDay = new Date(departureDate);
-    nextDay.setDate(nextDay.getDate() + 1);
-
     const outboundFlights = await db.flight.findMany({
       where: {
-        fromCity: params.fromCity,
-        toCity: params.toCity,
-        departureDate: {
-          gte: departureDate,
-          lt: nextDay,
+        departureAirport: params.departureAirport,
+        arrivalAirport: params.arrivalAirport,
+        departureTime: {
+          gte: new Date(params.departureTime),
         },
       },
       orderBy: {
-        departureDate: "asc",
+        departureTime: "asc",
       },
     });
 
     let returnFlights: Flight[] = [];
 
-    if (params.returnDate) {
-      const returnDate = new Date(params.returnDate);
-      const nextReturnDay = new Date(returnDate);
-      nextReturnDay.setDate(nextReturnDay.getDate() + 1);
-
+    if (params.arrivalTime) {
       returnFlights = await db.flight.findMany({
         where: {
-          fromCity: params.toCity,
-          toCity: params.fromCity,
-          departureDate: {
-            gte: returnDate,
-            lt: nextReturnDay,
+          departureAirport: params.arrivalAirport,
+          arrivalAirport: params.departureAirport,
+          departureTime: {
+            gte: new Date(params.arrivalTime),
           },
         },
         orderBy: {
-          departureDate: "asc",
+          departureTime: "asc",
         },
       });
     }
@@ -343,7 +339,7 @@ export async function searchFlights(params: {
       },
     };
   } catch (error) {
-    console.error("[SEARCH_FLIGHTS]", error);
+    console.error("Error searching flights:", error);
     return { error: "Failed to search flights" };
   }
 }
@@ -353,171 +349,117 @@ export async function getFlightStatus(
 ): Promise<{ data?: Flight & FlightStatus; error?: string }> {
   try {
     const flight = await db.flight.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!flight) {
       return { error: "Flight not found" };
     }
 
-    // Calculate estimated times and status based on current time
-    const now = new Date("2025-01-07T03:17:23-08:00");
-    const departureTime = new Date(flight.departureDate);
-    const estimatedDuration = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
-    const scheduledArrivalTime = new Date(departureTime.getTime() + estimatedDuration);
+    // Calculate estimated times based on current status
+    const now = new Date();
+    const departureTime = new Date(flight.departureTime);
+    const arrivalTime = new Date(flight.arrivalTime);
     
-    let status: FlightStatus['status'] = 'On Time';
-    let actualDepartureTime = null;
-    let estimatedArrivalTime = scheduledArrivalTime;
+    let status: FlightStatus["status"];
+    let actualDepartureTime: Date | null = null;
+    let estimatedArrivalTime: Date | null = null;
 
-    if (now > scheduledArrivalTime) {
-      status = 'Landed';
+    if (now < departureTime) {
+      status = "On Time";
+    } else if (now >= departureTime && now < arrivalTime) {
+      status = "In Flight";
       actualDepartureTime = departureTime;
-    } else if (now > departureTime) {
-      status = 'In Flight';
+      estimatedArrivalTime = arrivalTime;
+    } else {
+      status = "Landed";
       actualDepartureTime = departureTime;
-      // Recalculate estimated arrival if there was a delay
-      if (actualDepartureTime > departureTime) {
-        estimatedArrivalTime = new Date(actualDepartureTime.getTime() + estimatedDuration);
-      }
-    } else if (now.getTime() + 15 * 60 * 1000 >= departureTime.getTime()) {
-      status = 'Delayed';
-      actualDepartureTime = new Date(departureTime.getTime() + 30 * 60 * 1000); // 30 min delay
-      estimatedArrivalTime = new Date(actualDepartureTime.getTime() + estimatedDuration);
+      estimatedArrivalTime = arrivalTime;
     }
 
-    // Generate flight status information
     const flightStatus: FlightStatus = {
       actualDepartureTime,
       estimatedArrivalTime,
       scheduledDepartureTime: departureTime,
-      scheduledArrivalTime,
-      departureTerminal: '8',
-      arrivalTerminal: '4',
-      departureGate: '7',
-      arrivalGate: '41',
-      baggageClaim: 'T4B',
+      scheduledArrivalTime: arrivalTime,
+      departureTerminal: flight.departureTerminal || "TBD",
+      arrivalTerminal: flight.arrivalTerminal || "TBD",
+      departureGate: flight.departureGate || "TBD",
+      arrivalGate: flight.arrivalGate || "TBD",
+      baggageClaim: flight.baggageClaim || "TBD",
       status,
       aircraft: {
-        model: 'Airbus A321',
-        type: 'Transcon',
+        model: flight.aircraftModel || "Unknown",
+        type: flight.aircraftType || "Unknown",
       },
     };
 
     return { data: { ...flight, ...flightStatus } };
   } catch (error) {
-    console.error("[GET_FLIGHT_STATUS]", error);
-    return { error: "Failed to fetch flight status" };
+    console.error("Error getting flight status:", error);
+    return { error: "Failed to get flight status" };
   }
 }
 
 export async function getFlightStatusByParams(params: {
-  ticketNumber?: string;
-  from?: string;
-  to?: string;
-  date?: string;
-}): Promise<{ data?: Flight & {
-  departureTerminal: string | null;
-  arrivalTerminal: string | null;
-  departureGate: string | null;
-  arrivalGate: string | null;
-  baggageClaim: string | null;
-  aircraftModel: string | null;
-  aircraftType: string | null;
-  actualDepartureTime: Date | null;
-  estimatedArrivalTime: Date | null;
-  scheduledDepartureTime: Date | null;
-  scheduledArrivalTime: Date | null;
-}; error?: string }> {
+  flightNumber?: string;
+  departureAirport?: string;
+  arrivalAirport?: string;
+  departureTime?: string;
+}): Promise<{
+  data?: Flight & {
+    departureTerminal: string | null;
+    arrivalTerminal: string | null;
+    departureGate: string | null;
+    arrivalGate: string | null;
+    baggageClaim: string | null;
+    aircraftModel: string | null;
+    aircraftType: string | null;
+    actualDepartureTime: Date | null;
+    estimatedArrivalTime: Date | null;
+    scheduledDepartureTime: Date | null;
+    scheduledArrivalTime: Date | null;
+  };
+  error?: string;
+}> {
   try {
-    let flight: any;
-    
-    if (params.ticketNumber) {
-      // First find the booking by ticket number
-      const booking = await db.flightBooking.findFirst({
-        where: {
-          ticketNumber: params.ticketNumber
-        },
-        include: {
-          flight: true
-        }
-      });
+    const where: Prisma.FlightWhereInput = {};
 
-      if (!booking) {
-        return { error: "Booking not found" };
-      }
-
-      flight = booking.flight;
-    } else {
-      if (!params.from || !params.to || !params.date) {
-        return { error: "Missing required parameters" };
-      }
-      
-      flight = await db.flight.findFirst({
-        where: {
-          fromCity: params.from,
-          toCity: params.to,
-          departureDate: {
-            gte: new Date(params.date),
-            lt: new Date(new Date(params.date).getTime() + 24 * 60 * 60 * 1000), // Next day
-          },
-        },
-        orderBy: {
-          departureDate: 'asc',
-        },
-      });
+    if (params.flightNumber) {
+      where.flightNumber = params.flightNumber;
     }
+
+    if (params.departureAirport) {
+      where.departureAirport = params.departureAirport;
+    }
+
+    if (params.arrivalAirport) {
+      where.arrivalAirport = params.arrivalAirport;
+    }
+
+    if (params.departureTime) {
+      const date = new Date(params.departureTime);
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      where.departureTime = {
+        gte: date,
+        lt: nextDay,
+      };
+    }
+
+    const flight = await db.flight.findFirst({
+      where,
+    });
 
     if (!flight) {
       return { error: "Flight not found" };
     }
 
-    // Calculate flight status based on current time
-    const now = new Date("2025-01-07T05:00:00-08:00");
-    const departureTime = new Date(flight.departureDate);
-    const estimatedDuration = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
-    const scheduledArrivalTime = new Date(departureTime.getTime() + estimatedDuration);
-    
-    let status: string = 'On Time';
-    let actualDepartureTime: Date | null = null;
-    let estimatedArrivalTime: Date = scheduledArrivalTime;
-
-    if (now > scheduledArrivalTime) {
-      status = 'Landed';
-      actualDepartureTime = departureTime;
-    } else if (now > departureTime) {
-      status = 'In Flight';
-      actualDepartureTime = departureTime;
-      // Recalculate estimated arrival if there was a delay
-      if (actualDepartureTime > departureTime) {
-        estimatedArrivalTime = new Date(actualDepartureTime.getTime() + estimatedDuration);
-      }
-    } else if (now.getTime() + 15 * 60 * 1000 >= departureTime.getTime()) {
-      status = 'Delayed';
-      actualDepartureTime = new Date(departureTime.getTime() + 30 * 60 * 1000); // 30 min delay
-      estimatedArrivalTime = new Date(actualDepartureTime.getTime() + estimatedDuration);
-    }
-
-    return {
-      data: {
-        ...flight,
-        status: flight.status || status,
-        departureTerminal: flight.departureTerminal || "8",
-        arrivalTerminal: flight.arrivalTerminal || "4",
-        departureGate: flight.departureGate || "7",
-        arrivalGate: flight.arrivalGate || "41",
-        baggageClaim: flight.baggageClaim || "T4B",
-        aircraftModel: flight.aircraftModel || "Airbus A321",
-        aircraftType: flight.aircraftType || "Transcon",
-        actualDepartureTime: flight.actualDepartureTime || actualDepartureTime,
-        estimatedArrivalTime: flight.estimatedArrivalTime || estimatedArrivalTime,
-        scheduledDepartureTime: flight.scheduledDepartureTime || departureTime,
-        scheduledArrivalTime: flight.scheduledArrivalTime || scheduledArrivalTime,
-      },
-    };
+    return { data: flight };
   } catch (error) {
-    console.error("[GET_FLIGHT_STATUS_ERROR]", error);
-    return { error: "Failed to fetch flight status" };
+    console.error("Error getting flight status:", error);
+    return { error: "Failed to get flight status" };
   }
 }
 
@@ -539,30 +481,15 @@ export async function updateFlightStatus(
   }>
 ): Promise<{ success?: boolean; error?: string }> {
   try {
-    const updateData = {
-      status: data.status,
-      departureTerminal: data.departureTerminal,
-      arrivalTerminal: data.arrivalTerminal,
-      departureGate: data.departureGate,
-      arrivalGate: data.arrivalGate,
-      baggageClaim: data.baggageClaim,
-      aircraftModel: data.aircraftModel,
-      aircraftType: data.aircraftType,
-      actualDepartureTime: data.actualDepartureTime,
-      estimatedArrivalTime: data.estimatedArrivalTime,
-      scheduledDepartureTime: data.scheduledDepartureTime,
-      scheduledArrivalTime: data.scheduledArrivalTime,
-    };
-
     await db.flight.update({
       where: { id },
-      data: updateData,
+      data,
     });
 
-    revalidatePath("/admin/flight-status");
+    revalidatePath("/flights");
     return { success: true };
   } catch (error) {
-    console.error("[UPDATE_FLIGHT_STATUS_ERROR]", error);
+    console.error("Error updating flight status:", error);
     return { error: "Failed to update flight status" };
   }
 }

@@ -40,12 +40,12 @@ export async function bookFlight(data: {
       return { error: "No seats available" };
     }
 
-    // Verify payment method exists and is active
+    // Verify payment method exists
     const paymentMethod = await db.paymentMethod.findUnique({
       where: { id: data.paymentMethodId },
     });
 
-    if (!paymentMethod || !paymentMethod.isActive) {
+    if (!paymentMethod) {
       return { error: "Invalid payment method" };
     }
 
@@ -54,82 +54,55 @@ export async function bookFlight(data: {
       // Get the flight first
       const flightRecord = await tx.flight.findUnique({
         where: { id: data.flightId },
-        select: {
-          id: true,
-          fromCity: true,
-          toCity: true,
-          departureDate: true,
-          availableSeats: true,
-        },
       });
 
       if (!flightRecord) {
         throw new Error("Flight not found");
       }
 
+      // Update available seats
+      await tx.flight.update({
+        where: { id: data.flightId },
+        data: {
+          availableSeats: {
+            decrement: 1
+          }
+        }
+      });
+
+      // Create the booking
       const booking = await tx.flightBooking.create({
         data: {
           flightId: data.flightId,
-          paymentMethodId: data.paymentMethodId,
-          amount: data.amount,
           email: data.email.trim(),
           passengerName: data.passengerName.trim(),
-          status: "CONFIRMED", // Change status to CONFIRMED since we're sending email
-        },
-        select: {
-          id: true,
-          ticketNumber: true,
-          email: true,
-          passengerName: true,
-          status: true,
-          flightId: true,
-          paymentMethodId: true,
-          amount: true,
-          paymentConfirmedAt: true,
-          approvedAt: true,
-          createdAt: true,
-          updatedAt: true,
-        },
+          status: "CONFIRMED",
+          amount: data.amount,
+          paymentMethodId: data.paymentMethodId,
+        }
       });
 
-      const updatedFlight = await tx.flight.update({
-        where: { id: data.flightId },
-        data: {
-          availableSeats: flightRecord.availableSeats - 1,
-        },
-      });
-
-      // Send confirmation email within the transaction
-      try {
-        const departureDate = new Date(flightRecord.departureDate);
-        await sendFlightBookingConfirmationEmail(
-          booking.email,
-          booking.ticketNumber as string,
-          {
-            departure: flightRecord.fromCity,
-            arrival: flightRecord.toCity,
-            date: departureDate.toLocaleDateString(),
-            time: departureDate.toLocaleTimeString(),
-          },
-          booking.passengerName
-        );
-        console.log("[EMAIL_CONFIRMATION] Sent successfully to:", booking.email);
-      } catch (emailError) {
-        console.error("[SEND_CONFIRMATION_EMAIL]", emailError);
-        // Update booking status to indicate email failed
-        await tx.flightBooking.update({
-          where: { id: booking.id },
-          data: { status: "EMAIL_FAILED" },
-        });
-      }
-
-      return { booking, flight: updatedFlight };
+      return booking;
     });
 
+    // Send confirmation email
+    await sendFlightBookingConfirmationEmail(
+      data.email,
+      {
+        ticketNumber: result.ticketNumber,
+        passengerName: data.passengerName,
+        flightNumber: flight.flightNumber,
+        departureAirport: flight.departureAirport,
+        arrivalAirport: flight.arrivalAirport,
+        departureTime: flight.departureTime,
+        arrivalTime: flight.arrivalTime
+      }
+    );
+
     revalidatePath("/flights");
-    return { data: result.booking };
+    return { data: result };
   } catch (error) {
-    console.error("[BOOK_FLIGHT]", error);
-    return { error: "Failed to book flight" };
+    console.error("Error booking flight:", error);
+    return { error: "Failed to book flight. Please try again." };
   }
 }

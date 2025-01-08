@@ -140,7 +140,17 @@ export default function FlightForm() {
 
       if (flightId === "new") {
         const result = await createFlight({
-          ...data,
+          departureAirport: data.fromCity,
+          arrivalAirport: data.toCity,
+          departureTime: data.departureDate,
+          arrivalTime: data.returnDate || data.departureDate,
+          price: data.price,
+          availableSeats: data.availableSeats,
+          flightNumber: data.flightNumber,
+          userId: "system", // Using a default system user ID
+          airline: data.airline,
+          fromCity: data.fromCity,
+          toCity: data.toCity,
           variations: data.generateVariations ? {
             numberOfFlights: data.numberOfFlights,
             minPrice: data.priceMin,
@@ -160,15 +170,17 @@ export default function FlightForm() {
         }
       } else {
         const result = await updateFlight(flightId, {
-          ...data,
-          variations: data.generateVariations ? {
-            numberOfFlights: data.numberOfFlights,
-            minPrice: data.priceMin,
-            maxPrice: data.priceMax,
-            minSeats: data.seatsMin,
-            maxSeats: data.seatsMax,
-            hoursBetween: data.hoursBetweenFlights,
-          } : undefined,
+          departureAirport: data.fromCity,
+          arrivalAirport: data.toCity,
+          departureTime: data.departureDate,
+          arrivalTime: data.returnDate || data.departureDate,
+          price: data.price,
+          availableSeats: data.availableSeats,
+          flightNumber: data.flightNumber,
+          userId: "system",
+          airline: data.airline,
+          fromCity: data.fromCity,
+          toCity: data.toCity,
         });
 
         if (result.error) {

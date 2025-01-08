@@ -58,16 +58,10 @@ export const {
       }
     
       if (session.user) {
-        session.user.role = token.role as UserRole;
-        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
         session.user.isOAuth = token.isOAuth as boolean;
-        session.user.usdt = token.usdt as number;
-        session.user.btc = token.btc as number;
-        session.user.eth = token.eth as number;
         session.user.username = token.username as string;
-       
       }
     
       
@@ -90,10 +84,6 @@ export const {
       token.username = existingUser.username;
       token.role = existingUser.role;
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
-      token.usdt = existingUser.usdt;
-      token.btc = existingUser.btc;
-      token.eth = existingUser.eth;
-      token.username = existingUser.username;
     
       return token;
     },

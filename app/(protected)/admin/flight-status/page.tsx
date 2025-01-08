@@ -35,17 +35,22 @@ interface FlightWithStatus extends Flight {
 
 export default function FlightStatusPage() {
   const [searchParams, setSearchParams] = useState({
-    ticketNumber: '',
-    from: '',
-    to: '',
-    date: '',
+    flightNumber: '',
+    departureAirport: '',
+    arrivalAirport: '',
+    departureTime: '',
   });
   const [flight, setFlight] = useState<FlightWithStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async () => {
     try {
-      const result = await getFlightStatusByParams(searchParams);
+      // Only include non-empty params
+      const params = Object.fromEntries(
+        Object.entries(searchParams).filter(([_, value]) => value !== '')
+      );
+      
+      const result = await getFlightStatusByParams(params);
       if (result.error) {
         setError(result.error);
         setFlight(null);
@@ -88,35 +93,35 @@ export default function FlightStatusPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Input
-                placeholder="Ticket Number"
-                value={searchParams.ticketNumber}
-                onChange={(e) => setSearchParams({ ...searchParams, ticketNumber: e.target.value })}
+                placeholder="Flight Number"
+                value={searchParams.flightNumber}
+                onChange={(e) => setSearchParams({ ...searchParams, flightNumber: e.target.value })}
               />
             </div>
             <div>
               <Input
-                placeholder="From"
-                value={searchParams.from}
-                onChange={(e) => setSearchParams({ ...searchParams, from: e.target.value })}
+                placeholder="Departure Airport"
+                value={searchParams.departureAirport}
+                onChange={(e) => setSearchParams({ ...searchParams, departureAirport: e.target.value })}
               />
             </div>
             <div>
               <Input
-                placeholder="To"
-                value={searchParams.to}
-                onChange={(e) => setSearchParams({ ...searchParams, to: e.target.value })}
+                placeholder="Arrival Airport"
+                value={searchParams.arrivalAirport}
+                onChange={(e) => setSearchParams({ ...searchParams, arrivalAirport: e.target.value })}
               />
             </div>
             <div>
               <Input
-                type="date"
-                value={searchParams.date}
-                onChange={(e) => setSearchParams({ ...searchParams, date: e.target.value })}
+                type="datetime-local"
+                value={searchParams.departureTime}
+                onChange={(e) => setSearchParams({ ...searchParams, departureTime: e.target.value })}
               />
             </div>
           </div>
           <div className="mt-4">
-            <Button onClick={handleSearch} disabled={!searchParams.ticketNumber && (!searchParams.from || !searchParams.to || !searchParams.date)}>
+            <Button onClick={handleSearch} disabled={!searchParams.flightNumber && (!searchParams.departureAirport || !searchParams.arrivalAirport || !searchParams.departureTime)}>
               Search
             </Button>
           </div>

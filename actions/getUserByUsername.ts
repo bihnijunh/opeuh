@@ -21,7 +21,7 @@ export const getUserByUsername = async (username: string) => {
     }
 
     if (user.id === session.user.id) {
-      return { error: "You cannot send cryptocurrency to yourself" };
+      return { error: "You cannot send money to yourself" };
     }
 
     return { user };

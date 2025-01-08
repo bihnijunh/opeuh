@@ -6,15 +6,10 @@ export type ExtendedUser = DefaultSession["user"] & {
   role: UserRole;
   isTwoFactorEnabled: boolean;
   isOAuth: boolean;
-  usdt: number;
-  btc: number;
-  eth: number;
   username: string;
-  transactions?: Transaction[];
   userBankAccount?: UserBankAccount;
-  cryptoSellTransactions?: CryptoSellTransaction[];
-
 };
+
 declare module "next-auth" {
   interface Session {
     user: ExtendedUser;
@@ -32,10 +27,5 @@ export type UserWithBalance = DefaultSession["user"] & {
   role: UserRole;
   isTwoFactorEnabled: boolean;
   isOAuth: boolean;
-  usdt: number;
-  btc: number;
-  eth: number;
-  transactions: Transaction[];
   userBankAccount?: UserBankAccount;
-  cryptoSellTransactions?: CryptoSellTransaction[];
 };

@@ -55,9 +55,7 @@ export async function getCurrentUser() {
   const user = await db.user.findUnique({
     where: { id: session.user.id },
     include: {
-      transactions: true,
       bankAccount: true,
-      cryptoSellTransactions: true,
     }
   });
 

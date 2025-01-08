@@ -23,11 +23,15 @@ import {
 } from "@/components/ui/select";
 import { UserRole } from "@prisma/client";
 import { updateUser } from "@/actions/adminUsersPage";
-import { UserWithTransactions } from "@/types";
 
 interface EditUserFormProps {
-  user: UserWithTransactions;
-  onUserUpdated: (user: UserWithTransactions) => void;
+  user: {
+    id: string;
+    name: string | null;
+    email: string | null;
+    role: UserRole;
+  };
+  onUserUpdated: (user: any) => void;
   onCancel: () => void;
 }
 
@@ -41,9 +45,6 @@ export const EditUserForm = ({ user, onUserUpdated, onCancel }: EditUserFormProp
       name: user.name || "",
       email: user.email || "",
       role: user.role,
-      btc: user.btc || 0,
-      usdt: user.usdt || 0,
-      eth: user.eth || 0,
     },
   });
 
@@ -56,9 +57,6 @@ export const EditUserForm = ({ user, onUserUpdated, onCancel }: EditUserFormProp
         name: values.name,
         email: values.email,
         role: values.role as UserRole,
-        btc: parseFloat(values.btc),
-        usdt: parseFloat(values.usdt),
-        eth: parseFloat(values.eth),
       });
 
       if (result.error) {
@@ -125,48 +123,6 @@ export const EditUserForm = ({ user, onUserUpdated, onCancel }: EditUserFormProp
             </FormItem>
           )}
         />
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="btc"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>BTC Balance</FormLabel>
-                <FormControl>
-                  <Input {...field} type="number" step="0.00000001" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="usdt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>USDT Balance</FormLabel>
-                <FormControl>
-                  <Input {...field} type="number" step="0.01" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="eth"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ETH Balance</FormLabel>
-                <FormControl>
-                  <Input {...field} type="number" step="0.00000001" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
 
         {error && (
           <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive">

@@ -53,9 +53,6 @@ export const EditUserModal = ({
       name: user.name || "",
       email: user.email || "",
       role: user.role,
-      btc: user.btc || 0,
-      usdt: user.usdt || 0,
-      eth: user.eth || 0,
     },
   });
 
@@ -68,9 +65,6 @@ export const EditUserModal = ({
         name: values.name,
         email: values.email,
         role: values.role as UserRole,
-        btc: parseFloat(values.btc),
-        usdt: parseFloat(values.usdt),
-        eth: parseFloat(values.eth),
       });
 
       if (result.error) {
@@ -143,45 +137,6 @@ export const EditUserModal = ({
                         <SelectItem value={UserRole.USER}>User</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="btc"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>BTC Balance</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="number" step="0.00000001" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="eth"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ETH Balance</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="number" step="0.00000001" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="usdt"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>USDT Balance</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="number" step="0.01" />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

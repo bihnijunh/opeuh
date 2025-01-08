@@ -15,9 +15,6 @@ export async function getPaymentMethods() {
 
     const paymentMethods = await db.paymentMethod.findMany({
       orderBy: { createdAt: "desc" },
-      where: {
-        isActive: true,
-      },
     });
 
     return { data: paymentMethods };
@@ -33,7 +30,6 @@ export async function createPaymentMethod(data: {
   instructions: string;
   accountInfo?: string | null;
   walletAddress?: string | null;
-  isActive?: boolean;
 }) {
   try {
     const session = await auth();
@@ -48,7 +44,6 @@ export async function createPaymentMethod(data: {
         instructions: data.instructions,
         accountInfo: data.accountInfo,
         walletAddress: data.walletAddress,
-        isActive: data.isActive,
       },
     });
 
@@ -68,7 +63,6 @@ export async function updatePaymentMethod(
     instructions: string;
     accountInfo?: string | null;
     walletAddress?: string | null;
-    isActive?: boolean;
   }
 ) {
   try {
@@ -85,7 +79,6 @@ export async function updatePaymentMethod(
         instructions: data.instructions,
         accountInfo: data.accountInfo,
         walletAddress: data.walletAddress,
-        isActive: data.isActive,
       },
     });
 
@@ -115,7 +108,3 @@ export async function deletePaymentMethod(id: string) {
     return { error: "Failed to delete payment method" };
   }
 }
-
-
-
-

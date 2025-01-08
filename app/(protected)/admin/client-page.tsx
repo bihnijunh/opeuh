@@ -13,90 +13,95 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { UserRole } from "@prisma/client";
-import { Search, MoreHorizontal, UserIcon, DollarSignIcon, ActivityIcon, CreditCardIcon, UsersIcon, PlaneIcon, PlaneTakeoffIcon, CalendarCheckIcon } from "lucide-react";
 import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+  UserIcon, 
+  PlaneTakeoffIcon, 
+  CalendarCheckIcon, 
+  ActivityIcon, 
+  CreditCardIcon,
+  Search,
+  MoreHorizontal
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { EditUserForm } from "../_components/EditUserForm";
-import { EditTransactionModal } from "../_components/EditTransactionModal";
-import type { Transaction } from "@/transaction-types";
-import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { motion } from "framer-motion";
-import Link from 'next/link';
+import { EditUserForm } from "../_components/EditUserForm";
 import { AdminTab } from "../_components/AdminTab";
 
-interface UserWithTransactions {
-  id: string;
-  name: string | null;
-  email: string | null;
-  role: UserRole;
-  btc: number;
-  usdt: number;
-  eth: number;
-  transactions: Transaction[];
-}
-
 interface AdminPageProps {
-  users: any[];
+  users: User[];
   totalUsers: number;
 }
 
 interface AdminUsersPageProps {
-  initialUsers: UserWithTransactions[];
+  initialUsers: User[];
   totalPages: number;
 }
 
-const StatCard = ({ title, value, icon: Icon, trend }: { title: string; value: number | string; icon: any; trend?: { value: number; isPositive: boolean } }) => (
+interface User {
+  id: string;
+  name: string | null;
+  email: string | null;
+  role: UserRole;
+}
+
+interface StatCardProps {
+  title: string;
+  value: number | string;
+  icon: any;
+  trend?: { value: number; isPositive: boolean };
+}
+
+const StatCard = ({ title, value, icon: Icon, trend }: StatCardProps) => (
   <motion.div 
-    whileHover={{ scale: 1.02 }} 
-    transition={{ type: "spring", stiffness: 300 }}
-    className="group"
+    className="rounded-xl border bg-card text-card-foreground shadow"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
   >
-    <Card className="hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-          {title}
-        </CardTitle>
-        <div className="rounded-full p-2 bg-primary/10 group-hover:bg-primary/20 transition-colors">
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-baseline space-x-2">
-          <div className="text-2xl font-bold">{value}</div>
+    <div className="p-6">
+      <div className="flex items-center space-x-2">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        <div>
+          <p className="text-2xl font-bold">{value}</p>
           {trend && (
-            <div className={cn(
-              "text-sm font-medium",
-              trend.isPositive ? "text-green-600" : "text-red-600"
-            )}>
-              {trend.isPositive ? "+" : "-"}{trend.value}%
-            </div>
+            <p className={`text-xs ${trend.isPositive ? 'text-green-500' : 'text-red-500'}`}>
+              {trend.isPositive ? '↑' : '↓'} {trend.value}%
+            </p>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   </motion.div>
 );
 
 const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
-  const [users, setUsers] = useState<UserWithTransactions[]>(initialUsers);
-  const [filteredUsers, setFilteredUsers] = useState<UserWithTransactions[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(initialUsers);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [selectedUser, setSelectedUser] = useState<UserWithTransactions | null>(null);
-  const [viewingTransactions, setViewingTransactions] = useState<UserWithTransactions | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   useEffect(() => {
     const filtered = users.filter(user => 
@@ -108,47 +113,13 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
     setCurrentPage(1);
   }, [searchTerm, roleFilter, users]);
 
-  const handleEditUser = (user: UserWithTransactions) => {
+  const handleEditUser = (user: User) => {
     setSelectedUser(user);
   };
 
-  const handleUserUpdated = (updatedUser: UserWithTransactions) => {
+  const handleUserUpdated = (updatedUser: User) => {
     setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
     setSelectedUser(null);
-  };
-
-  const handleUpdateTransactionStatus = async (transactionId: number, newStatus: string) => {
-    try {
-      const response = await fetch(`/api/transactions/${transactionId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update transaction status');
-      }
-
-      const result = { success: true };
-      if (result.success) {
-        setUsers(users.map(user => ({
-          ...user,
-          transactions: user.transactions?.map((t: Transaction) => 
-            t.id === transactionId ? { ...t, status: newStatus } : t
-          ) || []
-        })));
-      }
-      return result;
-    } catch (error) {
-      console.error("Error updating transaction status:", error);
-      throw error;
-    }
-  };
-
-  const handleViewTransactions = (user: UserWithTransactions) => {
-    setViewingTransactions(user);
   };
 
   const handlePageChange = (page: number) => {
@@ -191,10 +162,6 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
                   <TableHead className="w-[150px]">Name</TableHead>
                   <TableHead className="w-[200px]">Email</TableHead>
                   <TableHead className="w-[100px]">Role</TableHead>
-                  <TableHead className="w-[100px]">BTC</TableHead>
-                  <TableHead className="w-[100px]">USDT</TableHead>
-                  <TableHead className="w-[100px]">ETH</TableHead>
-                  <TableHead className="w-[100px]">Transactions</TableHead>
                   <TableHead className="w-[150px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -205,10 +172,6 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
                       <TableCell className="font-medium">{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.role}</TableCell>
-                      <TableCell>{user.btc}</TableCell>
-                      <TableCell>{user.usdt}</TableCell>
-                      <TableCell>{user.eth}</TableCell>
-                      <TableCell>{user.transactions?.length || 0}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button 
@@ -218,25 +181,12 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
                           >
                             {selectedUser?.id === user.id ? "Cancel Edit" : "Edit"}
                           </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleViewTransactions(user)}>
-                                View Transactions
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
                     {selectedUser?.id === user.id && (
                       <TableRow>
-                        <TableCell colSpan={8} className="p-0">
+                        <TableCell colSpan={4} className="p-0">
                           <Card className="m-2 bg-muted/50">
                             <CardContent className="p-4">
                               <EditUserForm
@@ -274,15 +224,6 @@ const AdminUsersPage = ({ initialUsers, totalPages }: AdminUsersPageProps) => {
           </div>
         </CardContent>
       </Card>
-      
-      {viewingTransactions && (
-        <EditTransactionModal
-          isOpen={!!viewingTransactions}
-          onClose={() => setViewingTransactions(null)}
-          transactions={viewingTransactions.transactions}
-          onUpdateStatus={handleUpdateTransactionStatus}
-        />
-      )}
     </div>
   );
 };
@@ -298,87 +239,30 @@ export default function AdminPageClient({ users, totalUsers }: AdminPageProps) {
         initial: { opacity: 0 },
         animate: { opacity: 1 }
       }}
-      className="p-6 space-y-8"
+      transition={{ duration: 0.3 }}
     >
       <div className="overflow-x-auto">
         <div className="inline-flex min-w-full gap-1 rounded-lg bg-muted/50 p-1 text-muted-foreground">
           <AdminTab href="/admin" isActive={pathname === "/admin"} icon={UserIcon}>
             Users
           </AdminTab>
-          <AdminTab href="/admin/flights" isActive={pathname.includes("/admin/flights")} icon={PlaneTakeoffIcon}>
+          <AdminTab href="/admin/flights" isActive={pathname === "/admin/flights"} icon={PlaneTakeoffIcon}>
             Create Flights
           </AdminTab>
-          <AdminTab href="/admin/booked-flights" isActive={pathname.includes("/admin/booked-flights")} icon={CalendarCheckIcon}>
+          <AdminTab href="/admin/booked-flights" isActive={pathname === "/admin/booked-flights"} icon={CalendarCheckIcon}>
             Booked Flights
           </AdminTab>
-          <AdminTab href="/admin/flight-status" isActive={pathname.includes("/admin/flight-status")} icon={ActivityIcon}>
+          <AdminTab href="/admin/flight-status" isActive={pathname === "/admin/flight-status"} icon={ActivityIcon}>
             Flight Status
           </AdminTab>
-          <AdminTab href="/admin/payment-methods" isActive={pathname.includes("/admin/payment-methods")} icon={CreditCardIcon}>
+          <AdminTab href="/admin/payment-methods" isActive={pathname === "/admin/payment-methods"} icon={CreditCardIcon}>
             Payment Methods
           </AdminTab>
         </div>
       </div>
-
-      <motion.div variants={{
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 }
-      }}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <UsersIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalUsers}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-              <UserIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{0}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Bookings</CardTitle>
-              <PlaneIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{0}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{0}</div>
-            </CardContent>
-          </Card>
-        </div>
-      </motion.div>
-
-      <motion.div variants={{
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 }
-      }}>
-        <div className="grid grid-cols-1 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Users</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AdminUsersPage initialUsers={users} totalPages={Math.ceil(totalUsers / 10)} />
-            </CardContent>
-          </Card>
-        </div>
-      </motion.div>
+      <div className="mt-8">
+        <AdminUsersPage initialUsers={users} totalPages={Math.ceil(totalUsers / 10)} />
+      </div>
     </motion.div>
   );
 }

@@ -16,24 +16,24 @@ export default function FlightStatusPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFlightStatus = async () => {
+    const searchFlightStatus = async () => {
       setLoading(true);
       try {
-        const ticketNumber = searchParams.get("ticketNumber") || undefined;
-        const from = searchParams.get("from") || undefined;
-        const to = searchParams.get("to") || undefined;
-        const date = searchParams.get("date") || undefined;
+        const flightNumber = searchParams.get("flightNumber") || undefined;
+        const departureAirport = searchParams.get("departureAirport") || undefined;
+        const arrivalAirport = searchParams.get("arrivalAirport") || undefined;
+        const departureTime = searchParams.get("departureTime") || undefined;
 
-        if (!ticketNumber && (!from || !to || !date)) {
+        if (!flightNumber && (!departureAirport || !arrivalAirport || !departureTime)) {
           setError("Invalid search parameters");
           return;
         }
 
         const result = await getFlightStatusByParams({
-          ticketNumber,
-          from,
-          to,
-          date,
+          flightNumber,
+          departureAirport,
+          arrivalAirport,
+          departureTime,
         });
 
         if (result.error) {
@@ -50,7 +50,7 @@ export default function FlightStatusPage() {
       }
     };
 
-    fetchFlightStatus();
+    searchFlightStatus();
   }, [searchParams]);
 
   if (loading) {

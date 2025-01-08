@@ -20,11 +20,38 @@ export type Flight = {
 
 export type BookedFlight = {
   id: string;
-  flightId: string;
-  userId: string;
   ticketNumber: string;
-  passengerName: string;
+  passengerName: string | null;
+  passengerEmail: string | null;
+  flightNumber: string;
+  departure: string;
+  arrival: string;
+  departureTime: string;
+  arrivalTime: string;
   status: string;
-  flight: Flight;
-  user: User;
+  amount: number;
+  paymentMethod: string;
+  createdAt: string;
 };
+
+export type Transaction = {
+  id: string;
+  userId: string;
+  amount: number;
+  type: string;
+  status: string;
+  createdAt: Date;
+  date?: string;
+  walletAddress?: string;
+  transactionId?: string;
+  recipientId?: string;
+  senderAddress?: string;
+  senderUsername?: string;
+};
+
+export interface UserWithTransactions extends User {
+  btc: number;
+  usdt: number;
+  eth: number;
+  transactions: Transaction[];
+}
