@@ -174,34 +174,30 @@ model PaymentMethod {
 }
 
 model Flight {
-  id                 String        @id @default(cuid())
-  flightNumber       String        @unique
-  airline            String
-  fromCity           String
-  toCity             String
-  departureAirport   String
-  arrivalAirport     String
-  departureTime      DateTime
-  arrivalTime        DateTime
-  departureDate      DateTime
-  returnDate         DateTime?
-  price             Float
-  userId            String
-  status            String        @default("scheduled")
-  availableSeats    Int          @default(100)
-  departureTerminal  String?
-  arrivalTerminal    String?
-  departureGate      String?
-  arrivalGate        String?
-  baggageClaim       String?
-  aircraftModel      String?
-  aircraftType       String?
-  actualDepartureTime DateTime?
+  id                    String          @id @default(cuid())
+  flightNumber          String          @unique
+  airline              String
+  fromCity             String
+  toCity               String
+  departureDate        DateTime
+  returnDate           DateTime?
+  price                Float
+  userId               String
+  status               String          @default("scheduled")
+  availableSeats       Int             @default(100)
+  departureTerminal    String?
+  arrivalTerminal      String?
+  departureGate        String?
+  arrivalGate          String?
+  baggageClaim         String?
+  aircraftModel        String?
+  aircraftType         String?
+  actualDepartureTime  DateTime?
   estimatedArrivalTime DateTime?
   scheduledDepartureTime DateTime?
   scheduledArrivalTime DateTime?
-  user              User          @relation(fields: [userId], references: [id])
-  bookings          FlightBooking[]
+  user                 User            @relation(fields: [userId], references: [id])
+  bookings            FlightBooking[]
 
   @@index([userId])
 }

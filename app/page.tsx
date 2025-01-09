@@ -8,7 +8,7 @@ import ImageSlider from "./components/hero/image-slider";
 import TodaysOffers, { NewsAndOffers } from "./components/offers/todays-offers";
 import Footer from "./components/footer/footer";
 import { useRouter } from "next/navigation";
-import { airports } from "@/data/airports";
+import { airports } from "@/lib/airports";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";

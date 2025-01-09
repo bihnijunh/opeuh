@@ -19,22 +19,26 @@ export default function FlightStatusPage() {
     const searchFlightStatus = async () => {
       setLoading(true);
       try {
-        const flightNumber = searchParams.get("flightNumber") || undefined;
+        const ticketNumber = searchParams.get("ticketNumber") || undefined;
         const departureAirport = searchParams.get("departureAirport") || undefined;
         const arrivalAirport = searchParams.get("arrivalAirport") || undefined;
         const departureTime = searchParams.get("departureTime") || undefined;
 
-        if (!flightNumber && (!departureAirport || !arrivalAirport || !departureTime)) {
-          setError("Invalid search parameters");
+        // Filter out undefined values
+        const params = {
+          ...(ticketNumber && { ticketNumber }),
+          ...(departureAirport && { departureAirport }),
+          ...(arrivalAirport && { arrivalAirport }),
+          ...(departureTime && { departureTime }),
+        };
+
+        // Validate that we have either a ticket number or complete flight details
+        if (Object.keys(params).length === 0 || (!params.ticketNumber && (!params.departureAirport || !params.arrivalAirport || !params.departureTime))) {
+          setError("Please provide either a ticket number or complete flight details (departure airport, arrival airport, and departure time)");
           return;
         }
 
-        const result = await getFlightStatusByParams({
-          flightNumber,
-          departureAirport,
-          arrivalAirport,
-          departureTime,
-        });
+        const result = await getFlightStatusByParams(params);
 
         if (result.error) {
           setError(result.error);

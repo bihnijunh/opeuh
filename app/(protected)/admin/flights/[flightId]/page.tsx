@@ -5,8 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
-import { Trash } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,95 +31,110 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { FlightStatusForm } from "@/components/admin/flight-status-form";
+import { Trash } from "lucide-react";
+
+const flightFormSchema = z.object({
+  fromCity: z.string({
+    required_error: "From city is required",
+  }),
+  toCity: z.string({
+    required_error: "To city is required",
+  }).refine(val => val !== "", {
+    message: "To city is required"
+  }),
+  departureDate: z.string({
+    required_error: "Departure date is required",
+  }),
+  returnDate: z.string().optional(),
+  price: z.coerce.number().min(0, {
+    message: "Price must be greater than 0",
+  }),
+  availableSeats: z.coerce.number().min(1, {
+    message: "Available seats must be at least 1",
+  }),
+  airline: z.string({
+    required_error: "Airline is required",
+  }),
+  flightNumber: z.string({
+    required_error: "Flight number is required",
+  }).refine((val) => {
+    if (!val) return false;
+    // Flight number format: 2 uppercase letters followed by 1-4 digits
+    return /^[A-Z]{2}\d{1,4}$/.test(val);
+  }, {
+    message: "Invalid flight number format. Must be 2 uppercase letters followed by 1-4 digits",
+  }),
+  generateVariations: z.boolean().default(false),
+  numberOfFlights: z.coerce.number().min(1).max(10).optional(),
+  priceMin: z.coerce.number().min(0).optional(),
+  priceMax: z.coerce.number().min(0).optional(),
+  seatsMin: z.coerce.number().min(1).optional(),
+  seatsMax: z.coerce.number().min(1).optional(),
+  hoursBetweenFlights: z.coerce.number().min(1).max(24).optional(),
+});
+
+type FlightFormValues = z.infer<typeof flightFormSchema>;
 
 export default function FlightForm() {
   const params = useParams();
-  const flightId = params?.flightId as string;
   const router = useRouter();
-
-  const [open, setOpen] = useState(false);
+  const flightId = params?.flightId as string;
+  const isNew = flightId === "create";
   const [loading, setLoading] = useState(false);
-  const [selectedAirline, setSelectedAirline] = useState("");
   const [flightData, setFlightData] = useState<any>(null);
-
-  const formSchema = z.object({
-    fromCity: z.string().min(1).refine((val: string): val is string => airports.some(a => a.code === val), {
-      message: "Please select a valid departure airport"
-    }),
-    toCity: z.string().min(1).refine((val: string): val is string => airports.some(a => a.code === val), {
-      message: "Please select a valid arrival airport"
-    }),
-    departureDate: z.string().min(1),
-    returnDate: z.string().optional(),
-    price: z.coerce.number().min(0),
-    availableSeats: z.coerce.number().min(0),
-    airline: z.string().min(1).refine((val: string): val is string => airlines.some(a => a.code === val), {
-      message: "Please select a valid airline"
-    }),
-    flightNumber: z.string().min(1).refine((val: string): val is string => {
-      const airline = airlines.find(a => a.code === selectedAirline);
-      if (!airline) return false;
-      const pattern = new RegExp(`^${airline.flightNumberPrefix}\\d{1,4}$`);
-      return pattern.test(val);
-    }, {
-      message: "Invalid flight number format"
-    }).superRefine((val, ctx) => {
-      const airline = airlines.find(a => a.code === selectedAirline);
-      if (!airline) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Please select an airline first",
-        });
-        return z.NEVER;
-      }
-      
-      const pattern = new RegExp(`^${airline.flightNumberPrefix}\\d{1,4}$`);
-      if (!pattern.test(val)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `Flight number must start with ${airline.flightNumberPrefix} followed by 1-4 digits`,
-        });
-        return z.NEVER;
-      }
-    }),
-    generateVariations: z.boolean().default(false),
-    numberOfFlights: z.coerce.number().min(1).max(10).optional(),
-    priceMin: z.coerce.number().min(0).optional(),
-    priceMax: z.coerce.number().min(0).optional(),
-    seatsMin: z.coerce.number().min(1).optional(),
-    seatsMax: z.coerce.number().min(1).optional(),
-    hoursBetweenFlights: z.coerce.number().min(1).max(24).optional(),
-  });
-
-  type FlightFormValues = z.infer<typeof formSchema>;
+  const [open, setOpen] = useState(false);
 
   const form = useForm<FlightFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(flightFormSchema),
     defaultValues: {
       fromCity: "",
       toCity: "",
       departureDate: "",
       returnDate: "",
       price: 0,
-      availableSeats: 0,
+      availableSeats: 100,
       airline: "",
       flightNumber: "",
       generateVariations: false,
     },
   });
 
+  // Watch form values for cross-field validation
+  const fromCity = form.watch("fromCity");
+  const toCity = form.watch("toCity");
+  const departureDate = form.watch("departureDate");
+  const returnDate = form.watch("returnDate");
+
   useEffect(() => {
-    if (flightId !== "new") {
+    if (fromCity && toCity && fromCity === toCity) {
+      form.setError("toCity", {
+        message: "Departure and arrival cities must be different"
+      });
+    }
+  }, [fromCity, toCity, form]);
+
+  useEffect(() => {
+    if (departureDate && returnDate) {
+      const dDate = new Date(departureDate);
+      const rDate = new Date(returnDate);
+      if (rDate <= dDate) {
+        form.setError("returnDate", {
+          message: "Return date must be after departure date"
+        });
+      }
+    }
+  }, [departureDate, returnDate, form]);
+
+  useEffect(() => {
+    if (!isNew) {
       getFlight(flightId).then((result) => {
         if (result.data) {
           setFlightData(result.data);
-          setSelectedAirline(result.data.airline);
           form.reset({
             fromCity: result.data.fromCity,
             toCity: result.data.toCity,
-            departureDate: result.data.departureDate.toISOString().split('T')[0],
-            returnDate: result.data.returnDate ? result.data.returnDate.toISOString().split('T')[0] : undefined,
+            departureDate: result.data.departureDate.toString().split('T')[0],
+            returnDate: result.data.returnDate?.toString().split('T')[0],
             price: result.data.price,
             availableSeats: result.data.availableSeats,
             airline: result.data.airline,
@@ -130,27 +144,27 @@ export default function FlightForm() {
         }
       });
     }
-  }, [flightId, form]);
+  }, [form, flightId, isNew]);
 
-  const title = flightId === "new" ? "Create Flight" : "Edit Flight";
+  const title = isNew ? "Create Flight" : "Edit Flight";
+  const description = isNew 
+    ? "Add a new flight to the system" 
+    : "Edit an existing flight's details";
 
   const onSubmit = async (data: FlightFormValues) => {
     try {
       setLoading(true);
 
-      if (flightId === "new") {
+      if (isNew) {
         const result = await createFlight({
-          departureAirport: data.fromCity,
-          arrivalAirport: data.toCity,
-          departureTime: data.departureDate,
-          arrivalTime: data.returnDate || data.departureDate,
+          fromCity: data.fromCity,
+          toCity: data.toCity,
+          departureDate: data.departureDate,
+          returnDate: data.returnDate,
           price: data.price,
           availableSeats: data.availableSeats,
           flightNumber: data.flightNumber,
-          userId: "system", // Using a default system user ID
           airline: data.airline,
-          fromCity: data.fromCity,
-          toCity: data.toCity,
           variations: data.generateVariations ? {
             numberOfFlights: data.numberOfFlights,
             minPrice: data.priceMin,
@@ -170,17 +184,14 @@ export default function FlightForm() {
         }
       } else {
         const result = await updateFlight(flightId, {
-          departureAirport: data.fromCity,
-          arrivalAirport: data.toCity,
-          departureTime: data.departureDate,
-          arrivalTime: data.returnDate || data.departureDate,
+          fromCity: data.fromCity,
+          toCity: data.toCity,
+          departureDate: data.departureDate,
+          returnDate: data.returnDate,
           price: data.price,
           availableSeats: data.availableSeats,
           flightNumber: data.flightNumber,
-          userId: "system",
           airline: data.airline,
-          fromCity: data.fromCity,
-          toCity: data.toCity,
         });
 
         if (result.error) {
@@ -205,14 +216,13 @@ export default function FlightForm() {
       
       if (result.error) {
         toast.error(result.error);
-        return;
+      } else {
+        router.push('/admin/flights');
+        toast.success('Flight deleted successfully');
       }
-
       router.refresh();
-      router.push("/admin/flights");
-      toast.success("Flight deleted successfully");
     } catch (error) {
-      toast.error("Make sure you removed all bookings using this flight first.");
+      toast.error('Something went wrong');
     } finally {
       setLoading(false);
       setOpen(false);
@@ -234,7 +244,7 @@ export default function FlightForm() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <div className="grid grid-cols-1 gap-8">
                   <FormField
                     control={form.control}
@@ -279,7 +289,7 @@ export default function FlightForm() {
                       <FormItem>
                         <FormLabel>Departure Date</FormLabel>
                         <FormControl>
-                          <Input type="datetime-local" {...field} />
+                          <Input type="date" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -293,7 +303,7 @@ export default function FlightForm() {
                       <FormItem>
                         <FormLabel>Return Date (Optional)</FormLabel>
                         <FormControl>
-                          <Input type="datetime-local" {...field} />
+                          <Input type="date" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -338,7 +348,6 @@ export default function FlightForm() {
                           <AirlineSelect
                             value={field.value}
                             onChange={(value) => {
-                              setSelectedAirline(value);
                               field.onChange(value);
                               form.setValue("flightNumber", "");
                             }}
@@ -355,13 +364,30 @@ export default function FlightForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Flight Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={!selectedAirline} />
-                        </FormControl>
+                        <div className="flex space-x-2">
+                          <FormControl>
+                            <Input {...field} disabled={!form.watch("airline")} />
+                          </FormControl>
+                          {form.watch("airline") && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => {
+                                const airline = airlines.find((a: { code: string }) => a.code === form.watch("airline"));
+                                if (airline) {
+                                  const randomNum = Math.floor(Math.random() * 9000) + 1000;
+                                  form.setValue("flightNumber", `${airline.flightNumberPrefix}${randomNum}`);
+                                }
+                              }}
+                            >
+                              Generate
+                            </Button>
+                          )}
+                        </div>
                         <FormMessage />
-                        {selectedAirline && (
+                        {form.watch("airline") && (
                           <FormDescription>
-                            Must start with {airlines.find(a => a.code === selectedAirline)?.flightNumberPrefix} followed by 1-4 digits
+                            Must start with {airlines.find((a: { code: string }) => a.code === form.watch("airline"))?.flightNumberPrefix} followed by 1-4 digits
                           </FormDescription>
                         )}
                       </FormItem>
@@ -488,11 +514,11 @@ export default function FlightForm() {
                     </AccordionItem>
                   </Accordion>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-x-2">
                   <Button disabled={loading} type="submit">
-                    {loading ? "Saving..." : "Save Changes"}
+                    {loading ? "Saving..." : isNew ? "Create Flight" : "Save Changes"}
                   </Button>
-                  {flightId !== "new" && (
+                  {!isNew && (
                     <Button
                       disabled={loading}
                       type="button"
@@ -505,35 +531,6 @@ export default function FlightForm() {
                 </div>
               </form>
             </Form>
-
-            {flightId !== "new" && (
-              <div className="mt-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Flight Status</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <FlightStatusForm
-                      flightId={flightId}
-                      initialData={{
-                        status: flightData?.status,
-                        departureTerminal: flightData?.departureTerminal,
-                        arrivalTerminal: flightData?.arrivalTerminal,
-                        departureGate: flightData?.departureGate,
-                        arrivalGate: flightData?.arrivalGate,
-                        baggageClaim: flightData?.baggageClaim,
-                        aircraftModel: flightData?.aircraftModel,
-                        aircraftType: flightData?.aircraftType,
-                        actualDepartureTime: flightData?.actualDepartureTime,
-                        estimatedArrivalTime: flightData?.estimatedArrivalTime,
-                        scheduledDepartureTime: flightData?.scheduledDepartureTime,
-                        scheduledArrivalTime: flightData?.scheduledArrivalTime,
-                      }}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

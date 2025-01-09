@@ -35,7 +35,7 @@ interface FlightWithStatus extends Flight {
 
 export default function FlightStatusPage() {
   const [searchParams, setSearchParams] = useState({
-    flightNumber: '',
+    ticketNumber: '',
     departureAirport: '',
     arrivalAirport: '',
     departureTime: '',
@@ -45,10 +45,26 @@ export default function FlightStatusPage() {
 
   const handleSearch = async () => {
     try {
-      // Only include non-empty params
-      const params = Object.fromEntries(
-        Object.entries(searchParams).filter(([_, value]) => value !== '')
-      );
+      // Filter out empty values and create params object
+      const params = {
+        ...(searchParams.ticketNumber && { ticketNumber: searchParams.ticketNumber }),
+        ...(searchParams.departureAirport && { departureAirport: searchParams.departureAirport }),
+        ...(searchParams.arrivalAirport && { arrivalAirport: searchParams.arrivalAirport }),
+        ...(searchParams.departureTime && { departureTime: searchParams.departureTime }),
+      };
+
+      // Validate that we have either a ticket number or complete flight details
+      if (Object.keys(params).length === 0) {
+        setError("Please provide either a ticket number or flight details");
+        setFlight(null);
+        return;
+      }
+
+      if (!params.ticketNumber && (!params.departureAirport || !params.arrivalAirport || !params.departureTime)) {
+        setError("Please provide either a ticket number or complete flight details (departure airport, arrival airport, and departure time)");
+        setFlight(null);
+        return;
+      }
       
       const result = await getFlightStatusByParams(params);
       if (result.error) {
@@ -90,38 +106,56 @@ export default function FlightStatusPage() {
           <CardTitle>Search Flight</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <Input
-                placeholder="Flight Number"
-                value={searchParams.flightNumber}
-                onChange={(e) => setSearchParams({ ...searchParams, flightNumber: e.target.value })}
-              />
-            </div>
-            <div>
-              <Input
-                placeholder="Departure Airport"
-                value={searchParams.departureAirport}
-                onChange={(e) => setSearchParams({ ...searchParams, departureAirport: e.target.value })}
-              />
-            </div>
-            <div>
-              <Input
-                placeholder="Arrival Airport"
-                value={searchParams.arrivalAirport}
-                onChange={(e) => setSearchParams({ ...searchParams, arrivalAirport: e.target.value })}
-              />
-            </div>
-            <div>
-              <Input
-                type="datetime-local"
-                value={searchParams.departureTime}
-                onChange={(e) => setSearchParams({ ...searchParams, departureTime: e.target.value })}
-              />
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              <div>
+                <label htmlFor="ticketNumber" className="text-sm font-medium">
+                  Ticket Number
+                </label>
+                <Input
+                  id="ticketNumber"
+                  value={searchParams.ticketNumber}
+                  onChange={(e) => setSearchParams({ ...searchParams, ticketNumber: e.target.value })}
+                  placeholder="Enter ticket number"
+                />
+              </div>
+              <div>
+                <label htmlFor="departureAirport" className="text-sm font-medium">
+                  Departure Airport
+                </label>
+                <Input
+                  id="departureAirport"
+                  value={searchParams.departureAirport}
+                  onChange={(e) => setSearchParams({ ...searchParams, departureAirport: e.target.value })}
+                  placeholder="Enter departure airport"
+                />
+              </div>
+              <div>
+                <label htmlFor="arrivalAirport" className="text-sm font-medium">
+                  Arrival Airport
+                </label>
+                <Input
+                  id="arrivalAirport"
+                  value={searchParams.arrivalAirport}
+                  onChange={(e) => setSearchParams({ ...searchParams, arrivalAirport: e.target.value })}
+                  placeholder="Enter arrival airport"
+                />
+              </div>
+              <div>
+                <label htmlFor="departureTime" className="text-sm font-medium">
+                  Departure Time
+                </label>
+                <Input
+                  id="departureTime"
+                  type="datetime-local"
+                  value={searchParams.departureTime}
+                  onChange={(e) => setSearchParams({ ...searchParams, departureTime: e.target.value })}
+                />
+              </div>
             </div>
           </div>
           <div className="mt-4">
-            <Button onClick={handleSearch} disabled={!searchParams.flightNumber && (!searchParams.departureAirport || !searchParams.arrivalAirport || !searchParams.departureTime)}>
+            <Button onClick={handleSearch} disabled={!searchParams.ticketNumber && (!searchParams.departureAirport || !searchParams.arrivalAirport || !searchParams.departureTime)}>
               Search
             </Button>
           </div>
