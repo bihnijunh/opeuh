@@ -40,7 +40,7 @@ const formSchema = z.object({
 
 interface EditDialogProps {
   booking: BookedFlight;
-  onUpdate: (bookingId: string, data: z.infer<typeof formSchema>) => Promise<void>;
+  onSave: (bookingId: string, data: z.infer<typeof formSchema>) => Promise<void>;
 }
 
 const flightStatuses = [
@@ -52,16 +52,16 @@ const flightStatuses = [
   { value: "PENDING", label: "Pending" },
 ];
 
-const formatStatus = (status: string) => {
+function formatStatus(status: string) {
   return status.split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
-};
+}
 
-export function EditBookingDialog({ booking, onUpdate }: EditDialogProps) {
+export function EditBookingDialog({ booking, onSave }: EditDialogProps) {
   const [open, setOpen] = useState(false);
-  
-  const form = useForm({
+
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       passengerName: booking.passengerName,
@@ -72,7 +72,7 @@ export function EditBookingDialog({ booking, onUpdate }: EditDialogProps) {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await onUpdate(booking.id, data);
+      await onSave(booking.id, data);
       toast.success("Booking updated successfully");
       setOpen(false);
     } catch (error) {
@@ -87,9 +87,9 @@ export function EditBookingDialog({ booking, onUpdate }: EditDialogProps) {
           <Edit2Icon className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Flight Booking</DialogTitle>
+          <DialogTitle>Edit Booking</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -128,9 +128,7 @@ export function EditBookingDialog({ booking, onUpdate }: EditDialogProps) {
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select status">
-                          {formatStatus(field.value)}
-                        </SelectValue>
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -145,16 +143,9 @@ export function EditBookingDialog({ booking, onUpdate }: EditDialogProps) {
                 </FormItem>
               )}
             />
-            <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">Save Changes</Button>
-            </div>
+            <Button type="submit" className="w-full">
+              Save Changes
+            </Button>
           </form>
         </Form>
       </DialogContent>

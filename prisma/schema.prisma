@@ -155,19 +155,20 @@ enum UserRole {
 }
 
 enum PaymentMethodType {
-  BANK_TRANSFER
   CREDIT_CARD
   DEBIT_CARD
+  BANK_TRANSFER
+  CRYPTOCURRENCY
+  PAYPAL
 }
 
 model PaymentMethod {
-  id            String            @id @default(cuid())
+  id            String           @id @default(cuid())
   name          String
   type          PaymentMethodType
   instructions  String?
-  walletAddress String?
   accountInfo   String?
-  isActive      Boolean          @default(true)
+  walletAddress String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   bookings      FlightBooking[]

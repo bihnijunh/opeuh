@@ -3,20 +3,31 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getFlights } from "@/actions/flight";
-import { getPaymentMethods } from "@/actions/payment-method";
-import { bookFlight } from "@/actions/booking";
+import { format, parseISO, isSameDay, isAfter, addDays } from "date-fns";
+import { QRCodeSVG } from "qrcode.react";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import Navbar from "../components/navigation/navbar";
+import Image from "next/image";
 import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import { Flight as PrismaFlight } from "@prisma/client";
-import { format, isSameDay, parseISO, isAfter, addDays } from "date-fns";
-import Navbar from "../components/navigation/navbar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import Image from "next/image";
-import { QRCodeSVG } from 'qrcode.react';
+import { getPaymentMethods } from "@/actions/payment-method";
+import { bookFlight } from "@/actions/booking";
 
 interface FlightWithVariations extends PrismaFlight {
   variations?: PrismaFlight[];
@@ -24,12 +35,14 @@ interface FlightWithVariations extends PrismaFlight {
 
 interface DisplayFlight {
   id: string;
-  departureAirport: string;
-  arrivalAirport: string;
-  departureTime: string;
-  arrivalTime: string;
+  fromCity: string;
+  toCity: string;
+  departureDate: string;
+  returnDate: string | null;
   price: number;
   availableSeats: number;
+  airline: string;
+  flightNumber: string;
 }
 
 interface GroupedFlights {
@@ -72,9 +85,9 @@ export default function FlightsPage() {
     const searchFlights = async () => {
       try {
         const result = await getFlights({
-          departureAirport: searchParams.get("from") || "",
-          arrivalAirport: searchParams.get("to") || "",
-          ...(isOneWay ? {} : { departureTime: searchParams.get("departureDate") || "" }),
+          fromCity: searchParams.get("from") || "",
+          toCity: searchParams.get("to") || "",
+          ...(isOneWay ? {} : { departureDate: searchParams.get("departureDate") || "" }),
         });
 
         if (result.error) {
@@ -83,17 +96,19 @@ export default function FlightsPage() {
           // Convert PrismaFlight to DisplayFlight
           const displayFlights: DisplayFlight[] = result.data.map(flight => ({
             id: flight.id,
-            departureAirport: flight.departureAirport,
-            arrivalAirport: flight.arrivalAirport,
-            departureTime: flight.departureTime.toISOString(),
-            arrivalTime: flight.arrivalTime.toISOString(),
+            fromCity: flight.fromCity,
+            toCity: flight.toCity,
+            departureDate: flight.departureDate.toISOString(),
+            returnDate: flight.returnDate?.toISOString() || null,
             price: flight.price,
             availableSeats: flight.availableSeats,
+            airline: flight.airline,
+            flightNumber: flight.flightNumber,
           }));
 
           // Group flights by date
           const grouped = displayFlights.reduce((acc: GroupedFlights[], flight) => {
-            const date = parseISO(flight.departureTime);
+            const date = parseISO(flight.departureDate);
             const existingGroup = acc.find((group) =>
               isSameDay(group.date, date)
             );
@@ -202,9 +217,9 @@ export default function FlightsPage() {
         // Refresh flights list
         const searchParams = new URLSearchParams(window.location.search);
         const flightsResult = await getFlights({
-          departureAirport: searchParams.get("from") || "",
-          arrivalAirport: searchParams.get("to") || "",
-          ...(isOneWay ? {} : { departureTime: searchParams.get("departureDate") || "" }),
+          fromCity: searchParams.get("from") || "",
+          toCity: searchParams.get("to") || "",
+          ...(isOneWay ? {} : { departureDate: searchParams.get("departureDate") || "" }),
         });
 
         if (flightsResult.error) {
@@ -212,12 +227,14 @@ export default function FlightsPage() {
         } else if (flightsResult.data) {
           const displayFlights: DisplayFlight[] = flightsResult.data.map(flight => ({
             id: flight.id,
-            departureAirport: flight.departureAirport,
-            arrivalAirport: flight.arrivalAirport,
-            departureTime: flight.departureTime.toISOString(),
-            arrivalTime: flight.arrivalTime.toISOString(),
+            fromCity: flight.fromCity,
+            toCity: flight.toCity,
+            departureDate: flight.departureDate.toISOString(),
+            returnDate: flight.returnDate?.toISOString() || null,
             price: flight.price,
             availableSeats: flight.availableSeats,
+            airline: flight.airline,
+            flightNumber: flight.flightNumber,
           }));
           setFlights(displayFlights);
         }
@@ -301,23 +318,23 @@ export default function FlightsPage() {
                           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div className="flex-1 space-y-4">
                               <div className="flex items-center gap-3">
-                                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{flight.departureAirport}</h3>
+                                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{flight.fromCity}</h3>
                                 <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full">
                                   Direct
                                 </span>
                               </div>
                               <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
                                 <div className="flex flex-col">
-                                  <span className="text-lg font-medium">{flight.departureAirport}</span>
+                                  <span className="text-lg font-medium">{flight.fromCity}</span>
                                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                                    {format(parseISO(flight.departureTime), "h:mm a")}
+                                    {format(parseISO(flight.departureDate), "h:mm a")}
                                   </span>
                                 </div>
                                 <ArrowLongRightIcon className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                                 <div className="flex flex-col">
-                                  <span className="text-lg font-medium">{flight.arrivalAirport}</span>
+                                  <span className="text-lg font-medium">{flight.toCity}</span>
                                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                                    {format(parseISO(flight.arrivalTime), "h:mm a")}
+                                    {format(parseISO(flight.departureDate), "h:mm a")}
                                   </span>
                                 </div>
                               </div>
@@ -360,23 +377,23 @@ export default function FlightsPage() {
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div className="flex-1 space-y-4">
                           <div className="flex items-center gap-3">
-                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{flight.departureAirport}</h3>
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{flight.fromCity}</h3>
                             <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full">
                               Direct
                             </span>
                           </div>
                           <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
                             <div className="flex flex-col">
-                              <span className="text-lg font-medium">{flight.departureAirport}</span>
+                              <span className="text-lg font-medium">{flight.fromCity}</span>
                               <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {format(parseISO(flight.departureTime), "h:mm a")}
+                                {format(parseISO(flight.departureDate), "h:mm a")}
                               </span>
                             </div>
                             <ArrowLongRightIcon className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                             <div className="flex flex-col">
-                              <span className="text-lg font-medium">{flight.arrivalAirport}</span>
+                              <span className="text-lg font-medium">{flight.toCity}</span>
                               <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {format(parseISO(flight.arrivalTime), "h:mm a")}
+                                {format(parseISO(flight.departureDate), "h:mm a")}
                               </span>
                             </div>
                           </div>
@@ -430,27 +447,35 @@ export default function FlightsPage() {
                       <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl mt-2">
                         <div className="space-y-1">
                           <span className="text-gray-500 text-sm">From</span>
-                          <p className="font-semibold text-lg">{selectedFlight.departureAirport}</p>
+                          <p className="font-semibold text-lg">{selectedFlight.fromCity}</p>
                         </div>
                         <div className="space-y-1">
                           <span className="text-gray-500 text-sm">To</span>
-                          <p className="font-semibold text-lg">{selectedFlight.arrivalAirport}</p>
+                          <p className="font-semibold text-lg">{selectedFlight.toCity}</p>
                         </div>
                         <div className="space-y-1">
-                          <span className="text-gray-500 text-sm">Departure Time</span>
+                          <span className="text-gray-500 text-sm">Departure Date</span>
                           <p className="font-semibold">
-                            {format(parseISO(selectedFlight.departureTime), "MMM d, yyyy h:mm a")}
+                            {format(parseISO(selectedFlight.departureDate), "MMM d, yyyy")}
                           </p>
                         </div>
                         <div className="space-y-1">
-                          <span className="text-gray-500 text-sm">Arrival Time</span>
+                          <span className="text-gray-500 text-sm">Return Date</span>
                           <p className="font-semibold">
-                            {format(parseISO(selectedFlight.arrivalTime), "MMM d, yyyy h:mm a")}
+                            {selectedFlight.returnDate ? format(parseISO(selectedFlight.returnDate), "MMM d, yyyy") : 'N/A'}
                           </p>
                         </div>
                         <div className="space-y-1">
                           <span className="text-gray-500 text-sm">Price</span>
                           <p className="font-semibold text-xl">${selectedFlight.price}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-gray-500 text-sm">Airline</span>
+                          <p className="font-semibold text-lg">{selectedFlight.airline}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-gray-500 text-sm">Flight Number</span>
+                          <p className="font-semibold text-lg">{selectedFlight.flightNumber}</p>
                         </div>
                       </div>
                     </AccordionContent>
@@ -562,45 +587,73 @@ export default function FlightsPage() {
                       </AccordionTrigger>
                       <AccordionContent>
                         <div className="space-y-4 mt-2">
-                          {paymentMethods.find(m => m.id === selectedPaymentMethod)?.instructions && (
-                            <div className="bg-white p-4 rounded-lg border border-gray-100">
-                              <h4 className="font-medium text-gray-900 mb-2">Instructions</h4>
-                              <p className="text-sm text-gray-600">
-                                {paymentMethods.find(m => m.id === selectedPaymentMethod)?.instructions}
-                              </p>
-                            </div>
-                          )}
-                          {paymentMethods.find(m => m.id === selectedPaymentMethod)?.accountInfo && (
-                            <div className="bg-white p-4 rounded-lg border border-gray-100">
-                              <h4 className="font-medium text-gray-900 mb-2">Account Information</h4>
-                              <p className="text-sm text-gray-600 font-mono">
-                                {paymentMethods.find(m => m.id === selectedPaymentMethod)?.accountInfo}
-                              </p>
-                            </div>
-                          )}
-                          {paymentMethods.find(m => m.id === selectedPaymentMethod)?.type === "CRYPTO" && (
-                            <div className="bg-white p-4 rounded-lg border border-gray-100">
-                              <div className="mt-4">
-                                <p className="text-sm font-medium text-gray-700 mb-2">Scan QR Code</p>
-                                <div className="flex flex-col items-center">
-                                  <div className="bg-white p-4 rounded-lg">
-                                    {paymentMethods.find(m => m.id === selectedPaymentMethod)?.walletAddress && (
-                                      <QRCodeSVG
-                                        value={paymentMethods.find(m => m.id === selectedPaymentMethod)?.walletAddress || ''}
-                                        size={180}
-                                        level="H"
-                                        includeMargin
-                                        className="rounded-lg"
-                                      />
-                                    )}
+                          {(() => {
+                            const selectedMethod = paymentMethods.find(m => m.id === selectedPaymentMethod);
+                            if (!selectedMethod) return null;
+
+                            return (
+                              <>
+                                <div className="bg-gray-50 p-4 rounded-xl space-y-4">
+                                  <div className="prose prose-indigo">
+                                    <p className="text-gray-700">{selectedMethod.instructions}</p>
                                   </div>
-                                  <p className="text-sm text-gray-500 mt-2">
-                                    Scan this QR code to get the wallet address
-                                  </p>
+
+                                  {selectedMethod.type === "CRYPTOCURRENCY" && selectedMethod.walletAddress && (
+                                    <div className="space-y-4">
+                                      <div className="relative">
+                                        <Label className="block text-sm font-medium text-gray-700 mb-1">
+                                          Wallet Address
+                                        </Label>
+                                        <div className="flex items-center space-x-2">
+                                          <input
+                                            type="text"
+                                            value={selectedMethod.walletAddress}
+                                            readOnly
+                                            className="w-full p-3 bg-white border border-gray-300 rounded-lg text-sm font-mono"
+                                          />
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(selectedMethod.walletAddress!);
+                                              toast.success("Wallet address copied to clipboard!");
+                                            }}
+                                          >
+                                            Copy
+                                          </Button>
+                                        </div>
+                                      </div>
+
+                                      <div className="flex flex-col items-center justify-center p-4 bg-white rounded-xl border border-gray-200">
+                                        <Label className="block text-sm font-medium text-gray-700 mb-3">
+                                          Scan QR Code
+                                        </Label>
+                                        <QRCodeSVG
+                                          value={selectedMethod.walletAddress}
+                                          size={200}
+                                          level="H"
+                                          includeMargin={true}
+                                          className="mb-2"
+                                        />
+                                        <p className="text-sm text-gray-500 text-center mt-2">
+                                          Scan this QR code with your wallet app
+                                        </p>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {selectedMethod.accountInfo && (
+                                    <div className="mt-4">
+                                      <Label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Account Information
+                                      </Label>
+                                      <p className="text-gray-600">{selectedMethod.accountInfo}</p>
+                                    </div>
+                                  )}
                                 </div>
-                              </div>
-                            </div>
-                          )}
+                              </>
+                            );
+                          })()}
                         </div>
                       </AccordionContent>
                     </AccordionItem>

@@ -35,29 +35,28 @@ interface FlightStatus {
 }
 
 export async function getFlights(params?: {
-  departureAirport?: string;
-  arrivalAirport?: string;
-  departureTime?: string;
-  arrivalTime?: string;
+  fromCity?: string;
+  toCity?: string;
+  departureDate?: string;
   includeVariations?: boolean;
 }): Promise<{ data?: FlightWithVariations[]; error?: string }> {
   try {
     const where: Prisma.FlightWhereInput = {};
     
-    if (params?.departureAirport) {
-      where.departureAirport = params.departureAirport;
+    if (params?.fromCity) {
+      where.fromCity = params.fromCity;
     }
     
-    if (params?.arrivalAirport) {
-      where.arrivalAirport = params.arrivalAirport;
+    if (params?.toCity) {
+      where.toCity = params.toCity;
     }
     
-    if (params?.departureTime) {
-      const date = new Date(params.departureTime);
+    if (params?.departureDate) {
+      const date = new Date(params.departureDate);
       const nextDay = new Date(date);
       nextDay.setDate(nextDay.getDate() + 1);
       
-      where.departureTime = {
+      where.departureDate = {
         gte: date,
         lt: nextDay,
       };
@@ -66,7 +65,7 @@ export async function getFlights(params?: {
     const flights = await db.flight.findMany({
       where,
       orderBy: {
-        departureTime: "asc",
+        departureDate: "asc",
       },
     });
 
@@ -75,9 +74,9 @@ export async function getFlights(params?: {
         flights.map(async (flight) => {
           const variations = await db.flight.findMany({
             where: {
-              departureAirport: flight.departureAirport,
-              arrivalAirport: flight.arrivalAirport,
-              departureTime: {
+              fromCity: flight.fromCity,
+              toCity: flight.toCity,
+              departureDate: {
                 gte: new Date(),
               },
               NOT: {
@@ -86,7 +85,7 @@ export async function getFlights(params?: {
             },
             take: 3,
             orderBy: {
-              departureTime: "asc",
+              departureDate: "asc",
             },
           });
           return { ...flight, variations };
@@ -118,9 +117,9 @@ export async function getFlight(
     if (includeVariations) {
       const variations = await db.flight.findMany({
         where: {
-          departureAirport: flight.departureAirport,
-          arrivalAirport: flight.arrivalAirport,
-          departureTime: {
+          fromCity: flight.fromCity,
+          toCity: flight.toCity,
+          departureDate: {
             gte: new Date(),
           },
           NOT: {
@@ -129,7 +128,7 @@ export async function getFlight(
         },
         take: 3,
         orderBy: {
-          departureTime: "asc",
+          departureDate: "asc",
         },
       });
 
@@ -163,26 +162,27 @@ export async function createFlightVariations(
   } = params;
 
   for (let i = 0; i < numberOfFlights; i++) {
-    const departureTime = new Date(baseFlight.departureTime);
-    departureTime.setHours(departureTime.getHours() + (i * hoursBetween));
+    const departureDate = new Date(baseFlight.departureDate);
+    departureDate.setHours(departureDate.getHours() + (i * hoursBetween));
     
-    const arrivalTime = new Date(departureTime);
-    arrivalTime.setHours(arrivalTime.getHours() + 2); // Assuming 2-hour flights
-
     const variation = await db.flight.create({
       data: {
         flightNumber: `${baseFlight.flightNumber}-${i + 1}`,
-        departureAirport: baseFlight.departureAirport,
-        arrivalAirport: baseFlight.arrivalAirport,
-        departureTime,
-        arrivalTime,
-        departureDate: departureTime,
+        fromCity: baseFlight.fromCity,
+        toCity: baseFlight.toCity,
+        departureDate,
+        returnDate: null,
         price: generateRandomInRange(minPrice, maxPrice),
         availableSeats: generateRandomInRange(minSeats, maxSeats, true),
         userId: baseFlight.userId,
         airline: baseFlight.airline,
-        fromCity: baseFlight.fromCity,
-        toCity: baseFlight.toCity,
+        departureTerminal: baseFlight.departureTerminal,
+        arrivalTerminal: baseFlight.arrivalTerminal,
+        departureGate: baseFlight.departureGate,
+        arrivalGate: baseFlight.arrivalGate,
+        baggageClaim: baseFlight.baggageClaim,
+        aircraftModel: baseFlight.aircraftModel,
+        aircraftType: baseFlight.aircraftType,
       },
     });
 
@@ -229,11 +229,6 @@ export async function createFlight(data: {
         flightNumber: data.flightNumber,
         airline: data.airline,
         userId: adminUser.id,
-        // Add these fields for compatibility with flight status
-        departureAirport: data.fromCity,
-        arrivalAirport: data.toCity,
-        departureTime: departureDate,
-        arrivalTime: new Date(departureDate.getTime() + 2 * 60 * 60 * 1000), // Default 2 hours flight
         status: "scheduled",
       },
     });
@@ -267,7 +262,7 @@ export async function updateFlight(
   try {
     const departureDate = new Date(data.departureDate);
     
-    const flight = await db.flight.update({
+    await db.flight.update({
       where: { id },
       data: {
         fromCity: data.fromCity,
@@ -278,16 +273,13 @@ export async function updateFlight(
         availableSeats: data.availableSeats,
         flightNumber: data.flightNumber,
         airline: data.airline,
-        // Update these fields for compatibility with flight status
-        departureAirport: data.fromCity,
-        arrivalAirport: data.toCity,
-        departureTime: departureDate,
-        arrivalTime: new Date(departureDate.getTime() + 2 * 60 * 60 * 1000), // Default 2 hours flight
+        departureTerminal: data.fromCity,
+        arrivalTerminal: data.toCity,
       },
     });
 
-    revalidatePath("/flights");
-    return { data: flight };
+    const updatedFlight = await db.flight.findUnique({ where: { id } });
+    return { data: updatedFlight || undefined };
   } catch (error) {
     console.error("[UPDATE_FLIGHT]", error);
     return { error: "Failed to update flight" };
@@ -309,38 +301,38 @@ export async function deleteFlight(id: string): Promise<{ success?: boolean; err
 }
 
 export async function searchFlights(params: {
-  departureAirport: string;
-  arrivalAirport: string;
-  departureTime: string;
-  arrivalTime?: string;
+  fromCity: string;
+  toCity: string;
+  departureDate: string;
+  arrivalDate?: string;
 }): Promise<{ data?: { outbound: Flight[]; return: Flight[] }; error?: string }> {
   try {
     const outboundFlights = await db.flight.findMany({
       where: {
-        departureAirport: params.departureAirport,
-        arrivalAirport: params.arrivalAirport,
-        departureTime: {
-          gte: new Date(params.departureTime),
+        fromCity: params.fromCity,
+        toCity: params.toCity,
+        departureDate: {
+          gte: new Date(params.departureDate),
         },
       },
       orderBy: {
-        departureTime: "asc",
+        departureDate: "asc",
       },
     });
 
     let returnFlights: Flight[] = [];
 
-    if (params.arrivalTime) {
+    if (params.arrivalDate) {
       returnFlights = await db.flight.findMany({
         where: {
-          departureAirport: params.arrivalAirport,
-          arrivalAirport: params.departureAirport,
-          departureTime: {
-            gte: new Date(params.arrivalTime),
+          fromCity: params.toCity,
+          toCity: params.fromCity,
+          departureDate: {
+            gte: new Date(params.arrivalDate),
           },
         },
         orderBy: {
-          departureTime: "asc",
+          departureDate: "asc",
         },
       });
     }
@@ -371,30 +363,30 @@ export async function getFlightStatus(
 
     // Calculate estimated times based on current status
     const now = new Date();
-    const departureTime = new Date(flight.departureTime);
-    const arrivalTime = new Date(flight.arrivalTime);
+    const departureDate = new Date(flight.departureDate);
+    const scheduledArrivalTime = new Date(departureDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours after departure
     
     let status: FlightStatus["status"];
     let actualDepartureTime: Date | null = null;
     let estimatedArrivalTime: Date | null = null;
 
-    if (now < departureTime) {
+    if (now < departureDate) {
       status = "On Time";
-    } else if (now >= departureTime && now < arrivalTime) {
+    } else if (now >= departureDate && now < scheduledArrivalTime) {
       status = "In Flight";
-      actualDepartureTime = departureTime;
-      estimatedArrivalTime = arrivalTime;
+      actualDepartureTime = departureDate;
+      estimatedArrivalTime = scheduledArrivalTime;
     } else {
       status = "Landed";
-      actualDepartureTime = departureTime;
-      estimatedArrivalTime = arrivalTime;
+      actualDepartureTime = departureDate;
+      estimatedArrivalTime = scheduledArrivalTime;
     }
 
     const flightStatus: FlightStatus = {
       actualDepartureTime,
       estimatedArrivalTime,
-      scheduledDepartureTime: departureTime,
-      scheduledArrivalTime: arrivalTime,
+      scheduledDepartureTime: departureDate,
+      scheduledArrivalTime,
       departureTerminal: flight.departureTerminal || "TBD",
       arrivalTerminal: flight.arrivalTerminal || "TBD",
       departureGate: flight.departureGate || "TBD",
@@ -416,9 +408,9 @@ export async function getFlightStatus(
 
 export async function getFlightStatusByParams(params: {
   ticketNumber?: string;
-  departureAirport?: string;
-  arrivalAirport?: string;
-  departureTime?: string;
+  fromCity?: string;
+  toCity?: string;
+  departureDate?: string;
 }): Promise<{
   data?: Flight & {
     departureTerminal: string | null;
@@ -454,27 +446,27 @@ export async function getFlightStatusByParams(params: {
       // Otherwise use the other search parameters
       const where: Prisma.FlightWhereInput = {};
 
-      if (params.departureAirport) {
-        where.departureAirport = {
-          equals: params.departureAirport,
+      if (params.fromCity) {
+        where.fromCity = {
+          equals: params.fromCity,
           mode: 'insensitive'
         };
       }
 
-      if (params.arrivalAirport) {
-        where.arrivalAirport = {
-          equals: params.arrivalAirport,
+      if (params.toCity) {
+        where.toCity = {
+          equals: params.toCity,
           mode: 'insensitive'
         };
       }
 
-      if (params.departureTime) {
-        const date = new Date(params.departureTime);
-        where.departureTime = {
+      if (params.departureDate) {
+        const date = new Date(params.departureDate);
+        where.departureDate = {
           gte: date,
         };
       } else {
-        where.departureTime = {
+        where.departureDate = {
           gte: new Date()
         };
       }
@@ -482,7 +474,7 @@ export async function getFlightStatusByParams(params: {
       flight = await db.flight.findFirst({
         where,
         orderBy: {
-          departureTime: 'asc'
+          departureDate: 'asc'
         }
       });
     }

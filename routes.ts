@@ -25,10 +25,12 @@ export const authRoutes = [
 ];
 
 export const adminRoutes = [
+  `${BASE_URL}/admin`,
   `${BASE_URL}/admin/bank-accounts`,
   `${BASE_URL}/admin/flights`,
   `${BASE_URL}/admin/flight-status`,
   `${BASE_URL}/admin/booked-flights`,
+  `${BASE_URL}/admin/payment-methods`,
 ];
 
 /**

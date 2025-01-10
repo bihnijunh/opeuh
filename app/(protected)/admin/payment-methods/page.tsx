@@ -42,28 +42,167 @@ interface FormData {
   instructions: string;
   accountInfo: string | null;
   walletAddress: string | null;
-  isActive: boolean;
 }
 
 const paymentMethodTypes = [
   { label: "Bank Transfer", value: PaymentMethodType.BANK_TRANSFER },
   { label: "Credit Card", value: PaymentMethodType.CREDIT_CARD },
   { label: "Debit Card", value: PaymentMethodType.DEBIT_CARD },
+  { label: "Cryptocurrency", value: PaymentMethodType.CRYPTOCURRENCY },
 ];
+
+const PaymentMethodCard = ({ method, onEdit, onDelete }: {
+  method: PaymentMethod;
+  onEdit: (method: PaymentMethod) => void;
+  onDelete: (id: string) => void;
+}) => {
+  return (
+    <div className="bg-white p-4 rounded-lg shadow">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="font-semibold">{method.name}</h3>
+          <p className="text-sm text-gray-500">{method.type}</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(method)}
+          >
+            <PencilIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(method.id)}
+          >
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        {method.instructions && (
+          <p className="text-sm">{method.instructions}</p>
+        )}
+        {method.accountInfo && (
+          <p className="text-sm font-mono bg-gray-50 p-2 rounded">
+            {method.accountInfo}
+          </p>
+        )}
+        {method.type === PaymentMethodType.CRYPTOCURRENCY && method.walletAddress && (
+          <div className="mt-4">
+            <p className="text-sm font-mono bg-gray-50 p-2 rounded mb-2">
+              {method.walletAddress}
+            </p>
+            <div className="flex justify-center">
+              <QRCodeSVG
+                value={method.walletAddress}
+                size={128}
+                level="L"
+                includeMargin={true}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const PaymentMethodForm = ({ 
+  initialData,
+  onSubmit,
+  onCancel 
+}: {
+  initialData?: PaymentMethod;
+  onSubmit: (data: FormData) => void;
+  onCancel: () => void;
+}) => {
+  const [formData, setFormData] = useState<FormData>({
+    name: initialData?.name || "",
+    type: initialData?.type || PaymentMethodType.BANK_TRANSFER,
+    instructions: initialData?.instructions || "",
+    accountInfo: initialData?.accountInfo || "",
+    walletAddress: initialData?.walletAddress || "",
+  });
+
+  return (
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      onSubmit(formData);
+    }} className="space-y-4">
+      <div className="space-y-2">
+        <Input
+          placeholder="Name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Select
+          value={formData.type}
+          onValueChange={(value: PaymentMethodType) => 
+            setFormData({ ...formData, type: value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select type" />
+          </SelectTrigger>
+          <SelectContent>
+            {paymentMethodTypes.map((type) => (
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Textarea
+          placeholder="Instructions"
+          value={formData.instructions}
+          onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
+        />
+      </div>
+
+      {formData.type === PaymentMethodType.CRYPTOCURRENCY ? (
+        <div className="space-y-2">
+          <Input
+            placeholder="Wallet Address"
+            value={formData.walletAddress || ""}
+            onChange={(e) => setFormData({ ...formData, walletAddress: e.target.value })}
+          />
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Input
+            placeholder="Account Information"
+            value={formData.accountInfo || ""}
+            onChange={(e) => setFormData({ ...formData, accountInfo: e.target.value })}
+          />
+        </div>
+      )}
+
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit">
+          {initialData ? "Update" : "Create"}
+        </Button>
+      </div>
+    </form>
+  );
+};
 
 export default function PaymentMethodsPage() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentMethod, setCurrentMethod] = useState<PaymentMethod | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    type: PaymentMethodType.BANK_TRANSFER,
-    instructions: "",
-    accountInfo: null,
-    walletAddress: null,
-    isActive: true,
-  });
+  const [currentMethod, setCurrentMethod] = useState<PaymentMethod | undefined>(undefined);
 
   useEffect(() => {
     fetchPaymentMethods();
@@ -88,15 +227,14 @@ export default function PaymentMethodsPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (data: FormData) => {
     try {
       const submitData = {
-        name: formData.name,
-        type: formData.type,
-        instructions: formData.instructions || "",
-        accountInfo: formData.type === PaymentMethodType.BANK_TRANSFER ? formData.accountInfo : null,
-        walletAddress: formData.type === PaymentMethodType.CREDIT_CARD || formData.type === PaymentMethodType.DEBIT_CARD ? formData.walletAddress : null,
+        name: data.name,
+        type: data.type,
+        instructions: data.instructions || "",
+        accountInfo: data.type === PaymentMethodType.BANK_TRANSFER ? data.accountInfo : null,
+        walletAddress: data.type === PaymentMethodType.CRYPTOCURRENCY ? data.walletAddress : null,
       };
 
       const result = isEditing
@@ -122,14 +260,6 @@ export default function PaymentMethodsPage() {
   const handleEdit = (method: PaymentMethod) => {
     setIsEditing(true);
     setCurrentMethod(method);
-    setFormData({
-      name: method.name,
-      type: method.type,
-      instructions: method.instructions || "",
-      accountInfo: method.accountInfo,
-      walletAddress: method.walletAddress,
-      isActive: true,
-    });
   };
 
   const handleDelete = async (id: string) => {
@@ -150,15 +280,7 @@ export default function PaymentMethodsPage() {
 
   const resetForm = () => {
     setIsEditing(false);
-    setCurrentMethod(null);
-    setFormData({
-      name: "",
-      type: PaymentMethodType.BANK_TRANSFER,
-      instructions: "",
-      accountInfo: null,
-      walletAddress: null,
-      isActive: true,
-    });
+    setCurrentMethod(undefined);
   };
 
   if (loading) {
@@ -171,164 +293,23 @@ export default function PaymentMethodsPage() {
         <h1 className="text-2xl font-bold mb-4">
           {isEditing ? "Edit Payment Method" : "Add Payment Method"}
         </h1>
-        <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
-          <div>
-            <label className="block text-sm font-medium mb-1">Name</label>
-            <Input
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="e.g., Bitcoin, Zelle"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-1">Type</label>
-            <Select
-              value={formData.type}
-              onValueChange={(value) =>
-                setFormData({ ...formData, type: value as PaymentMethodType })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethodTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Instructions</label>
-            <Textarea
-              value={formData.instructions}
-              onChange={(e) =>
-                setFormData({ ...formData, instructions: e.target.value })
-              }
-              placeholder="Enter payment instructions..."
-              required
-            />
-          </div>
-
-          {(formData.type === PaymentMethodType.CREDIT_CARD || formData.type === PaymentMethodType.DEBIT_CARD) && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Wallet Address</label>
-              <Input
-                value={formData.walletAddress || ''}
-                onChange={(e) =>
-                  setFormData({ ...formData, walletAddress: e.target.value })
-                }
-                placeholder="Enter wallet address for card payments"
-              />
-            </div>
-          )}
-
-          {(formData.type === PaymentMethodType.BANK_TRANSFER) && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Account Information</label>
-              <Textarea
-                value={formData.accountInfo || ''}
-                onChange={(e) =>
-                  setFormData({ ...formData, accountInfo: e.target.value })
-                }
-                placeholder="Enter account details..."
-              />
-            </div>
-          )}
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={formData.isActive}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, isActive: checked })
-              }
-            />
-            <label>Active</label>
-          </div>
-
-          <div className="flex space-x-2">
-            <Button type="submit">
-              {isEditing ? "Update" : "Add"} Payment Method
-            </Button>
-            {isEditing && (
-              <Button type="button" variant="outline" onClick={resetForm}>
-                Cancel
-              </Button>
-            )}
-          </div>
-        </form>
+        <PaymentMethodForm 
+          initialData={currentMethod}
+          onSubmit={handleSubmit}
+          onCancel={resetForm}
+        />
       </div>
 
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4">Payment Methods</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {paymentMethods.map((method) => (
-            <div
-              key={method.id}
-              className="p-4 border rounded-lg shadow-sm space-y-2"
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold">{method.name}</h3>
-                  <p className="text-sm text-gray-600">{method.type}</p>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleEdit(method)}
-                    className="p-1 hover:bg-gray-100 rounded"
-                  >
-                    <PencilIcon className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(method.id)}
-                    className="p-1 hover:bg-gray-100 rounded text-red-600"
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-              <p className="text-sm">{method.instructions}</p>
-              {(method.type === PaymentMethodType.CREDIT_CARD || method.type === PaymentMethodType.DEBIT_CARD) && method.walletAddress && (
-                <div className="mt-2">
-                  <div className="flex justify-center">
-                    <QRCodeSVG value={method.walletAddress} size={150} />
-                  </div>
-                  <p className="text-xs mt-1 text-gray-500 break-all">{method.walletAddress}</p>
-                </div>
-              )}
-              {(method.type === PaymentMethodType.BANK_TRANSFER) && method.accountInfo && (
-                <p className="text-sm text-gray-600">{method.accountInfo}</p>
-              )}
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={true}
-                  onCheckedChange={async (checked) => {
-                    try {
-                      await updatePaymentMethod(method.id, {
-                        name: method.name,
-                        type: method.type,
-                        instructions: method.instructions || "",
-                        accountInfo: method.accountInfo,
-                        walletAddress: method.walletAddress,
-                      });
-                      fetchPaymentMethods();
-                    } catch (error) {
-                      toast.error("Failed to update status");
-                    }
-                  }}
-                />
-                <span className="text-sm">
-                  Active
-                </span>
-              </div>
-            </div>
+            <PaymentMethodCard 
+              key={method.id} 
+              method={method} 
+              onEdit={handleEdit} 
+              onDelete={handleDelete} 
+            />
           ))}
         </div>
       </div>

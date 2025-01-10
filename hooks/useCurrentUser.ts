@@ -1,24 +1,9 @@
-import { useState, useEffect } from 'react';
-import { getCurrentUser } from "@/actions/admin-dashboard";
+import { useSession } from "next-auth/react";
 import { ExtendedUser } from "@/next-auth";
 
 export function useCurrentUser() {
-  const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: session, status } = useSession();
+  const user = session?.user as ExtendedUser;
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const user = await getCurrentUser();
-        setCurrentUser(user as ExtendedUser);
-      } catch (error) {
-        console.error('Failed to fetch current user:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchCurrentUser();
-  }, []);
-
-  return { currentUser, isLoading };
+  return user;
 }

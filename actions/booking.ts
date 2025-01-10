@@ -92,17 +92,19 @@ export async function bookFlight(data: {
         ticketNumber: result.ticketNumber,
         passengerName: data.passengerName,
         flightNumber: flight.flightNumber,
-        departureAirport: flight.departureAirport,
-        arrivalAirport: flight.arrivalAirport,
-        departureTime: flight.departureTime,
-        arrivalTime: flight.arrivalTime
+        fromCity: flight.fromCity,
+        toCity: flight.toCity,
+        departureDate: flight.departureDate,
+        returnDate: flight.returnDate
       }
     );
 
     revalidatePath("/flights");
+    revalidatePath("/admin/booked-flights");
+
     return { data: result };
   } catch (error) {
-    console.error("Error booking flight:", error);
+    console.error("[BOOK_FLIGHT]", error);
     return { error: "Failed to book flight. Please try again." };
   }
 }

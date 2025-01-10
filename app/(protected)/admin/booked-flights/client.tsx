@@ -18,10 +18,10 @@ interface BookedFlight {
   passengerName: string;
   passengerEmail: string;
   flightNumber: string;
-  departure: string;
-  arrival: string;
-  departureTime: string;
-  arrivalTime: string;
+  fromCity: string;
+  toCity: string;
+  departureDate: string;
+  returnDate: string | null;
   status: string;
   amount: number;
   paymentMethod: string;

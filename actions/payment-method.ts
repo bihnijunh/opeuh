@@ -27,7 +27,7 @@ export async function getPaymentMethods() {
 export async function createPaymentMethod(data: {
   name: string;
   type: PaymentMethodType;
-  instructions: string;
+  instructions?: string | null;
   accountInfo?: string | null;
   walletAddress?: string | null;
 }) {
@@ -51,11 +51,10 @@ export async function createPaymentMethod(data: {
         instructions: data.instructions,
         accountInfo: data.accountInfo,
         walletAddress: data.walletAddress,
-        isActive: true,
       },
     });
 
-    revalidatePath("/admin/payment-methods");
+    revalidatePath("/payment-methods");
     return { data: paymentMethod };
   } catch (error) {
     console.error("[CREATE_PAYMENT_METHOD]", error);

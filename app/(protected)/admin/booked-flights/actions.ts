@@ -10,7 +10,7 @@ export async function updateBooking(
     passengerEmail: string;
     status: string;
   }
-) {
+): Promise<void> {
   try {
     await db.flightBooking.update({
       where: {
@@ -25,6 +25,7 @@ export async function updateBooking(
 
     revalidatePath("/admin/booked-flights");
   } catch (error) {
+    console.error("[UPDATE_BOOKING]", error);
     throw new Error("Failed to update booking");
   }
 }

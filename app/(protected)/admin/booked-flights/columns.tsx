@@ -12,10 +12,10 @@ export type BookedFlight = {
   passengerName: string;
   passengerEmail: string;
   flightNumber: string;
-  departure: string;
-  arrival: string;
-  departureTime: string;
-  arrivalTime: string;
+  fromCity: string;
+  toCity: string;
+  departureDate: string;
+  returnDate: string | null;
   status: string;
   amount: number;
   paymentMethod: string;
@@ -50,60 +50,42 @@ const formatStatus = (status: string) => {
 export const columns: ColumnDef<BookedFlight>[] = [
   {
     accessorKey: "ticketNumber",
-    header: "Ticket Number"
-  },
-  {
-    accessorKey: "flightNumber",
-    header: "Flight Number"
+    header: "Ticket Number",
   },
   {
     accessorKey: "passengerName",
-    header: "Passenger Name"
+    header: "Passenger Name",
   },
   {
-    accessorKey: "passengerEmail",
-    header: "Email"
+    accessorKey: "flightNumber",
+    header: "Flight Number",
   },
   {
-    accessorKey: "departure",
-    header: "From"
+    accessorKey: "fromCity",
+    header: "From",
   },
   {
-    accessorKey: "arrival",
-    header: "To"
+    accessorKey: "toCity",
+    header: "To",
   },
   {
-    accessorKey: "departureTime",
-    header: "Departure Time",
+    accessorKey: "departureDate",
+    header: "Departure Date",
+    cell: ({ row }) => format(new Date(row.getValue("departureDate")), "PPp"),
+  },
+  {
+    accessorKey: "returnDate",
+    header: "Return Date",
     cell: ({ row }) => {
-      const value = row.getValue("departureTime") as string;
-      if (value === 'N/A') return value;
-      return format(new Date(value), "PPp");
-    }
-  },
-  {
-    accessorKey: "arrivalTime",
-    header: "Arrival Time",
-    cell: ({ row }) => {
-      const value = row.getValue("arrivalTime") as string;
-      if (value === 'N/A') return value;
-      return format(new Date(value), "PPp");
-    }
-  },
-  {
-    accessorKey: "amount",
-    header: "Amount",
-    cell: ({ row }) => {
-      const amount = row.getValue("amount") as number;
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(amount);
-    }
-  },
-  {
-    accessorKey: "paymentMethod",
-    header: "Payment Method"
+      const returnDate = row.getValue("returnDate") as string | null;
+      if (!returnDate) return "N/A";
+      try {
+        return format(new Date(returnDate), "PPp");
+      } catch (error) {
+        console.error("[FORMAT_RETURN_DATE]", error);
+        return "Invalid Date";
+      }
+    },
   },
   {
     accessorKey: "status",
@@ -115,21 +97,31 @@ export const columns: ColumnDef<BookedFlight>[] = [
           {formatStatus(status)}
         </Badge>
       );
-    }
+    },
+  },
+  {
+    accessorKey: "amount",
+    header: "Amount",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("amount"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return formatted;
+    },
+  },
+  {
+    accessorKey: "paymentMethod",
+    header: "Payment Method"
   },
   {
     accessorKey: "createdAt",
     header: "Booking Date",
-    cell: ({ row }) => {
-      const value = row.getValue("createdAt") as string;
-      return format(new Date(value), "PPp");
-    }
+    cell: ({ row }) => format(new Date(row.getValue("createdAt")), "PPp"),
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const booking = row.original;
-      return <EditBookingDialog booking={booking} onUpdate={updateBooking} />;
-    }
+    cell: ({ row }) => <EditBookingDialog booking={row.original} onSave={updateBooking} />,
   }
 ];

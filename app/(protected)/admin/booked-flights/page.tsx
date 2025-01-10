@@ -8,10 +8,10 @@ interface BookedFlight {
   passengerName: string;
   passengerEmail: string;
   flightNumber: string;
-  departure: string;
-  arrival: string;
-  departureTime: string;
-  arrivalTime: string;
+  fromCity: string;
+  toCity: string;
+  departureDate: string;
+  returnDate: string | null;
   status: string;
   amount: number;
   paymentMethod: string;
@@ -42,10 +42,10 @@ export default async function BookedFlightsPage() {
     passengerName: booking.passengerName || '',
     passengerEmail: booking.email || '',
     flightNumber: booking.flight.flightNumber,
-    departure: booking.flight.departureAirport,
-    arrival: booking.flight.arrivalAirport,
-    departureTime: booking.flight.departureTime.toISOString(),
-    arrivalTime: booking.flight.arrivalTime.toISOString(),
+    fromCity: booking.flight.fromCity,
+    toCity: booking.flight.toCity,
+    departureDate: booking.flight.departureDate.toISOString(),
+    returnDate: booking.flight.returnDate?.toISOString() || null,
     status: booking.status,
     amount: booking.amount,
     paymentMethod: booking.paymentMethod.name,
