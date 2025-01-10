@@ -15,9 +15,9 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PIEDRA- STONE BANK | Secure Crypto Exchange",
+  title: "American-Airway",
   description:
-    "PIEDRA-X is a secure and user-friendly platform for buying, selling, and exchanging cryptocurrencies. Manage your digital assets with ease, including BTC, ETH, and USDT.",
+    "Book and manage your flights easily with American-Airway.",
 };
 
 export default async function RootLayout({
